@@ -32,6 +32,6 @@ class ChapterCollection extends JsonResource
             ->where('id', \request()->get('translator_id'))
             ->select('language_code')
             ->first()
-            ->language_code;
+            ?->language_code;
     }
 }

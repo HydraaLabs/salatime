@@ -127,7 +127,7 @@ if (!function_exists('translateToLanguage')) {
                 ->where('id', $id)
                 ->select('language_code')
                 ->first()
-                ->language_code;
+                ?->language_code;
         }
     }
 }
