@@ -47,17 +47,27 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('dashboard', [DashboardController::class, 'getDashboardInformation']);
 Route::get('get-region-info', [DashboardController::class, 'getOsInfo']);
 Route::get('get-country-info', [DashboardController::class, 'getCountryInfo']);
-Route::get('chapters', [ChapterController::class, 'index']);
-Route::get('verses/{chapter}', [VerseController::class, 'index']);
-Route::get('juzes', [JuzesController::class, 'index']);
-Route::get('translators', [TranslatorController::class, 'index']);
-Route::get('dua-list', [DuaController::class, 'index']);
-Route::get('dua-details/{id}', [DuaController::class, 'show']);
-Route::get('dhikr-list', [DhikrController::class, 'dhikrList']);
-Route::get('dhikr-details/{id}', [DhikrController::class, 'show']);
-Route::get('sifat-name-list', [SifatNameController::class, 'dhikrList']);
-Route::get('sifat-name-details/{id}', [SifatNameController::class, 'show']);
-Route::get('haram-code-list', [HaramCodeController::class, 'haramCodeList']);
+
+// Static content (quran, dua, dhikr, reciters, wallpapers): public cache,
+// 1 year TTL. Purged by emptying the LiteSpeed cache storage on the server.
+Route::middleware('cache.headers:public;max_age=31536000;etag')->group(function () {
+    Route::get('chapters', [ChapterController::class, 'index']);
+    Route::get('verses/{chapter}', [VerseController::class, 'index']);
+    Route::get('juzes', [JuzesController::class, 'index']);
+    Route::get('translators', [TranslatorController::class, 'index']);
+    Route::get('dua-list', [DuaController::class, 'index']);
+    Route::get('dua-details/{id}', [DuaController::class, 'show']);
+    Route::get('dhikr-list', [DhikrController::class, 'dhikrList']);
+    Route::get('dhikr-details/{id}', [DhikrController::class, 'show']);
+    Route::get('sifat-name-list', [SifatNameController::class, 'dhikrList']);
+    Route::get('sifat-name-details/{id}', [SifatNameController::class, 'show']);
+    Route::get('haram-code-list', [HaramCodeController::class, 'haramCodeList']);
+    Route::get('get-cities', [PrayerTimeController::class, 'getCities']);
+    Route::get('reciters', [ReciterController::class, 'index']);
+    Route::get('reciter-sura/{reciter}', [ReciterController::class, 'reciterSuraList']);
+    Route::get('wallpapers', [WallpaperController::class, 'index']);
+    Route::get('wallpaper-category', [WallpaperCategoryController::class, 'wallpaperCategory']);
+});
 Route::any('today-prayer-time', [PrayerTimeController::class, 'getPrayerTime']);
 Route::get('prayer-by-location', [PrayerTimeController::class, 'prayerByLocation']);
 Route::get('settings', [SettingsController::class, 'index']);
@@ -87,10 +97,5 @@ Route::post('donation/sslcommerz/fail',     [SslCommerzDonationController::class
 Route::post('donation/sslcommerz/cancel',   [SslCommerzDonationController::class, 'cancel']);
 Route::post('donation/sslcommerz/ipn',      [SslCommerzDonationController::class, 'ipn']);
 Route::get('payment-methods', [PaymentMethodController::class, 'customerPaymentMethod']);
-Route::get('get-cities', [PrayerTimeController::class, 'getCities']);
-Route::get('reciters', [ReciterController::class, 'index']);
-Route::get('reciter-sura/{reciter}', [ReciterController::class, 'reciterSuraList']);
-Route::get('wallpapers', [WallpaperController::class, 'index']);
-Route::get('wallpaper-category', [WallpaperCategoryController::class, 'wallpaperCategory']);
 Route::post('ai/chat', [AIChatController::class, 'chat']);
 Route::post('ai/generate-names', [AIChatController::class, 'generateNames']);
