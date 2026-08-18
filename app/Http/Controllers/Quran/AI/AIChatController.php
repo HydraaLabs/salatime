@@ -17,25 +17,40 @@ class AIChatController extends Controller
     }
 
 
-    private function groqChat(array $messages, int $maxTokens = 600): string
+    private function aiChat(array $messages, int $maxTokens = 600): string
     {
-
         $settings = $this->service->getFormattedSettings();
 
-        $response = Http::timeout(30)->withHeaders([
-            'Authorization' => 'Bearer ' . $this->safeDecrypt($settings['islamic_name_api_key']),
-        ])->post('https://api.groq.com/openai/v1/chat/completions', [
-            'model'       => 'llama-3.3-70b-versatile',
-            'messages'    => $messages,
-            'max_tokens'  => $maxTokens,
-            'temperature' => 0.7,
+        $apiKey = env('ONEMIN_API_KEY')
+            ?: $this->safeDecrypt($settings['islamic_name_api_key']);
+
+        // 1min.ai takes a single prompt string: merge system + user messages.
+        $prompt = collect($messages)
+            ->map(fn ($m) => strtoupper($m['role']) . ": " . $m['content'])
+            ->implode("\n\n");
+
+        $response = Http::timeout(60)->withHeaders([
+            'API-KEY' => $apiKey,
+        ])->post('https://api.1min.ai/api/chat-with-ai', [
+            'type'  => 'UNIFY_CHAT_WITH_AI',
+            'model' => 'gpt-4o-mini',
+            'promptObject' => [
+                'prompt'    => $prompt,
+                'isMixed'   => false,
+                'webSearch' => false,
+            ],
         ]);
 
         if (!$response->successful()) {
-            throw new \Exception('Groq API error: ' . $response->status());
+            throw new \Exception('1min.ai API error: ' . $response->status());
         }
 
-        return $response->json('choices.0.message.content', '');
+        $result = $response->json('aiRecord.aiRecordDetail.resultObject');
+        if (is_array($result)) {
+            return implode("\n", array_filter($result));
+        }
+
+        return is_string($result) ? $result : '';
     }
 
 
@@ -45,7 +60,7 @@ class AIChatController extends Controller
         $request->validate(['message' => 'required|string|max:500']);
 
         try {
-            $reply = $this->groqChat([
+            $reply = $this->aiChat([
                 [
                     'role'    => 'system',
                     'content' => 'You are SalaTime AI, a knowledgeable Islamic scholar assistant. Answer questions about Islam, Quran, Hadith, prayer, fiqh, Islamic history, halal/haram, duas, and Islamic lifestyle. Be respectful, accurate, and cite Quranic verses or hadith references when relevant. Include Arabic text for prayers and duas with English translation. Keep answers helpful, clear, and concise. If asked about unrelated topics, politely redirect to Islamic subjects.',
@@ -73,7 +88,7 @@ class AIChatController extends Controller
         $prompt = "Generate 6 beautiful Islamic names for a {$gender}{$themeClause}. Return ONLY a valid JSON array with no markdown, no explanation. Each object must have exactly: \"arabic\" (Arabic script), \"name\" (English transliteration), \"meaning\" (clear English meaning), \"origin\" (e.g. Arabic, Persian, Urdu). Example: [{\"arabic\":\"عبدالله\",\"name\":\"Abdullah\",\"meaning\":\"Servant of Allah\",\"origin\":\"Arabic\"}]";
 
         try {
-            $content = $this->groqChat([
+            $content = $this->aiChat([
                 ['role' => 'system', 'content' => 'You are an Islamic names expert. Always respond with a valid JSON array only — no markdown fences, no explanation, no other text.'],
                 ['role' => 'user', 'content' => $prompt],
             ], 1000);
