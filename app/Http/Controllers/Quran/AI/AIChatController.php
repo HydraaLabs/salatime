@@ -77,21 +77,46 @@ class AIChatController extends Controller
     public function generateNames(Request $request)
     {
         $request->validate([
-            'gender' => 'required|in:boy,girl',
-            'theme'  => 'nullable|string|max:100',
+            'gender'      => 'required|in:boy,girl,any',
+            'origin'      => 'nullable|string|max:50',
+            'theme'       => 'nullable|string|max:100',
+            'starts_with' => 'nullable|string|max:3',
+            'count'       => 'nullable|integer|min:1|max:30',
         ]);
 
-        $gender      = $request->gender;
-        $theme       = trim($request->theme ?? '');
-        $themeClause = $theme ? " with names that relate to the theme '{$theme}'" : '';
+        $gender     = $request->gender;
+        $origin     = trim($request->origin ?? '');
+        $theme      = trim($request->theme ?? '');
+        $startsWith = trim($request->starts_with ?? '');
+        $count      = $request->integer('count') ?: 15;
 
-        $prompt = "Generate 6 beautiful Islamic names for a {$gender}{$themeClause}. Return ONLY a valid JSON array with no markdown, no explanation. Each object must have exactly: \"arabic\" (Arabic script), \"name\" (English transliteration), \"meaning\" (clear English meaning), \"origin\" (e.g. Arabic, Persian, Urdu). Example: [{\"arabic\":\"عبدالله\",\"name\":\"Abdullah\",\"meaning\":\"Servant of Allah\",\"origin\":\"Arabic\"}]";
+        $filters = [];
+        if ($gender !== 'any') {
+            $filters[] = "Gender: {$gender} names only";
+        }
+        if ($origin !== '' && strtolower($origin) !== 'any') {
+            $filters[] = "Origin: {$origin}";
+        }
+        if ($theme !== '') {
+            $filters[] = "Meaning must relate to: \"{$theme}\"";
+        }
+        if ($startsWith !== '') {
+            $filters[] = 'English transliteration must start with: "' . strtoupper($startsWith) . '"';
+        }
+        $filterText = empty($filters)
+            ? 'Provide a beautiful and diverse variety of names.'
+            : implode("\n", $filters);
+
+        $prompt = "Generate exactly {$count} Islamic baby names as a valid JSON array only.\n\n{$filterText}\n\n"
+            . 'Each object must have these exact fields:'
+            . "\n- arabic (string)\n- english (string)\n- meaning (string)\n- origin (string)\n- gender (string: \"boy\" or \"girl\")\n- quranicReference (string or null)"
+            . "\n\nReturn only the JSON array, nothing else.";
 
         try {
             $content = $this->aiChat([
                 ['role' => 'system', 'content' => 'You are an Islamic names expert. Always respond with a valid JSON array only — no markdown fences, no explanation, no other text.'],
                 ['role' => 'user', 'content' => $prompt],
-            ], 1000);
+            ], 1500);
 
             preg_match('/\[[\s\S]*\]/u', $content, $m);
             $names = json_decode($m[0] ?? '[]', true) ?? [];
