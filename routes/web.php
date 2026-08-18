@@ -284,6 +284,14 @@ Route::get('install-demo-data', [InstallDemoDataController::class, 'run'])
     ->name('install-demo-data');
 Route::get('symlink', [InstallDemoDataController::class, 'symlink']);
 
+// Serve public storage files through Laravel (Apache FollowSymLinks is
+// disabled on this shared host, so the public/storage symlink returns 403)
+Route::get('storage/{path}', function (string $path) {
+    $full = storage_path('app/public/' . $path);
+    abort_unless(is_file($full), 404);
+    return response()->file($full);
+})->where('path', '.*');
+
 
 Route::get('blog', [BlogPublicController::class, 'index'])->name('blog.index');
 Route::get('blog/{slug}', [BlogPublicController::class, 'show'])->name('blog.show');
