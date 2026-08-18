@@ -1,0 +1,1 @@
+const g=function(s=new FormData,p){return Object.keys(p).map(n=>{if(p[n]&&!p[n].length>0&&Object.keys(p[n]).length>0)Object.keys(p[n]).map(r=>s.append(n+`[${r}]`,p[n][r]));else if(Array.isArray(p[n]))p[n].map((r,u)=>{Object.keys(r).map(i=>{s.append(n+`[${u}][${i}]`,r[i])})});else return s.append(n,p[n])}),s};export{g as f};
