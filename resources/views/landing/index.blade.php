@@ -521,9 +521,6 @@
                     <svg class="theme-icon-sun hidden w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                     <svg class="theme-icon-moon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
                 </button>
-                @if($showAdminLogin)
-                <a href="{{ route('login') }}" class="text-white/80 hover:text-white text-sm font-medium transition-colors" data-i18n="nav.admin">Admin Login</a>
-                @endif
                 <a href="#download" class="px-5 py-2.5 rounded-full text-sm font-semibold text-gray-900 transition-all hover:scale-105"
                    style="background: linear-gradient(135deg, var(--gold), var(--gold-light));" data-i18n="nav.download_btn">
                     Download Free
@@ -569,9 +566,6 @@
                 </button>
             </div>
             <div class="mt-3 pt-3 border-t border-white/10 flex gap-3">
-                @if($showAdminLogin)
-                <a href="{{ route('login') }}" class="flex-1 text-center py-2 rounded-full text-white/80 border border-white/20 text-sm" data-i18n="nav.admin">Admin Login</a>
-                @endif
                 <a href="#download" class="flex-1 text-center py-2 rounded-full text-gray-900 text-sm font-semibold" style="background: linear-gradient(135deg, var(--gold), var(--gold-light));" data-i18n="nav.download_btn">Download</a>
             </div>
         </div>
@@ -1652,11 +1646,8 @@
                 <div>
                     <h4 class="font-semibold text-white mb-4" data-i18n="footer.links">Links</h4>
                     <ul class="space-y-2 text-sm text-gray-400">
-                        <li><a href="{{ route('blog.index') }}" class="hover:text-white transition-colors">Blog</a></li>
                         <li><a href="{{ url('privacy-policy') }}" class="hover:text-white transition-colors" data-i18n="footer.privacy">Privacy Policy</a></li>
-                        <li><a href="{{ url('terms-and-conditions') }}" class="hover:text-white transition-colors" data-i18n="footer.terms">Terms & Conditions</a></li>
                         <li><a href="{{ url('support') }}" class="hover:text-white transition-colors" data-i18n="footer.support">Support</a></li>
-                        <li><a href="{{ route('login') }}" class="hover:text-white transition-colors" data-i18n="footer.admin">Admin Panel</a></li>
                     </ul>
                 </div>
             </div>
