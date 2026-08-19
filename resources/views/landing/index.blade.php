@@ -1611,17 +1611,6 @@
                         </div>
                     </a>
                 </div>
-
-                <!-- Also on CodeCanyon -->
-                @if(($s['show_codecanyon_link'] ?? '1') != '0')
-                <p class="text-white/50 text-sm">
-                    <span data-i18n="download.codecanyon" data-i18n-en="{{ $s['codecanyon_prompt_text'] }}">{{ $s['codecanyon_prompt_text'] }}</span>
-                    <a href="{{ $s['codecanyon_url'] }}" target="_blank"
-                       class="underline transition-colors" style="color: var(--gold);" data-i18n="download.codecanyon_link" data-i18n-en="{{ $s['codecanyon_link_text'] }}">
-                        {{ $s['codecanyon_link_text'] }}
-                    </a>
-                </p>
-                @endif
             </div>
         </div>
     </section>
