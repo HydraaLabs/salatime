@@ -4,12 +4,11 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="icon" type="image/png" href="/assets/favicon/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="/assets/favicon/favicon.svg" />
-    <link rel="shortcut icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="/assets/favicon/favicon-96x96.png?v=20260827" sizes="96x96" />
+    <link rel="shortcut icon" href="/favicon.ico?v=20260827" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png?v=20260827" />
     <meta name="apple-mobile-web-app-title" content="SalaTime" />
-    <link rel="manifest" href="/assets/favicon/site.webmanifest" />
+    <link rel="manifest" href="/assets/favicon/site.webmanifest?v=20260827" />
     <meta property="og:title" content="{{config('settings.application.company_name')}}">
     <meta property="og:description" content="{{config('settings.application.company_name')}} Admin Panel">
     <meta property="og:image" content="{{config('settings.application.web_logo')}}">

@@ -40,7 +40,7 @@
     <meta name="twitter:description" content="{{ $twDesc }}">
     @if($ogImage)<meta name="twitter:image" content="{{ $ogImage }}">@endif
 
-    <link rel="icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" href="{{ asset('favicon.ico') }}?v=20260827">
 
     @if(!empty($s['seo_google_analytics']))
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ $s['seo_google_analytics'] }}"></script>
@@ -466,7 +466,7 @@
             <!-- Logo -->
             <a href="{{ url('/') }}" class="flex items-center gap-3">
                 @if(!empty($s['web_logo']))
-                    <img src="{{ asset($s['web_logo']) }}" alt="{{ $s['app_name'] }}" class="h-10 w-auto max-w-[160px] object-contain" />
+                    <img src="{{ asset($s['web_logo']) }}?v=20260827" alt="{{ $s['app_name'] }}" class="h-10 w-auto max-w-[160px] object-contain" />
                 @else
                     <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, var(--gold), var(--gold-light));">
                         <span class="text-xl">🕌</span>

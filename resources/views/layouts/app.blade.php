@@ -9,12 +9,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="base-url" content="{{ url('/') }}">
     <meta name="author" content="{{ config('settings.application.company_name') }}">
-    <link rel="icon" type="image/png" href="/assets/favicon/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="/assets/favicon/favicon.svg" />
-    <link rel="shortcut icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="/assets/favicon/favicon-96x96.png?v=20260827" sizes="96x96" />
+    <link rel="shortcut icon" href="/favicon.ico?v=20260827" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png?v=20260827" />
     <meta name="apple-mobile-web-app-title" content="SalaTime" />
-    <link rel="manifest" href="/assets/favicon/site.webmanifest" />
+    <link rel="manifest" href="/assets/favicon/site.webmanifest?v=20260827" />
     <meta name="keywords" content="{{ config('settings.application.company_name') }}">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link rel="shortcut icon" href="{{ asset(config('settings.application.web_icon')) }}" />

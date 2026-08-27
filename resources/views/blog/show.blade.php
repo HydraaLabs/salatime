@@ -11,7 +11,7 @@
     @if($post->thumbnail)<meta property="og:image" content="{{ asset($post->thumbnail) }}">@endif
     <meta property="og:url" content="{{ url()->current() }}">
     <link rel="canonical" href="{{ url()->current() }}">
-    <link rel="icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" href="{{ asset('favicon.ico') }}?v=20260827">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -89,7 +89,7 @@
 <header class="topbar">
     <a href="{{ url('/') }}" class="topbar-brand">
         @if(!empty($s['web_logo']))
-            <img src="{{ asset($s['web_logo']) }}" alt="{{ $s['app_name'] ?? 'SalaTime' }}" class="topbar-logo">
+            <img src="{{ asset($s['web_logo']) }}?v=20260827" alt="{{ $s['app_name'] ?? 'SalaTime' }}" class="topbar-logo">
         @else
             <span class="topbar-name">{{ $s['app_name'] ?? 'SalaTime' }}</span>
         @endif

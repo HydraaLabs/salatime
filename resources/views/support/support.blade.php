@@ -113,7 +113,7 @@
     <header class="topbar">
         <a href="{{ url('/') }}" class="topbar-brand">
             @if(config('settings.application.web_logo'))
-                <img src="{{ asset(config('settings.application.web_logo')) }}" alt="{{ config('settings.application.company_name') }}" class="topbar-logo">
+                <img src="{{ asset(config('settings.application.web_logo')) }}?v=20260827" alt="{{ config('settings.application.company_name') }}" class="topbar-logo">
             @else
                 <span class="topbar-name">{{ config('settings.application.company_name') }}</span>
             @endif
