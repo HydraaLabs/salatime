@@ -23,6 +23,7 @@
 
     <title>{{ $seoTitle }}</title>
     <meta name="description" content="{{ $seoDesc }}">
+    <meta name="theme-color" content="#071f17">
     @if(!empty($s['seo_keywords']))<meta name="keywords" content="{{ $s['seo_keywords'] }}">@endif
     <meta name="robots" content="{{ $s['seo_robots'] ?? 'index,follow' }}">
     @if(!empty($s['seo_canonical_url']))<link rel="canonical" href="{{ $s['seo_canonical_url'] }}">@endif
@@ -50,7 +51,7 @@
     <!-- Fonts: Inter, Amiri (Quran), Cairo (Arabic UI), Noto Sans Bengali, Noto Sans Devanagari (Hindi) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+Bengali:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://t.contentsquare.net/uxa/2fd348fa4e3b8.js"></script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -81,7 +82,7 @@
                         }
                     },
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: ['Manrope', 'sans-serif'],
                         arabic: ['Amiri', 'serif'],
                     }
                 }
@@ -136,7 +137,7 @@
 
         html { scroll-behavior: smooth; }
 
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Manrope', sans-serif; }
 
         html.dark body { background-color: var(--theme-page); color: #f1f5f9; }
 
@@ -452,45 +453,487 @@
         [dir="rtl"] #navbar > div { flex-direction: row-reverse; }
         [dir="rtl"] .lp-ltr-only { direction: ltr; }
         [dir="rtl"] .footer-brand { direction: rtl; }
+
+        /* ── 2026 visual refresh ─────────────────────────────── */
+        :root {
+            --st-ink: #071711;
+            --st-emerald: #0b4b35;
+            --st-mint: #6ee7b7;
+            --st-canvas: #f4f8f5;
+            --st-shadow: 0 24px 70px rgba(5, 35, 24, 0.14);
+        }
+
+        ::selection { background: rgba(var(--theme-accent-rgb), .3); color: var(--st-ink); }
+
+        body {
+            background: var(--st-canvas);
+            letter-spacing: -0.012em;
+            overflow-x: hidden;
+        }
+
+        .skip-link {
+            position: fixed;
+            top: 12px;
+            left: 50%;
+            z-index: 100;
+            transform: translate(-50%, -160%);
+            padding: 10px 18px;
+            border-radius: 999px;
+            background: #fff;
+            color: var(--st-ink);
+            font-size: 13px;
+            font-weight: 800;
+            box-shadow: var(--st-shadow);
+            transition: transform .2s ease;
+        }
+        .skip-link:focus { transform: translate(-50%, 0); outline: 3px solid var(--gold); }
+
+        section[id] { scroll-margin-top: 104px; }
+        section.lp-theme h2,
+        #ai h2,
+        #ai-chat h2,
+        #donate h2,
+        #download h2 {
+            letter-spacing: -0.045em;
+            line-height: 1.06;
+        }
+
+        #navbar {
+            padding: 16px 24px;
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+        #navbar .nav-shell {
+            max-width: 82rem;
+            min-height: 66px;
+            padding: 10px 12px 10px 18px;
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 22px;
+            background: rgba(4, 38, 27, .18);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.07);
+            backdrop-filter: blur(16px) saturate(135%);
+            -webkit-backdrop-filter: blur(16px) saturate(135%);
+            transition: background .3s ease, border-color .3s ease, box-shadow .3s ease;
+        }
+        #navbar.navbar-scrolled .nav-shell {
+            background: rgba(5, 31, 23, .88);
+            border-color: rgba(255,255,255,.15);
+            box-shadow: 0 16px 44px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.08);
+        }
+        #navbar .nav-logo { transition: transform .2s ease; }
+        #navbar .nav-logo:hover { transform: translateY(-1px); }
+        #navbar .nav-link-modern {
+            position: relative;
+            padding: 9px 0;
+            color: rgba(255,255,255,.68);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: -.01em;
+        }
+        #navbar .nav-link-modern::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            right: 50%;
+            bottom: 3px;
+            height: 2px;
+            border-radius: 99px;
+            background: var(--gold-light);
+            transition: left .2s ease, right .2s ease;
+        }
+        #navbar .nav-link-modern:hover { color: #fff; }
+        #navbar .nav-link-modern:hover::after { left: 0; right: 0; }
+        #navbar .nav-control {
+            border-radius: 12px;
+            border-color: rgba(255,255,255,.14);
+            background: rgba(255,255,255,.055);
+        }
+        #navbar .nav-cta {
+            border-radius: 13px;
+            box-shadow: 0 10px 26px rgba(var(--theme-accent-rgb), .22);
+        }
+
+        .hero-modern {
+            min-height: 920px;
+            isolation: isolate;
+            background:
+                radial-gradient(circle at 77% 30%, rgba(106, 231, 183, .18), transparent 27%),
+                radial-gradient(circle at 12% 82%, rgba(var(--theme-accent-rgb), .16), transparent 24%),
+                linear-gradient(122deg, #061b14 0%, #0b3a2a 46%, #0d5b3d 100%);
+        }
+        .hero-modern::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            opacity: .34;
+            background-image:
+                linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+            background-size: 72px 72px;
+            -webkit-mask-image: linear-gradient(to bottom, #000, transparent 88%);
+            mask-image: linear-gradient(to bottom, #000, transparent 88%);
+        }
+        .hero-modern::after {
+            content: '';
+            position: absolute;
+            width: 620px;
+            height: 620px;
+            right: -170px;
+            top: 80px;
+            z-index: -1;
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 50%;
+            box-shadow: 0 0 0 90px rgba(255,255,255,.018), 0 0 0 180px rgba(255,255,255,.012);
+        }
+        .hero-layout { max-width: 82rem; padding-top: 150px; padding-bottom: 150px; }
+        .hero-copy { position: relative; z-index: 2; }
+        .hero-bismillah {
+            font-size: clamp(1.55rem, 2.5vw, 2.2rem);
+            letter-spacing: .015em;
+            opacity: .92;
+        }
+        .hero-kicker {
+            padding: 9px 14px;
+            border-radius: 999px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .hero-title-modern {
+            max-width: 760px;
+            font-size: clamp(3.25rem, 5.8vw, 6.25rem);
+            letter-spacing: -.065em;
+            line-height: .97;
+            text-wrap: balance;
+        }
+        .hero-title-modern .hero-gradient-text {
+            background: linear-gradient(105deg, #f2c766 0%, #ffe8a3 48%, #d9a73a 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-lede { max-width: 650px; color: rgba(255,255,255,.68); font-size: 1.08rem; }
+        .hero-actions a { min-height: 58px; border-radius: 16px; }
+        .hero-primary {
+            box-shadow: 0 18px 38px rgba(var(--theme-accent-rgb), .2), inset 0 1px 0 rgba(255,255,255,.45);
+        }
+        .hero-secondary {
+            background: rgba(255,255,255,.075) !important;
+            border-color: rgba(255,255,255,.15) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.07);
+        }
+        .hero-actions a:hover { transform: translateY(-3px); }
+        .hero-proof { gap: 10px; }
+        .hero-proof > div {
+            min-height: 40px;
+            padding: 8px 12px;
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 12px;
+            background: rgba(255,255,255,.045);
+            color: rgba(255,255,255,.66);
+            backdrop-filter: blur(8px);
+        }
+
+        .phone-stage { min-height: 590px; perspective: 1100px; }
+        .phone-stage::before {
+            content: '';
+            position: absolute;
+            width: 540px;
+            height: 540px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(110,231,183,.22), rgba(110,231,183,.04) 48%, transparent 70%);
+            filter: blur(4px);
+        }
+        .phone-mockup {
+            border-color: #18241f;
+            box-shadow: 0 45px 90px rgba(0,0,0,.47), inset 0 0 0 1px rgba(255,255,255,.12);
+        }
+        .phone-primary { transform: rotateY(-8deg) rotateZ(-2deg); z-index: 2; }
+        .phone-secondary { transform: rotateY(-8deg) rotateZ(4deg); z-index: 1; }
+        .phone-screen {
+            background:
+                radial-gradient(circle at 50% 12%, rgba(var(--theme-accent-rgb), .11), transparent 30%),
+                linear-gradient(160deg, #071f17 0%, #0f5a3e 100%);
+        }
+        .hero-orbit {
+            position: absolute;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 142px;
+            padding: 11px 13px;
+            border: 1px solid rgba(255,255,255,.16);
+            border-radius: 16px;
+            background: rgba(5, 31, 23, .76);
+            box-shadow: 0 18px 45px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.08);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+        .hero-orbit-icon {
+            display: grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            flex: 0 0 auto;
+            border-radius: 11px;
+            background: rgba(var(--theme-accent-rgb), .16);
+            color: var(--gold-light);
+        }
+        .hero-orbit small { display: block; color: rgba(255,255,255,.48); font-size: 10px; }
+        .hero-orbit strong { display: block; color: #fff; font-size: 12px; }
+        .hero-orbit-prayer { left: -18px; top: 76px; }
+        .hero-orbit-qibla { right: 10px; bottom: 88px; }
+
+        .stats-modern {
+            position: relative;
+            z-index: 5;
+            margin-top: -72px;
+            padding: 0 0 86px;
+            background: transparent !important;
+        }
+        .stats-shell {
+            padding: 14px;
+            border: 1px solid rgba(8, 61, 42, .09);
+            border-radius: 30px;
+            background: rgba(255,255,255,.9);
+            box-shadow: 0 24px 70px rgba(6, 48, 33, .12), inset 0 1px 0 #fff;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+        .stat-item {
+            position: relative;
+            padding: 24px 16px;
+            border-radius: 20px;
+            transition: background .2s ease, transform .2s ease;
+        }
+        .stat-item:hover { background: #f4f9f6; transform: translateY(-2px); }
+        .stat-counter { font-size: clamp(2.15rem, 4vw, 3.15rem); letter-spacing: -.06em; }
+
+        #features {
+            background:
+                radial-gradient(circle at 8% 6%, rgba(52, 211, 153, .1), transparent 23%),
+                linear-gradient(180deg, #f5faf7, #edf5f0) !important;
+        }
+        #features .card-hover,
+        #prayer .card-hover,
+        #tech-specs .card-hover {
+            border-color: rgba(12, 74, 51, .09) !important;
+            box-shadow: 0 12px 38px rgba(9, 54, 38, .07), inset 0 1px 0 rgba(255,255,255,.9);
+        }
+        #features .card-hover {
+            position: relative;
+            overflow: hidden;
+            border-radius: 28px;
+        }
+        #features .card-hover::after {
+            content: '';
+            position: absolute;
+            inset: auto 24px 0;
+            height: 3px;
+            border-radius: 3px 3px 0 0;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            opacity: 0;
+            transition: opacity .25s ease;
+        }
+        #features .card-hover:hover::after { opacity: .8; }
+        #features .feature-icon {
+            border-radius: 18px;
+            color: var(--st-emerald);
+            box-shadow: inset 0 0 0 1px rgba(8, 61, 42, .08);
+        }
+        #features .feature-icon svg {
+            width: 28px;
+            height: 28px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        #features .feature-card-featured .feature-icon { color: var(--gold-light); }
+
+        #donate,
+        #ai,
+        #download {
+            background:
+                radial-gradient(circle at 86% 10%, rgba(110,231,183,.13), transparent 28%),
+                radial-gradient(circle at 6% 90%, rgba(var(--theme-accent-rgb),.13), transparent 24%),
+                linear-gradient(135deg, #061b14, #0b432f 56%, #0d5b3d) !important;
+        }
+        #donate::before,
+        #ai::before,
+        #download::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background-image: radial-gradient(rgba(255,255,255,.13) .7px, transparent .7px);
+            background-size: 18px 18px;
+            opacity: .16;
+        }
+        #donate { padding-top: 90px; padding-bottom: 90px; }
+        #donate .bg-white.rounded-2xl {
+            border: 1px solid rgba(255,255,255,.4);
+            border-radius: 26px;
+            box-shadow: 0 30px 80px rgba(0,0,0,.24), inset 0 1px 0 #fff;
+        }
+        #ai { position: relative; }
+        #ai > div,
+        #download > div { position: relative; z-index: 1; }
+        #ai .rounded-3xl { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+
+        #quran .rounded-3xl,
+        #prayer-card,
+        #quran-audio .shadow-2xl {
+            box-shadow: 0 28px 70px rgba(8, 62, 42, .14);
+        }
+        #prayer-card { border-radius: 28px; }
+        #ai-chat { background: radial-gradient(circle at 75% 20%, #10291f, #050c09 48%, #020604) !important; }
+        #name-generator,
+        #tech-specs { background: #f2f7f4 !important; }
+
+        #features,
+        #quran,
+        #quran-audio,
+        #prayer,
+        #ai,
+        #ai-chat,
+        #name-generator,
+        #dhikr,
+        #tech-specs,
+        #download {
+            padding-top: 5.5rem !important;
+            padding-bottom: 5.5rem !important;
+        }
+
+        .section-divider {
+            width: 44px;
+            height: 3px;
+            margin-bottom: 22px;
+            box-shadow: 0 4px 14px rgba(var(--theme-accent-rgb), .22);
+        }
+
+        footer.site-footer {
+            position: relative;
+            overflow: hidden;
+            background: #030906 !important;
+        }
+        footer.site-footer::before {
+            content: '';
+            position: absolute;
+            width: 420px;
+            height: 420px;
+            right: -180px;
+            top: -220px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(110,231,183,.1), transparent 68%);
+        }
+        .footer-logo { filter: drop-shadow(0 12px 24px rgba(0,0,0,.2)); }
+
+        @media (max-width: 1023px) {
+            .hero-modern { min-height: auto; }
+            .hero-layout { padding-top: 145px; padding-bottom: 130px; }
+            .hero-copy { max-width: 800px; margin-inline: auto; text-align: center; }
+            .hero-lede { margin-inline: auto; }
+            .hero-actions,
+            .hero-proof { justify-content: center; }
+            .hero-title-modern { margin-inline: auto; }
+        }
+
+        @media (max-width: 767px) {
+            #navbar { padding: 10px 12px; }
+            #navbar .nav-shell { min-height: 58px; padding: 8px 10px 8px 12px; border-radius: 18px; }
+            #navbar .nav-logo img { height: 34px; max-width: 142px; }
+            #mobile-menu {
+                max-height: calc(100vh - 92px);
+                overflow-y: auto;
+                border: 1px solid rgba(255,255,255,.13);
+                border-radius: 20px;
+                background: rgba(4, 30, 21, .96) !important;
+                box-shadow: 0 24px 60px rgba(0,0,0,.3);
+            }
+            .hero-modern .hero-layout { padding: 108px 18px 84px !important; }
+            .hero-modern .hero-bismillah { margin-bottom: 14px !important; font-size: 1.45rem !important; }
+            .hero-modern .hero-kicker { margin-bottom: 18px !important; }
+            .hero-modern .hero-title-modern {
+                margin-bottom: 18px !important;
+                font-size: clamp(2.2rem, 10.5vw, 3rem) !important;
+                line-height: 1.02 !important;
+            }
+            .hero-modern .hero-lede { margin-bottom: 26px !important; font-size: .95rem !important; line-height: 1.65 !important; }
+            .hero-modern .hero-actions { gap: 10px; margin-bottom: 0 !important; }
+            .hero-modern .hero-actions a { width: 100%; min-height: 54px; justify-content: center; padding-block: 12px; }
+            .hero-modern .hero-proof { display: none !important; }
+            .stats-modern { margin-top: -52px; padding-bottom: 64px; }
+            .stats-shell { border-radius: 24px; padding: 8px; }
+            .stat-item { padding: 18px 8px; }
+            .stat-item p { font-size: 12px; }
+            #donate { padding-top: 72px; padding-bottom: 72px; }
+            #donate-payment-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+            #features,
+            #quran,
+            #quran-audio,
+            #prayer,
+            #ai,
+            #ai-chat,
+            #name-generator,
+            #dhikr,
+            #tech-specs,
+            #download {
+                padding-top: 4rem !important;
+                padding-bottom: 4rem !important;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important;
+            }
+            .reveal { opacity: 1; transform: none; }
+        }
     </style>
 
     {{-- Active theme colors + light/dark mode (overrides the fallbacks above) --}}
     @include('partials.theme-vars')
 </head>
 
-<body class="bg-white text-gray-900">
+<body class="bg-white text-gray-900 antialiased">
+
+    <a href="#main-content" class="skip-link">Skip to content</a>
 
     <!-- ===================== NAVBAR ===================== -->
-    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-4 px-6">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <nav id="navbar" aria-label="Primary navigation" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-4 px-6">
+        <div class="nav-shell max-w-7xl mx-auto flex items-center justify-between">
             <!-- Logo -->
-            <a href="{{ url('/') }}" class="flex items-center gap-3">
+            <a href="{{ url('/') }}" class="nav-logo flex items-center gap-3" aria-label="{{ $s['app_name'] }} home">
                 @if(!empty($s['web_logo']))
                     <img src="{{ asset($s['web_logo']) }}?v=20260827" alt="{{ $s['app_name'] }}" class="h-10 w-auto max-w-[160px] object-contain" />
                 @else
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, var(--gold), var(--gold-light));">
-                        <span class="text-xl">🕌</span>
-                    </div>
+                    <img src="{{ asset('assets/img/logo.png') }}?v=20260827" alt="{{ $s['app_name'] }}" class="h-10 w-auto max-w-[160px] object-contain" />
                 @endif
                 {{-- <span class="text-white font-bold text-2xl tracking-tight">{{ $s['app_name'] }}</span> --}}
             </a>
 
             <!-- Desktop Nav -->
             <div class="hidden md:flex items-center gap-8">
-                <a href="#features" class="text-white/80 hover:text-white transition-colors text-sm font-medium" data-i18n="nav.features">Features</a>
-                <a href="#quran" class="text-white/80 hover:text-white transition-colors text-sm font-medium" data-i18n="nav.quran">Quran</a>
-                <a href="#quran-audio" class="text-white/80 hover:text-white transition-colors text-sm font-medium" data-i18n="nav.listen">Listen</a>
-                <a href="#prayer" class="text-white/80 hover:text-white transition-colors text-sm font-medium" data-i18n="nav.prayer">Prayer</a>
-                <a href="#ai" class="text-white/80 hover:text-white transition-colors text-sm font-medium" data-i18n="nav.ai">AI</a>
-                <a href="#download" class="text-white/80 hover:text-white transition-colors text-sm font-medium" data-i18n="nav.download">Download</a>
-                <a href="#donate" class="text-white/80 hover:text-white transition-colors text-sm font-medium" data-i18n="nav.donate">Donate</a>
+                <a href="#features" class="nav-link-modern transition-colors" data-i18n="nav.features">Features</a>
+                <a href="#quran" class="nav-link-modern transition-colors" data-i18n="nav.quran">Quran</a>
+                <a href="#quran-audio" class="nav-link-modern transition-colors" data-i18n="nav.listen">Listen</a>
+                <a href="#prayer" class="nav-link-modern transition-colors" data-i18n="nav.prayer">Prayer</a>
+                <a href="#ai" class="nav-link-modern transition-colors" data-i18n="nav.ai">AI</a>
+                <a href="#download" class="nav-link-modern transition-colors" data-i18n="nav.download">Download</a>
+                <a href="#donate" class="nav-link-modern transition-colors" data-i18n="nav.donate">Donate</a>
             </div>
 
             <!-- CTA + Language Switcher -->
             <div class="hidden md:flex items-center gap-3">
                 <!-- Language switcher -->
                 <div class="relative" id="lang-dropdown">
-                    <button onclick="toggleLangDropdown(event)" class="flex items-center gap-1.5 text-white/70 hover:text-white text-xs font-semibold transition-colors px-3 py-2 rounded-lg hover:bg-white/10 border border-white/20">
+                    <button id="lang-menu-button" onclick="toggleLangDropdown(event)" aria-haspopup="true" aria-expanded="false" aria-controls="lang-menu" class="nav-control flex items-center gap-1.5 text-white/70 hover:text-white text-xs font-semibold transition-colors px-3 py-2 rounded-lg hover:bg-white/10 border border-white/20">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         <span id="current-lang-label">EN</span>
                         <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
@@ -517,18 +960,18 @@
                     </div>
                 </div>
                 <!-- Theme toggle -->
-                <button onclick="toggleTheme()" class="flex items-center justify-center w-9 h-9 rounded-lg text-white/70 hover:text-white transition-colors hover:bg-white/10 border border-white/20" title="Toggle theme" aria-label="Toggle theme">
+                <button onclick="toggleTheme()" class="nav-control flex items-center justify-center w-9 h-9 rounded-lg text-white/70 hover:text-white transition-colors hover:bg-white/10 border border-white/20" title="Toggle theme" aria-label="Toggle theme">
                     <svg class="theme-icon-sun hidden w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                     <svg class="theme-icon-moon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
                 </button>
-                <a href="#download" class="px-5 py-2.5 rounded-full text-sm font-semibold text-gray-900 transition-all hover:scale-105"
+                <a href="#download" class="nav-cta px-5 py-2.5 rounded-full text-sm font-semibold text-gray-900 transition-all hover:-translate-y-0.5"
                    style="background: linear-gradient(135deg, var(--gold), var(--gold-light));" data-i18n="nav.download_btn">
                     Download Free
                 </a>
             </div>
 
             <!-- Mobile hamburger -->
-            <button id="menu-btn" class="md:hidden text-white" onclick="toggleMenu()">
+            <button id="menu-btn" class="nav-control md:hidden text-white w-10 h-10 inline-flex items-center justify-center" onclick="toggleMenu()" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
@@ -571,47 +1014,48 @@
         </div>
     </nav>
 
+    <main id="main-content">
     <!-- ===================== HERO ===================== -->
-    <section class="hero-gradient pattern-bg min-h-screen flex items-center relative overflow-hidden">
+    <section class="hero-modern hero-gradient pattern-bg min-h-screen flex items-center relative overflow-hidden">
         <!-- Decorative circles -->
         <div class="absolute top-32 right-16 w-64 h-64 rounded-full opacity-10 float-1" style="background: radial-gradient(circle, var(--gold), transparent);"></div>
         <div class="absolute bottom-32 left-8 w-48 h-48 rounded-full opacity-10 float-2" style="background: radial-gradient(circle, var(--gold), transparent);"></div>
         <div class="absolute top-1/2 left-1/3 w-32 h-32 rounded-full opacity-5 float-3" style="background: radial-gradient(circle, #ffffff, transparent);"></div>
 
-        <div class="max-w-7xl mx-auto px-6 py-32 grid lg:grid-cols-2 gap-16 items-center w-full">
+        <div class="hero-layout max-w-7xl mx-auto px-6 py-32 grid lg:grid-cols-2 gap-16 items-center w-full">
             <!-- Text content -->
-            <div>
+            <div class="hero-copy">
                 <!-- Bismillah -->
-                <div class="font-arabic text-gold-400 text-3xl mb-6 arabic-glow" style="color: var(--gold);">
+                <div class="hero-bismillah font-arabic text-gold-400 text-3xl mb-6 arabic-glow" style="color: var(--gold);">
                     بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ
                 </div>
 
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold mb-6" style="background: rgba(var(--theme-accent-rgb),0.15); color: var(--gold); border: 1px solid rgba(var(--theme-accent-rgb),0.3);">
+                <div class="hero-kicker inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold mb-6" style="background: rgba(var(--theme-accent-rgb),0.15); color: var(--gold); border: 1px solid rgba(var(--theme-accent-rgb),0.3);">
                     <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
                     <span data-i18n="hero.badge" data-i18n-en="{{ $s['hero_badge_text'] }}">{{ $s['hero_badge_text'] }}</span>
                 </div>
 
-                <h1 class="text-5xl lg:text-6xl font-black text-white leading-tight mb-6">
+                <h1 class="hero-title-modern text-5xl lg:text-6xl font-black text-white leading-tight mb-6">
                     <span data-i18n="hero.title" data-i18n-en="{{ $s['hero_title'] }}">{{ $s['hero_title'] }}</span>
-                    <span class="block" style="background: linear-gradient(135deg, var(--gold), var(--gold-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    <span class="hero-gradient-text block" style="background: linear-gradient(135deg, var(--gold), var(--gold-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
                         <span data-i18n="hero.subtitle" data-i18n-en="{{ $s['hero_subtitle'] }}">{{ $s['hero_subtitle'] }}</span>
                     </span>
                 </h1>
 
-                <p class="text-white/70 text-lg leading-relaxed mb-10 max-w-xl" data-i18n="hero.description" data-i18n-en="{{ $s['hero_description'] }}">
+                <p class="hero-lede text-white/70 text-lg leading-relaxed mb-10 max-w-xl" data-i18n="hero.description" data-i18n-en="{{ $s['hero_description'] }}">
                     {{ $s['hero_description'] }}
                 </p>
 
                 <!-- CTA Buttons -->
-                <div class="flex flex-wrap gap-4 mb-10">
-                    <a href="{{ $s['app_store_url'] }}" class="inline-flex items-center gap-3 px-6 py-4 rounded-2xl text-gray-900 font-bold text-base btn-pulse transition-all hover:scale-105"
+                <div class="hero-actions flex flex-wrap gap-4 mb-10">
+                    <a href="{{ $s['app_store_url'] }}" class="hero-primary inline-flex items-center gap-3 px-6 py-4 rounded-2xl text-gray-900 font-bold text-base transition-all"
                        style="background: linear-gradient(135deg, var(--gold), var(--gold-light));">
                         <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
                         </svg>
                         <span data-i18n="hero.app_store">App Store</span>
                     </a>
-                    <a href="{{ $s['play_store_url'] }}" class="inline-flex items-center gap-3 px-6 py-4 rounded-2xl font-bold text-base transition-all hover:scale-105"
+                    <a href="{{ $s['play_store_url'] }}" class="hero-secondary inline-flex items-center gap-3 px-6 py-4 rounded-2xl font-bold text-base transition-all"
                        style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(8px);">
                         <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M3.18 23.76c.27.15.58.2.89.13l12.89-7.43-2.77-2.76-11.01 10.06zm-.99-20.29v18.06c0 .36.1.69.28.97l10.32-10.32L2.19 2.5c-.0 .0-.0.0-.0 0zm16.12 6.77l-2.44-1.41-3.08 3.09 3.09 3.09 2.44-1.41c.7-.4 1.12-1.15 1.12-1.68 0-.53-.42-1.27-1.13-1.68zm-14.7-8.47c.04-.01.08-.01.12-.01.31 0 .61.09.87.26l12.01 6.93-2.76 2.76L4.44.73c-.31-.18-.66-.21-.93-.05l-.0-.91z"/>
@@ -621,7 +1065,7 @@
                 </div>
 
                 <!-- Trust badges -->
-                <div class="flex flex-wrap items-center gap-6 text-white/50 text-sm">
+                <div class="hero-proof flex flex-wrap items-center gap-6 text-white/50 text-sm">
                     <div class="flex items-center gap-2">
                         <span class="text-yellow-400">★★★★★</span>
                         <span>{{ $s['rating'] }} <span data-i18n="hero.rating_label">Rating</span></span>
@@ -638,9 +1082,17 @@
             </div>
 
             <!-- Phone Mockups -->
-            <div class="hidden lg:flex items-center justify-center gap-6 relative">
+            <div class="phone-stage hidden lg:flex items-center justify-center gap-6 relative">
+                <div class="hero-orbit hero-orbit-prayer float-2" aria-hidden="true">
+                    <span class="hero-orbit-icon">◷</span>
+                    <span><small data-i18n="nav.prayer">Prayer</small><strong>04:30 PM</strong></span>
+                </div>
+                <div class="hero-orbit hero-orbit-qibla float-3" aria-hidden="true">
+                    <span class="hero-orbit-icon">⌁</span>
+                    <span><small data-i18n="footer.qibla">Qibla Finder</small><strong>125° SE</strong></span>
+                </div>
                 <!-- Main phone -->
-                <div class="phone-mockup float-1">
+                <div class="phone-mockup phone-primary float-1">
                     <div class="phone-screen">
                         <div class="font-arabic text-center text-gold-400 text-xl mb-4" style="color: var(--gold);">
                             قُلْ هُوَ اللَّهُ أَحَدٌ
@@ -674,7 +1126,7 @@
                 </div>
 
                 <!-- Second phone (offset) -->
-                <div class="phone-mockup float-2" style="width: 200px; height: 400px; margin-top: 60px;">
+                <div class="phone-mockup phone-secondary float-2" style="width: 200px; height: 400px; margin-top: 60px;">
                     <div class="phone-screen">
                         <div class="text-white/70 text-xs mb-4 text-center">Prayer Times</div>
                         <!-- Clock mockup -->
@@ -705,22 +1157,22 @@
     </section>
 
     <!-- ===================== STATS ===================== -->
-    <section id="stats" class="py-16 bg-white lp-theme">
+    <section id="stats" class="stats-modern py-16 bg-white lp-theme">
         <div class="max-w-6xl mx-auto px-6">
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
-                <div class="reveal">
+            <div class="stats-shell grid grid-cols-2 lg:grid-cols-4 gap-2 text-center">
+                <div class="stat-item reveal">
                     <div class="stat-counter">114</div>
                     <p class="text-gray-500 mt-1 font-medium" data-i18n="stats.surahs">Surahs of Quran</p>
                 </div>
-                <div class="reveal" style="transition-delay: 0.1s;">
+                <div class="stat-item reveal" style="transition-delay: 0.1s;">
                     <div class="stat-counter">{{ $s['languages_count'] }}</div>
                     <p class="text-gray-500 mt-1 font-medium" data-i18n="stats.languages">Languages</p>
                 </div>
-                <div class="reveal" style="transition-delay: 0.2s;">
+                <div class="stat-item reveal" style="transition-delay: 0.2s;">
                     <div class="stat-counter">{{ $s['rating'] }}</div>
                     <p class="text-gray-500 mt-1 font-medium" data-i18n="stats.rating">App Rating</p>
                 </div>
-                <div class="reveal" style="transition-delay: 0.3s;">
+                <div class="stat-item reveal" style="transition-delay: 0.3s;">
                     <div class="stat-counter">{{ $s['downloads_count'] }}</div>
                     <p class="text-gray-500 mt-1 font-medium" data-i18n="stats.downloads">Downloads</p>
                 </div>
@@ -918,13 +1370,21 @@
                 ];
                 $featureCards = !empty($s['features']) ? $s['features'] : $defaultFeatures;
                 $delays = ['0s','0.1s','0.2s','0.1s','0.2s','0.3s'];
+                $featureIcons = [
+                    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M4 4v15.5"/><path d="M6.5 2H20v15H6.5A2.5 2.5 0 0 0 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>',
+                    '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/><path d="M6.3 4.8 4.8 3.3M17.7 4.8l1.5-1.5"/></svg>',
+                    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3-1.3 3.7L7 8l3.7 1.3L12 13l1.3-3.7L17 8l-3.7-1.3L12 3Z"/><path d="m18 14-.8 2.2L15 17l2.2.8L18 20l.8-2.2L21 17l-2.2-.8L18 14Z"/><path d="m5 13-.7 2.3L2 16l2.3.7L5 19l.7-2.3L8 16l-2.3-.7L5 13Z"/></svg>',
+                    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+                    '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="4"/><circle cx="16" cy="16" r="4"/><path d="m11 5 8 8M5 11l8 8"/></svg>',
+                    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>',
+                ];
                 $isDark = fn($i) => $i === 2;
             @endphp
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($featureCards as $i => $card)
                     @if($isDark($i))
-                        <div class="rounded-3xl p-8 card-hover reveal" style="background: linear-gradient(135deg, var(--green-dark), var(--green-mid)); transition-delay: {{ $delays[$i] ?? '0s' }};">
-                            <div class="feature-icon" style="background: rgba(var(--theme-accent-rgb),0.2);">{{ $card['icon'] }}</div>
+                        <div class="feature-card-featured rounded-3xl p-8 card-hover reveal" style="background: linear-gradient(135deg, var(--green-dark), var(--green-mid)); transition-delay: {{ $delays[$i] ?? '0s' }};">
+                            <div class="feature-icon" style="background: rgba(var(--theme-accent-rgb),0.2);">{!! $featureIcons[$i] ?? e($card['icon']) !!}</div>
                             <h3 class="text-xl font-bold text-white mb-3" data-i18n="feature.{{ $i }}.title" data-i18n-en="{{ $card['title'] }}">{{ $card['title'] }}</h3>
                             <p class="text-white/70 text-sm leading-relaxed mb-4" data-i18n="feature.{{ $i }}.desc" data-i18n-en="{{ $card['description'] }}">{{ $card['description'] }}</p>
                             <ul class="space-y-2 text-sm text-white/80" data-feature-bullets="{{ $i }}" data-en-bullets="{{ trim($card['bullets']) }}">
@@ -935,7 +1395,7 @@
                         </div>
                     @else
                         <div class="bg-white rounded-3xl p-8 card-hover reveal" style="border: 1px solid var(--lp-border); transition-delay: {{ $delays[$i] ?? '0s' }};">
-                            <div class="feature-icon" style="background: linear-gradient(135deg, #f0f4ff, #e0e7ff);">{{ $card['icon'] }}</div>
+                            <div class="feature-icon" style="background: linear-gradient(135deg, #edf8f2, #e2f0e8);">{!! $featureIcons[$i] ?? e($card['icon']) !!}</div>
                             <h3 class="text-xl font-bold text-gray-900 mb-3" data-i18n="feature.{{ $i }}.title" data-i18n-en="{{ $card['title'] }}">{{ $card['title'] }}</h3>
                             <p class="text-gray-500 text-sm leading-relaxed mb-4" data-i18n="feature.{{ $i }}.desc" data-i18n-en="{{ $card['description'] }}">{{ $card['description'] }}</p>
                             <ul class="space-y-2 text-sm text-gray-600" data-feature-bullets="{{ $i }}" data-en-bullets="{{ trim($card['bullets']) }}">
@@ -1608,19 +2068,21 @@
             </div>
         </div>
     </section>
+    </main>
 
     <!-- ===================== FOOTER ===================== -->
-    <footer class="bg-gray-950 text-white py-16">
+    <footer class="site-footer bg-gray-950 text-white py-16">
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid md:grid-cols-4 gap-10 mb-12">
                 <!-- Brand -->
                 <div class="md:col-span-2">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, var(--gold), var(--gold-light));">
-                            <span class="text-xl">🕌</span>
-                        </div>
-                        <span class="text-white font-bold text-2xl">{{ $s['app_name'] }}</span>
-                    </div>
+                    <a href="{{ url('/') }}" class="inline-flex items-center mb-5" aria-label="{{ $s['app_name'] }} home">
+                        @if(!empty($s['web_logo']))
+                            <img src="{{ asset($s['web_logo']) }}?v=20260827" alt="{{ $s['app_name'] }}" class="footer-logo h-12 w-auto max-w-[190px] object-contain" />
+                        @else
+                            <img src="{{ asset('assets/img/logo.png') }}?v=20260827" alt="{{ $s['app_name'] }}" class="footer-logo h-12 w-auto max-w-[190px] object-contain" />
+                        @endif
+                    </a>
                     <p class="text-gray-400 text-sm leading-relaxed mb-4 max-w-xs" data-i18n="footer.description" data-i18n-en="{{ $s['footer_description'] }}">
                         {{ $s['footer_description'] }}
                     </p>
@@ -1671,7 +2133,18 @@
 
         // ── Mobile menu ──────────────────────────────────────────
         function toggleMenu() {
-            document.getElementById('mobile-menu').classList.toggle('open');
+            const menu = document.getElementById('mobile-menu');
+            const button = document.getElementById('menu-btn');
+            const isOpen = menu.classList.toggle('open');
+            button.setAttribute('aria-expanded', String(isOpen));
+            button.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
+        }
+
+        // Present the product before asking for support.
+        const donationSection = document.getElementById('donate');
+        const downloadSection = document.getElementById('download');
+        if (donationSection && downloadSection && donationSection.nextElementSibling !== downloadSection) {
+            downloadSection.parentNode.insertBefore(donationSection, downloadSection);
         }
 
         // ── Reveal on scroll ─────────────────────────────────────
@@ -2175,12 +2648,12 @@
 
         // ── Language meta ────────────────────────────────────────
         const LANG_META = {
-            en: { dir:'ltr', font:"'Inter', sans-serif",               label:'EN' },
+            en: { dir:'ltr', font:"'Manrope', sans-serif",             label:'EN' },
             ar: { dir:'rtl', font:"'Cairo', 'Amiri', sans-serif",      label:'AR' },
             bn: { dir:'ltr', font:"'Noto Sans Bengali', sans-serif",   label:'BN' },
             hi: { dir:'ltr', font:"'Noto Sans Devanagari', sans-serif",label:'HI' },
-            es: { dir:'ltr', font:"'Inter', sans-serif",               label:'ES' },
-            fr: { dir:'ltr', font:"'Inter', sans-serif",               label:'FR' },
+            es: { dir:'ltr', font:"'Manrope', sans-serif",             label:'ES' },
+            fr: { dir:'ltr', font:"'Manrope', sans-serif",             label:'FR' },
         };
 
         let currentLang = 'en';
@@ -2189,10 +2662,13 @@
         // ── Language dropdown ────────────────────────────────────
         function toggleLangDropdown(e) {
             e.stopPropagation();
-            document.getElementById('lang-menu').classList.toggle('open');
+            const menu = document.getElementById('lang-menu');
+            const isOpen = menu.classList.toggle('open');
+            document.getElementById('lang-menu-button').setAttribute('aria-expanded', String(isOpen));
         }
         document.addEventListener('click', () => {
             document.getElementById('lang-menu').classList.remove('open');
+            document.getElementById('lang-menu-button').setAttribute('aria-expanded', 'false');
         });
 
         // ── Apply translations ───────────────────────────────────
