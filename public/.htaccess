@@ -5,12 +5,12 @@
 
     RewriteEngine On
 
-    # LiteSpeed page cache (1 year, public) for static GET API data:
+    # LiteSpeed page cache (24 hours, public) for static GET API data:
     # quran, dhikr, dua, reciters, wallpapers... Purge = empty the LSWS cache dir.
     <IfModule LiteSpeed>
         RewriteCond %{REQUEST_METHOD} ^GET$
         RewriteCond %{HTTP:Authorization} ^$
-        RewriteRule ^api/(chapters|verses|juzes|translators|dua-list|dua-details|dhikr-list|dhikr-details|sifat-name-list|sifat-name-details|haram-code-list|get-cities|reciters|reciter-sura|wallpapers|wallpaper-category) - [E=Cache-Control:max-age=31536000]
+        RewriteRule ^api/(chapters|verses|juzes|translators|dua-list|dua-details|dhikr-list|dhikr-details|sifat-name-list|sifat-name-details|haram-code-list|get-cities|reciters|reciter-sura|wallpapers|wallpaper-category) - [E=Cache-Control:max-age=86400]
     </IfModule>
 
     # Never cache APK downloads (Cloudflare would serve stale builds)

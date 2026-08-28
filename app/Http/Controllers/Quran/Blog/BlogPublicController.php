@@ -15,6 +15,7 @@ class BlogPublicController extends Controller
             ->paginate(9);
 
         $s = $this->seoSettings();
+
         return view('blog.index', compact('posts', 's'));
     }
 
@@ -29,18 +30,20 @@ class BlogPublicController extends Controller
             ->get();
 
         $s = $this->seoSettings();
+
         return view('blog.show', compact('post', 'related', 's'));
     }
 
     private function seoSettings(): array
     {
         try {
-            $landing = resolve(SettingService::class)->getFormattedSettings('landing');
-            $app     = resolve(SettingService::class)->getFormattedSettings('app');
+            $landing = resolve(SettingService::class)->getCachedFormattedSettings('landing');
+            $app = resolve(SettingService::class)->getCachedFormattedSettings('app');
         } catch (\Throwable) {
             $landing = [];
-            $app     = [];
+            $app = [];
         }
+
         return array_merge([
             'app_name' => 'SalaTime',
             'web_logo' => $app['web_logo'] ?? null,

@@ -5,37 +5,40 @@ namespace App\Http\Controllers\Quran\API\Verse;
 use App\Http\Controllers\Controller;
 use App\Models\Quran\Chapter\Chapter;
 use App\Models\Quran\Chapter\ChapterDetail;
-use App\Models\Quran\Translator\Translator;
+use App\Services\Quran\TranslatorLanguageResolver;
+use Illuminate\Http\Request;
 
 class VerseController extends Controller
 {
+    public function __construct(private readonly TranslatorLanguageResolver $translatorLanguageResolver) {}
 
-    public function index(Chapter $chapter)
+    public function index(Request $request, Chapter $chapter)
     {
-        $translatorId = request('translator_id');
+        $translatorId = $request->query('translator_id');
 
         try {
+            $languageCode = $this->translatorLanguageResolver->resolve($request, $translatorId);
 
             $chapterData = $this->getChapterInfo($chapter, $translatorId);
 
-            if (!$chapterData) {
+            if (! $chapterData) {
                 return response()->json([
                     'status' => true,
-                    'message' => 'Data fetched successfully'
+                    'message' => 'Data fetched successfully',
                 ]);
             }
 
             $chapterInfo = $this->getChapterDetails($chapter, $translatorId);
 
             $output = [
-                'chapter' => $this->formatChapterInfo($chapterData, $translatorId),
-                'chapter_info' => $this->formatChapterDetails($chapterInfo, $translatorId),
+                'chapter' => $this->formatChapterInfo($chapterData, $languageCode),
+                'chapter_info' => $this->formatChapterDetails($chapterInfo, $languageCode),
             ];
 
             return response()->json([
                 'status' => true,
                 'message' => 'Data fetched successfully',
-                'data' => $output
+                'data' => $output,
             ]);
 
         } catch (\Exception $exception) {
@@ -46,12 +49,12 @@ class VerseController extends Controller
         }
     }
 
-    private function getChapterInfo(Chapter $chapter, $translatorId): null|object
+    private function getChapterInfo(Chapter $chapter, $translatorId): ?object
     {
         return Chapter::query()
-            ->withWhereHas('translateChapters', fn($builder) => $builder->where([
+            ->withWhereHas('translateChapters', fn ($builder) => $builder->where([
                 ['translator_id', $translatorId],
-                ['chapter_id', $chapter->id]
+                ['chapter_id', $chapter->id],
             ]))
             ->first();
     }
@@ -59,25 +62,25 @@ class VerseController extends Controller
     private function getChapterDetails(Chapter $chapter, $translatorId): \Illuminate\Database\Eloquent\Collection|array
     {
         return ChapterDetail::query()
-            ->withWhereHas('translators', fn($builder) => $builder->where('translator_id', $translatorId))
+            ->withWhereHas('translators', fn ($builder) => $builder->where('translator_id', $translatorId))
             ->where('chapter_id', $chapter->id)
             ->get()
             ->groupBy('page_number');
     }
 
-    private function formatChapterInfo($chapter, $translatorId): array
+    private function formatChapterInfo($chapter, ?string $languageCode): array
     {
         return [
             'id' => $chapter->id,
-            'serial_number' => translateToLanguage($chapter->id, $this->getTranslator($translatorId)),
+            'serial_number' => translateToLanguage($chapter->id, $languageCode),
             'arabic_name' => $chapter->arabic_name,
             'translated_name' => $chapter->translateChapters ? $chapter->translateChapters->translate_name : '',
-            'verses_translate_name' => translateToLanguage('verses', $this->getTranslator($translatorId)),
-            'verses_count' => translateToLanguage($chapter->verses_count, $this->getTranslator($translatorId)),
+            'verses_translate_name' => translateToLanguage('verses', $languageCode),
+            'verses_count' => translateToLanguage($chapter->verses_count, $languageCode),
         ];
     }
 
-    private function formatChapterDetails($chapterDetails, $translatorId): array
+    private function formatChapterDetails($chapterDetails, ?string $languageCode): array
     {
         $chapterInfo = [];
         $number = 0;
@@ -86,40 +89,28 @@ class VerseController extends Controller
             $concatenatedAyah = '';
             foreach ($pageDetails as $detail) {
                 $translatedName = $detail->translators && isset($detail->translators[0]) ? $detail->translators[0]->translate_name : '';
-                $concatenatedAyah .= $detail['arabic_name'] . ' (' . translateToLanguage($detail['verse_number'], 'ar') . ')' . '  ';
+                $concatenatedAyah .= $detail['arabic_name'].' ('.translateToLanguage($detail['verse_number'], 'ar').')'.'  ';
                 $pageVerses[] = [
                     'id' => $detail->id,
                     'chapter_id' => $detail->chapter_id,
-                    'verses_translate_name' => translateToLanguage('verses', $this->getTranslator($translatorId)),
-                    // 'verses_number' => translateToLanguage($detail->verse_number, $this->getTranslator($translatorId)),
+                    'verses_translate_name' => translateToLanguage('verses', $languageCode),
+                    // 'verses_number' => translateToLanguage($detail->verse_number, $languageCode),
                     'verses_number' => strval($detail->verse_number),
                     'arabic_name' => $detail->arabic_name,
                     'translated_name' => $translatedName,
-                    'english_transliteration' => $detail->english_transliteration
+                    'english_transliteration' => $detail->english_transliteration,
                 ];
             }
 
             $chapterInfo[] = [
                 'eng_page_number' => $pageNumber,
                 'page_key' => $number++, // Add index key
-                'page_number' => translateToLanguage($pageNumber, $this->getTranslator($translatorId)),
+                'page_number' => translateToLanguage($pageNumber, $languageCode),
                 'page_verses' => $pageVerses,
-                'page_arabic_ayah' => trim($concatenatedAyah)
+                'page_arabic_ayah' => trim($concatenatedAyah),
             ];
         }
 
         return $chapterInfo;
     }
-
-
-    private function getTranslator($translatorId)
-    {
-        $translator = Translator::query()
-            ->where('id', $translatorId)
-            ->select('language_code')
-            ->first();
-
-        return $translator?->language_code;
-    }
-
 }

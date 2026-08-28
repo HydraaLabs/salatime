@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrap();
 
         try {
-            $settings = resolve(SettingService::class)->getFormattedSettings('app');
+            $settings = resolve(SettingService::class)->getCachedFormattedSettings('app');
             View::composer('*', function ($view) use ($settings) {
                 $view->with('settings', $settings);
             });
@@ -36,11 +36,10 @@ class AppServiceProvider extends ServiceProvider
                 if ($key == 'company_name') {
                     config()->set('app.name', $setting);
                 }
-                config()->set('settings.application.' . $key, $setting);
+                config()->set('settings.application.'.$key, $setting);
             }
         } catch (Exception $exception) {
         }
-
 
         try {
             SetEmailConfig::new(true)

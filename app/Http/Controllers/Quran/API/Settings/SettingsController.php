@@ -20,16 +20,17 @@ class SettingsController extends Controller
     public function index(Request $request)
     {
         try {
-            // Get IP address from your source (you mentioned $position)
-            $ipAddress = request()->ip();
+            $ipAddress = $request->ip();
             $this->getDeviceInfo($ipAddress);
 
-            $data = $this->service->getFormattedSettings();
+            // Only the settings read is cached. Device/IP collection still runs
+            // independently for every request and is never part of the cache key.
+            $data = $this->service->getCachedFormattedSettings();
 
             return response()->json([
                 'status' => true,
                 'message' => 'Data fetched successfully',
-                'data' => new SettingsResourceCollection($data)
+                'data' => new SettingsResourceCollection($data),
             ]);
 
         } catch (\Exception $exception) {
@@ -43,47 +44,32 @@ class SettingsController extends Controller
 
     public function getDeviceInfo($ipAddress)
     {
-        $newIp = env('IS_DEMO_VERSION') ? '103.161.68.149' : $ipAddress;
-        // Get device and country information
-        $position = Location::get($newIp);
-
-        // Access the device name and country name
         $osType = Agent::platform() == 0 ? 'Android' : Agent::platform();
 
-        // Check if there is a record with the same OS and IP address
         $existingDeviceInfo = DeviceInfo::where('os', $osType)
             ->where('ip_address', $ipAddress)
             ->first();
 
-
-
-        // Update or create the record in the DeviceInfo table
-        if (!$existingDeviceInfo) {
-            DeviceInfo::updateOrCreate(
-                ['ip_address' => $ipAddress, 'os' => $osType],
-                [
-                    'os' => $osType,
-                    'country' => $position ? $position->countryName : null,
-                    'state' => $position ? $position->cityName : null,
-                    'latitude' => $position ? $position->latitude : null,
-                    'longitude' => $position ? $position->longitude: null,
-                    'count' => 1, // Set count to 1 for new records
-                ]
-            );
-        } else {
-            // Update the existing record if IP and OS are different
-            if ($existingDeviceInfo->ip_address != $ipAddress || $existingDeviceInfo->os != $osType) {
-                $existingDeviceInfo->update([
-                    'country' => $position->countryName,
-                    'state' => $position->cityName,
-                    'latitude' => $position->latitude,
-                    'longitude' => $position->longitude,
-                    'count' => $existingDeviceInfo->count + 1, // Increment count
-                ]);
-            }
+        // Avoid a remote GeoIP lookup when this device has already been seen.
+        if ($existingDeviceInfo) {
+            return $this;
         }
+
+        $newIp = env('IS_DEMO_VERSION') ? '103.161.68.149' : $ipAddress;
+        $position = Location::get($newIp);
+
+        DeviceInfo::updateOrCreate(
+            ['ip_address' => $ipAddress, 'os' => $osType],
+            [
+                'os' => $osType,
+                'country' => $position ? $position->countryName : null,
+                'state' => $position ? $position->cityName : null,
+                'latitude' => $position ? $position->latitude : null,
+                'longitude' => $position ? $position->longitude : null,
+                'count' => 1,
+            ]
+        );
+
         return $this;
     }
-
-
 }

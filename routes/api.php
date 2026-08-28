@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Dashboard\DashboardController;
+use App\Http\Controllers\Quran\AI\AIChatController;
 use App\Http\Controllers\Quran\API\Category\CategoryController;
 use App\Http\Controllers\Quran\API\Chapter\ChapterController;
 use App\Http\Controllers\Quran\API\Dhikr\DhikrController;
@@ -23,7 +24,6 @@ use App\Http\Controllers\Quran\API\Theme\ThemeController;
 use App\Http\Controllers\Quran\API\Translator\TranslatorController;
 use App\Http\Controllers\Quran\API\Verse\VerseController;
 use App\Http\Controllers\Quran\API\WallPaper\WallpaperController;
-use App\Http\Controllers\Quran\AI\AIChatController;
 use App\Http\Controllers\Quran\WallPaper\WallpaperCategoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -43,14 +43,14 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-
 Route::get('dashboard', [DashboardController::class, 'getDashboardInformation']);
 Route::get('get-region-info', [DashboardController::class, 'getOsInfo']);
 Route::get('get-country-info', [DashboardController::class, 'getCountryInfo']);
 
-// Static content (quran, dua, dhikr, reciters, wallpapers): public cache,
-// 1 year TTL. Purged by emptying the LiteSpeed cache storage on the server.
-Route::middleware('cache.headers:public;max_age=31536000;etag')->group(function () {
+// Static public content is cached inside Laravel (file store today, Memcached
+// compatible later). Route parameters and canonicalized query strings are part
+// of the key; successful admin mutations rotate the namespace version.
+Route::middleware('public.api.cache:content,86400')->group(function () {
     Route::get('chapters', [ChapterController::class, 'index']);
     Route::get('verses/{chapter}', [VerseController::class, 'index']);
     Route::get('juzes', [JuzesController::class, 'index']);
@@ -71,31 +71,33 @@ Route::middleware('cache.headers:public;max_age=31536000;etag')->group(function 
 Route::any('today-prayer-time', [PrayerTimeController::class, 'getPrayerTime']);
 Route::get('prayer-by-location', [PrayerTimeController::class, 'prayerByLocation']);
 Route::get('settings', [SettingsController::class, 'index']);
-Route::get('theme', [ThemeController::class, 'index']);
-Route::get('home-layout', [HomeLayoutController::class, 'index']);
+Route::middleware('public.api.cache:settings,600')->group(function () {
+    Route::get('theme', [ThemeController::class, 'index']);
+    Route::get('home-layout', [HomeLayoutController::class, 'index']);
+});
 Route::get('donation-categories', [CategoryController::class, 'index']);
 Route::post('donation-store', [DonationController::class, 'store']);
 Route::get('donation-list', [DonationController::class, 'index']);
 // Stripe
 Route::post('donation/stripe/checkout', [StripeDonationController::class, 'createCheckout']);
-Route::post('donation/stripe/verify',   [StripeDonationController::class, 'verifySession']);
+Route::post('donation/stripe/verify', [StripeDonationController::class, 'verifySession']);
 // PayPal
-Route::get('donation/paypal/client-id',      [PaypalDonationController::class, 'clientId']);
-Route::post('donation/paypal/create-order',  [PaypalDonationController::class, 'createOrder']);
+Route::get('donation/paypal/client-id', [PaypalDonationController::class, 'clientId']);
+Route::post('donation/paypal/create-order', [PaypalDonationController::class, 'createOrder']);
 Route::post('donation/paypal/capture-order', [PaypalDonationController::class, 'captureOrder']);
 // Razorpay
 Route::post('donation/razorpay/create-order', [RazorpayDonationController::class, 'createOrder']);
-Route::post('donation/razorpay/verify',        [RazorpayDonationController::class, 'verifyPayment']);
+Route::post('donation/razorpay/verify', [RazorpayDonationController::class, 'verifyPayment']);
 // Paystack
-Route::get('donation/paystack/public-key',  [PaystackDonationController::class, 'publicKey']);
+Route::get('donation/paystack/public-key', [PaystackDonationController::class, 'publicKey']);
 Route::post('donation/paystack/initialize', [PaystackDonationController::class, 'initialize']);
-Route::post('donation/paystack/verify',     [PaystackDonationController::class, 'verify']);
+Route::post('donation/paystack/verify', [PaystackDonationController::class, 'verify']);
 // SSLCommerz
 Route::post('donation/sslcommerz/initiate', [SslCommerzDonationController::class, 'initiate']);
-Route::post('donation/sslcommerz/success',  [SslCommerzDonationController::class, 'success']);
-Route::post('donation/sslcommerz/fail',     [SslCommerzDonationController::class, 'fail']);
-Route::post('donation/sslcommerz/cancel',   [SslCommerzDonationController::class, 'cancel']);
-Route::post('donation/sslcommerz/ipn',      [SslCommerzDonationController::class, 'ipn']);
+Route::post('donation/sslcommerz/success', [SslCommerzDonationController::class, 'success']);
+Route::post('donation/sslcommerz/fail', [SslCommerzDonationController::class, 'fail']);
+Route::post('donation/sslcommerz/cancel', [SslCommerzDonationController::class, 'cancel']);
+Route::post('donation/sslcommerz/ipn', [SslCommerzDonationController::class, 'ipn']);
 Route::get('payment-methods', [PaymentMethodController::class, 'customerPaymentMethod']);
 Route::post('ai/chat', [AIChatController::class, 'chat']);
 Route::post('ai/generate-names', [AIChatController::class, 'generateNames']);

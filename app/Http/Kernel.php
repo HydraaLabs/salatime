@@ -68,6 +68,8 @@ class Kernel extends HttpKernel
         'demo' => \App\Http\Middleware\DemoMode::class,
         'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
+        'public.api.cache' => \App\Http\Middleware\CachePublicApiResponse::class,
+        'invalidate.application-cache' => \App\Http\Middleware\InvalidateApplicationCache::class,
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,

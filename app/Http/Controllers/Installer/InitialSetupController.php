@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Installer;
 use App\Http\Controllers\Controller;
 use App\Models\Quran\Chapter\Chapter;
 use App\Models\Quran\Chapter\ChapterDetail;
+use App\Support\ApplicationCache;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -42,6 +43,7 @@ class InitialSetupController extends Controller
 
             config()->set('database.connections.mysql.strict', true);
             DB::commit();
+            ApplicationCache::invalidatePublicResponses('content');
 
             return redirect()->route('dashboard')->with('success', 'Successfully Quran Surah Imported !!');
         } catch (Exception $exception) {
@@ -76,6 +78,7 @@ class InitialSetupController extends Controller
             }
 
             DB::commit();
+            ApplicationCache::invalidatePublicResponses('content');
 
             return redirect()->route('dashboard')->with('success', 'Successfully Quran Transliteration Imported !!');
         } catch (Exception $exception) {

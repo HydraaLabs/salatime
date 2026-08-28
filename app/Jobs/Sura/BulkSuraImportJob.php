@@ -4,6 +4,7 @@ namespace App\Jobs\Sura;
 
 use App\Models\Quran\Reciter\BulkSuraImport;
 use App\Models\Quran\Reciter\ReciterSura;
+use App\Support\ApplicationCache;
 use App\Support\Mp3Duration;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -27,29 +28,30 @@ class BulkSuraImportJob implements ShouldQueue
 
     public int $tries = 1;
 
-    public function __construct(public int $importId)
-    {
-    }
+    public function __construct(public int $importId) {}
 
     public function handle(): void
     {
         $import = BulkSuraImport::find($this->importId);
 
-        if (!$import) {
+        if (! $import) {
             Log::warning("BulkSuraImportJob: import {$this->importId} not found");
+
             return;
         }
 
         $zipPath = $import->zip_path;
 
-        if (!$zipPath || !file_exists($zipPath)) {
+        if (! $zipPath || ! file_exists($zipPath)) {
             $this->fail($import, 'Uploaded ZIP archive could not be found on the server.');
+
             return;
         }
 
-        $zip = new \ZipArchive();
+        $zip = new \ZipArchive;
         if ($zip->open($zipPath) !== true) {
             $this->fail($import, 'The uploaded file is not a valid ZIP archive.');
+
             return;
         }
 
@@ -87,7 +89,7 @@ class BulkSuraImportJob implements ShouldQueue
         ]);
 
         $destinationDir = storage_path("app/public/quran/{$import->reciter_id}");
-        if (!file_exists($destinationDir)) {
+        if (! file_exists($destinationDir)) {
             mkdir($destinationDir, 0755, true);
         }
 
@@ -97,11 +99,12 @@ class BulkSuraImportJob implements ShouldQueue
             $number = $this->suraNumberFromFilename($entry['base']);
 
             // Validate Surah number range.
-            if ($number === null || !isset($suraMap[$number])) {
+            if ($number === null || ! isset($suraMap[$number])) {
                 $import->skipped_count++;
                 $import->processed++;
                 $import->pushError($entry['base'], 'Filename does not map to a valid Surah number (1-114).');
                 $import->save();
+
                 continue;
             }
 
@@ -111,11 +114,12 @@ class BulkSuraImportJob implements ShouldQueue
                 ->first();
 
             // Duplicate handling: skip unless the user opted to replace.
-            if ($existing && !$import->replace_existing) {
+            if ($existing && ! $import->replace_existing) {
                 $import->skipped_count++;
                 $import->processed++;
                 $import->pushError($entry['base'], "Surah {$number} already exists (replace disabled).");
                 $import->save();
+
                 continue;
             }
 
@@ -148,8 +152,8 @@ class BulkSuraImportJob implements ShouldQueue
                 $import->success_count++;
             } catch (\Throwable $e) {
                 $import->failed_count++;
-                $import->pushError($entry['base'], 'Import error: ' . $e->getMessage());
-                Log::error("BulkSuraImportJob: failed importing {$entry['base']} for reciter {$import->reciter_id}: " . $e->getMessage());
+                $import->pushError($entry['base'], 'Import error: '.$e->getMessage());
+                Log::error("BulkSuraImportJob: failed importing {$entry['base']} for reciter {$import->reciter_id}: ".$e->getMessage());
             }
 
             $import->processed++;
@@ -166,6 +170,8 @@ class BulkSuraImportJob implements ShouldQueue
             'current_file' => null,
             'message' => 'Import completed',
         ]);
+
+        ApplicationCache::invalidatePublicResponses('content');
     }
 
     /**
@@ -196,7 +202,7 @@ class BulkSuraImportJob implements ShouldQueue
     {
         $stem = pathinfo($base, PATHINFO_FILENAME);
 
-        if (!preg_match('/^0*(\d{1,3})$/', trim($stem), $m)) {
+        if (! preg_match('/^0*(\d{1,3})$/', trim($stem), $m)) {
             return null;
         }
 
@@ -220,10 +226,10 @@ class BulkSuraImportJob implements ShouldQueue
     public function failed(\Throwable $exception): void
     {
         $import = BulkSuraImport::find($this->importId);
-        if ($import && !in_array($import->status, ['completed', 'failed'])) {
+        if ($import && ! in_array($import->status, ['completed', 'failed'])) {
             $import->update([
                 'status' => 'failed',
-                'message' => 'Import failed: ' . $exception->getMessage(),
+                'message' => 'Import failed: '.$exception->getMessage(),
             ]);
         }
     }

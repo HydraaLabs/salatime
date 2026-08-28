@@ -9,26 +9,26 @@ use App\Http\Controllers\Installer\InitialSetupController;
 use App\Http\Controllers\Installer\InstallerController;
 use App\Http\Controllers\Installer\PurchaseKeyController;
 use App\Http\Controllers\Profile\ProfileController;
-use App\Http\Controllers\Quran\Donation\DonationController;
 use App\Http\Controllers\Quran\Auth\ForgotPasswordController;
 use App\Http\Controllers\Quran\Auth\ResetPasswordController;
 use App\Http\Controllers\Quran\Auth\UserJoinController;
+use App\Http\Controllers\Quran\Blog\BlogController;
+use App\Http\Controllers\Quran\Blog\BlogPublicController;
 use App\Http\Controllers\Quran\Category\CategoryController;
 use App\Http\Controllers\Quran\Dhikr\DhikrController;
+use App\Http\Controllers\Quran\Donation\DonationController;
 use App\Http\Controllers\Quran\Dua\DuaController;
 use App\Http\Controllers\Quran\HarmCode\HaramCodeController;
-use App\Http\Controllers\Quran\Reciter\ReciterController;
 use App\Http\Controllers\Quran\PaymentMethod\PaymentMethodController;
 use App\Http\Controllers\Quran\PrayerTime\PrayerTimeController;
 use App\Http\Controllers\Quran\PrayerTime\PrayerTimeImportController;
-use App\Http\Controllers\Quran\Reciter\ReciterSuraController;
 use App\Http\Controllers\Quran\Reciter\BulkSuraImportController;
+use App\Http\Controllers\Quran\Reciter\ReciterController;
+use App\Http\Controllers\Quran\Reciter\ReciterSuraController;
 use App\Http\Controllers\Quran\Settings\EmailSettingController;
 use App\Http\Controllers\Quran\Settings\LandingSettingController;
 use App\Http\Controllers\Quran\Settings\SettingsController;
 use App\Http\Controllers\Quran\SifatName\SifatNameController;
-use App\Http\Controllers\Quran\Blog\BlogController;
-use App\Http\Controllers\Quran\Blog\BlogPublicController;
 use App\Http\Controllers\Quran\Support\SupportController;
 use App\Http\Controllers\Quran\WallPaper\WallpaperCategoryController;
 use App\Http\Controllers\Quran\WallPaper\WallpaperController;
@@ -50,7 +50,7 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-//Installation
+// Installation
 Route::middleware('not_install')->group(function (Router $router) {
     $router->get('install', [InstallerController::class, 'installation'])->name('install.view');
     $router->get('installation/requirements', [InstallerController::class, 'index']);
@@ -86,8 +86,8 @@ Route::middleware(['guest', 'install'])->group(function () {
 
 });
 
-//Supporting Routes for view
-Route::middleware(['auth', 'authorize','install'])->controller(ViewController::class)->group(function (Router $router) {
+// Supporting Routes for view
+Route::middleware(['auth', 'authorize', 'install'])->controller(ViewController::class)->group(function (Router $router) {
 
     $router->get('user/list', 'userList')
         ->name('user-list.view')
@@ -137,7 +137,6 @@ Route::middleware(['auth', 'authorize','install'])->controller(ViewController::c
         ->name('prayer-time-import.view')
         ->middleware('can:import_prayer_times');
 
-
     $router->get('setting', 'setting')
         ->name('setting.view')
         ->middleware(['can:view_setting,view_email_setting']);
@@ -154,7 +153,6 @@ Route::middleware(['auth', 'authorize','install'])->controller(ViewController::c
         ->name('donation-list.view')
         ->middleware(['can:view_donation']);
 
-
     $router->get('audio/reciter/list', 'audioReciterList')
         ->name('audio-reciter-list.view')
         ->middleware('can:view_reciter');
@@ -166,7 +164,6 @@ Route::middleware(['auth', 'authorize','install'])->controller(ViewController::c
     $router->get('audio/reciter/bulk-import', 'bulkSuraImport')
         ->name('audio-sura-bulk-import.view')
         ->middleware('can:import_reciter_sura');
-
 
     $router->get('my-profile', 'myProfile')->name('my-profile.view');
 
@@ -199,7 +196,7 @@ Route::middleware(['auth', 'authorize','install'])->controller(ViewController::c
 
 });
 
-Route::middleware(['admin','install'])->group(callback: function () {
+Route::middleware(['admin', 'install'])->group(callback: function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('settings', [SettingsController::class, 'index'])->name('setting.index');
     Route::post('settings', [SettingsController::class, 'update'])->name('setting.update');
@@ -208,19 +205,23 @@ Route::middleware(['admin','install'])->group(callback: function () {
     Route::get('home-layout-presets', [SettingsController::class, 'homeLayoutPresets'])->name('setting.home-layout.presets');
     Route::post('privacy-support', [SettingsController::class, 'privacySupportUpdate'])->name('setting.update');
     Route::get('landing-settings', [LandingSettingController::class, 'index'])->name('landing-setting.index');
-    Route::post('landing-settings', [LandingSettingController::class, 'update'])->name('landing-setting.update');
+    Route::post('landing-settings', [LandingSettingController::class, 'update'])
+        ->middleware('invalidate.application-cache:settings')
+        ->name('landing-setting.update');
     Route::get('email-settings', [EmailSettingController::class, 'index'])
         ->name('email-setting.index');
     Route::post('email-settings', [EmailSettingController::class, 'update'])
         ->name('email-setting.update');
-    Route::apiResource('dhikrs', DhikrController::class);
-    Route::apiResource('dua', DuaController::class);
-    Route::apiResource('wallpaper-category', WallpaperCategoryController::class);
-    Route::apiResource('wallpaper', WallpaperController::class);
-    Route::apiResource('sifats', SifatNameController::class);
-    Route::apiResource('haram-codes', HaramCodeController::class);
-    Route::apiResource('prayer-times', PrayerTimeController::class);
-    Route::post('prayertime-import', [PrayerTimeImportController::class, 'import'])->name('prayer-times.import')->middleware('can:import_prayer_times');
+    Route::apiResource('dhikrs', DhikrController::class)->middleware('invalidate.application-cache:content');
+    Route::apiResource('dua', DuaController::class)->middleware('invalidate.application-cache:content');
+    Route::apiResource('wallpaper-category', WallpaperCategoryController::class)->middleware('invalidate.application-cache:content');
+    Route::apiResource('wallpaper', WallpaperController::class)->middleware('invalidate.application-cache:content');
+    Route::apiResource('sifats', SifatNameController::class)->middleware('invalidate.application-cache:content');
+    Route::apiResource('haram-codes', HaramCodeController::class)->middleware('invalidate.application-cache:content');
+    Route::apiResource('prayer-times', PrayerTimeController::class)->middleware('invalidate.application-cache:content');
+    Route::post('prayertime-import', [PrayerTimeImportController::class, 'import'])
+        ->name('prayer-times.import')
+        ->middleware(['can:import_prayer_times', 'invalidate.application-cache:content']);
     Route::apiResource('roles', RoleController::class);
     Route::apiResource('users', UserController::class);
     Route::post('user-invite', [UserInviteController::class, 'invite'])
@@ -228,7 +229,9 @@ Route::middleware(['admin','install'])->group(callback: function () {
     Route::apiResource('payment-method', PaymentMethodController::class);
     Route::apiResource('category', CategoryController::class);
     Route::get('donation-list', [DonationController::class, 'index'])->name('donation.view');
-    Route::delete('delete-prayer-times', [PrayerTimeController::class, 'deleteCityPrayerTimes'])->name('delete-prayer-times');
+    Route::delete('delete-prayer-times', [PrayerTimeController::class, 'deleteCityPrayerTimes'])
+        ->middleware('invalidate.application-cache:content')
+        ->name('delete-prayer-times');
 
     Route::apiResource('blog-posts', BlogController::class)->parameters(['blog-posts' => 'blog']);
     Route::post('blog-posts-upload-image', [BlogController::class, 'uploadContentImage'])->name('blog-posts.upload-image');
@@ -236,9 +239,9 @@ Route::middleware(['admin','install'])->group(callback: function () {
     Route::get('blog-posts-upload-chunk/status', [BlogController::class, 'thumbnailUploadStatus'])->name('blog-posts.upload-chunk.status');
     Route::post('blog-posts-upload-chunk/complete', [BlogController::class, 'completeThumbnailUpload'])->name('blog-posts.upload-chunk.complete');
     Route::delete('blog-posts-upload-chunk', [BlogController::class, 'cancelThumbnailUpload'])->name('blog-posts.upload-chunk.cancel');
-    Route::apiResource('reciter', ReciterController::class);
+    Route::apiResource('reciter', ReciterController::class)->middleware('invalidate.application-cache:content');
     Route::get('reciter-sura-list/{reciter}', [ReciterSuraController::class, 'index'])->name('reciter-sura.view');
-    Route::apiResource('reciter-sura', ReciterSuraController::class);
+    Route::apiResource('reciter-sura', ReciterSuraController::class)->middleware('invalidate.application-cache:content');
     Route::post('upload-chunk', [ReciterSuraController::class, 'uploadChunk'])->name('upload.chunk');
     Route::get('upload-chunk/status', [ReciterSuraController::class, 'uploadStatus'])->name('upload.chunk.status');
     Route::post('upload-chunk/complete', [ReciterSuraController::class, 'completeUpload'])->name('upload.chunk.complete');
@@ -255,7 +258,6 @@ Route::middleware(['admin','install'])->group(callback: function () {
 });
 
 Route::get('get-cities', [PrayerTimeController::class, 'getCities']);
-
 
 Route::middleware('auth')->controller(ProfileController::class)->group(function (Router $router) {
     $router->get('profile', 'index')->name('my-profile');
@@ -287,11 +289,11 @@ Route::get('symlink', [InstallDemoDataController::class, 'symlink']);
 // Serve public storage files through Laravel (Apache FollowSymLinks is
 // disabled on this shared host, so the public/storage symlink returns 403)
 Route::get('storage/{path}', function (string $path) {
-    $full = storage_path('app/public/' . $path);
+    $full = storage_path('app/public/'.$path);
     abort_unless(is_file($full), 404);
+
     return response()->file($full);
 })->where('path', '.*');
-
 
 Route::get('blog', [BlogPublicController::class, 'index'])->name('blog.index');
 Route::get('blog/{slug}', [BlogPublicController::class, 'show'])->name('blog.show');
@@ -299,6 +301,3 @@ Route::get('blog/{slug}', [BlogPublicController::class, 'show'])->name('blog.sho
 Route::get('privacy-policy', [SupportController::class, 'privacyPolicy']);
 Route::get('terms-and-conditions', [SupportController::class, 'termsCondition']);
 Route::get('support', [SupportController::class, 'support']);
-
-
-
