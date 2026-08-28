@@ -184,7 +184,7 @@ class ViewController extends Controller
             'downloads_count'          => '100K+',
             'languages_count'          => '40+',
             'app_store_url'            => $app['app_store_url']  ?? '#',
-            'play_store_url'           => $app['play_store_url'] ?? '#',
+            'play_store_url'           => $app['play_store_url'] ?? 'https://play.google.com/store/apps/details?id=net.salatime.app&pli=1',
             'web_logo'                 => $app['web_logo']       ?? null,
             'codecanyon_url'           => 'https://codecanyon.net/item/zabi-islamic-flutter-android-iso-app/50458856',
             'features_title'           => 'Everything You Need',

@@ -84,7 +84,7 @@ class LandingSettingSeeder extends Seeder
             'hero_subtitle'          => 'Faith in Your Hands',
             'hero_description'       => 'Your complete Islamic companion app. Bringing the beauty of Islam to your fingertips with modern technology.',
             'app_store_url'          => 'https://apps.apple.com',
-            'play_store_url'         => 'https://play.google.com',
+            'play_store_url'         => 'https://play.google.com/store/apps/details?id=net.salatime.app&pli=1',
 
             // Stats
             'rating'                 => '5',
