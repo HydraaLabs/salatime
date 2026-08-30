@@ -5,6 +5,16 @@
 
     RewriteEngine On
 
+    # Keep one indexable origin: HTTPS without www. The production vhost
+    # points directly to /public, so canonical redirects must live here.
+    RewriteCond %{HTTP_HOST} ^www\.salatime\.net$ [NC]
+    RewriteRule ^ https://salatime.net%{REQUEST_URI} [R=301,L,NE]
+
+    RewriteCond %{HTTP_HOST} ^salatime\.net$ [NC]
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
+    RewriteRule ^ https://salatime.net%{REQUEST_URI} [R=301,L,NE]
+
     # LiteSpeed page cache (24 hours, public) for static GET API data:
     # quran, dhikr, dua, reciters, wallpapers... Purge = empty the LSWS cache dir.
     <IfModule LiteSpeed>
