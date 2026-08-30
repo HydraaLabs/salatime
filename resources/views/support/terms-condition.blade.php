@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ config('settings.application.company_name') }} – Terms & Conditions</title>
     <meta name="description" content="Terms and Conditions for {{ config('settings.application.company_name') }}">
+    <meta name="robots" content="index,follow">
+    <link rel="canonical" href="{{ config('seo.site_url') }}/terms-and-conditions">
     <link rel="shortcut icon" href="{{ asset(config('settings.application.web_icon') ?? 'favicon.ico') }}" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">

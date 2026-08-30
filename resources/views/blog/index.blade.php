@@ -1,10 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    @php
+        $blogCanonical = config('seo.site_url') . '/blog';
+        $blogTitle = 'Islamic Prayer, Quran & Qibla Guides – SalaTime';
+        $blogDescription = 'Practical Islamic guides about prayer times, Quran reading, Qibla direction, Adhan reminders, duas and dhikr from SalaTime.';
+    @endphp
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog – {{ $s['app_name'] ?? 'SalaTime' }}</title>
-    <meta name="description" content="Islamic articles, guides, and updates from {{ $s['app_name'] ?? 'SalaTime' }}">
+    <title>{{ $blogTitle }}</title>
+    <meta name="description" content="{{ $blogDescription }}">
+    <meta name="robots" content="{{ $posts->isEmpty() ? 'noindex,follow' : 'index,follow' }}">
+    <link rel="canonical" href="{{ $blogCanonical }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="SalaTime">
+    <meta property="og:title" content="{{ $blogTitle }}">
+    <meta property="og:description" content="{{ $blogDescription }}">
+    <meta property="og:url" content="{{ $blogCanonical }}">
+    <meta property="og:image" content="{{ asset(config('seo.social_image')) }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $blogTitle }}">
+    <meta name="twitter:description" content="{{ $blogDescription }}">
+    <meta name="twitter:image" content="{{ asset(config('seo.social_image')) }}">
     <link rel="icon" href="{{ asset('favicon.ico') }}?v=20260827">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">

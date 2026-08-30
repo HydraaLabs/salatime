@@ -34,6 +34,7 @@ use App\Http\Controllers\Quran\WallPaper\WallpaperCategoryController;
 use App\Http\Controllers\Quran\WallPaper\WallpaperController;
 use App\Http\Controllers\Role\PermissionController;
 use App\Http\Controllers\Role\RoleController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\UserInviteController;
 use App\Http\Controllers\View\ViewController;
@@ -70,6 +71,7 @@ Route::middleware('not_install')->group(function (Router $router) {
 });
 
 Route::get('/', [ViewController::class, 'landingPage'])->name('landing')->middleware('install');
+Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/admin', function () {
     return redirect()->route('login');
 });
@@ -298,6 +300,6 @@ Route::get('storage/{path}', function (string $path) {
 Route::get('blog', [BlogPublicController::class, 'index'])->name('blog.index');
 Route::get('blog/{slug}', [BlogPublicController::class, 'show'])->name('blog.show');
 
-Route::get('privacy-policy', [SupportController::class, 'privacyPolicy']);
-Route::get('terms-and-conditions', [SupportController::class, 'termsCondition']);
-Route::get('support', [SupportController::class, 'support']);
+Route::get('privacy-policy', [SupportController::class, 'privacyPolicy'])->name('privacy-policy');
+Route::get('terms-and-conditions', [SupportController::class, 'termsCondition'])->name('terms-and-conditions');
+Route::get('support', [SupportController::class, 'support'])->name('support');

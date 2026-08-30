@@ -1,2 +1,11 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /install
+Disallow: /landing/
+Disallow: /login
+Disallow: /settings
+
+Sitemap: https://salatime.net/sitemap.xml

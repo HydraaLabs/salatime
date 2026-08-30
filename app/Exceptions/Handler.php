@@ -49,7 +49,7 @@ class Handler extends ExceptionHandler
                 if (view()->exists('custom_errors.' . $statusCode)) {
                     return response()->view('custom_errors.' . $statusCode, [
                         'message' => $message
-                    ]);
+                    ], $statusCode);
                 }
             }
         }
@@ -58,20 +58,20 @@ class Handler extends ExceptionHandler
             if ($e->getStatusCode() == 404) {
                 return response()->view('custom_errors.404', [
                     'message' => trans('default.resource_not_found_app')
-                ]);
+                ], 404);
             }
         }
 
         if (!$request->expectsJson() && $e instanceof ModelNotFoundException) {
             return response()->view('custom_errors.404', [
                 'message' => trans('default.resource_not_found', ['resource' => trans('default.resource')])
-            ]);
+            ], 404);
         }
 
         if (!$request->expectsJson() && $e instanceof AuthorizationException) {
             return response()->view('custom_errors.403', [
                 'message' => $e->getMessage()
-            ]);
+            ], 403);
         }
 
         if ($request->expectsJson() && $e instanceof TokenMismatchException) {

@@ -176,7 +176,7 @@ class ViewController extends Controller
 
         $defaults = [
             'app_name' => 'SalaTime',
-            'hero_badge_text' => 'Available on iOS & Android',
+            'hero_badge_text' => 'Available on Android',
             'hero_title' => 'Your Complete',
             'hero_subtitle' => 'Islamic Companion',
             'hero_description' => 'SalaTime brings you the full Quran, prayer times, hadith, dua, Qibla, Zakat calculator, AI Islamic chat, and 40+ languages — everything you need for your daily Islamic life in one beautiful app.',
@@ -184,7 +184,7 @@ class ViewController extends Controller
             'downloads_count' => '100K+',
             'languages_count' => '40+',
             'app_store_url' => $app['app_store_url'] ?? '#',
-            'play_store_url' => $app['play_store_url'] ?? 'https://play.google.com/store/apps/details?id=net.salatime.app&pli=1',
+            'play_store_url' => $app['play_store_url'] ?? config('seo.play_store_url'),
             'web_logo' => $app['web_logo'] ?? null,
             'codecanyon_url' => 'https://codecanyon.net/item/zabi-islamic-flutter-android-iso-app/50458856',
             'features_title' => 'Everything You Need',
@@ -227,17 +227,17 @@ class ViewController extends Controller
             'footer_description' => 'Your complete Islamic companion app. Bringing the beauty of Islam to your fingertips with modern technology.',
             'features' => [],
             // SEO defaults
-            'seo_title' => null,
-            'seo_description' => null,
+            'seo_title' => config('seo.title'),
+            'seo_description' => config('seo.description'),
             'seo_keywords' => null,
-            'seo_canonical_url' => null,
+            'seo_canonical_url' => config('seo.site_url').'/',
             'seo_robots' => 'index,follow',
-            'seo_og_title' => null,
-            'seo_og_description' => null,
-            'seo_og_image' => null,
+            'seo_og_title' => config('seo.title'),
+            'seo_og_description' => config('seo.description'),
+            'seo_og_image' => config('seo.social_image'),
             'seo_twitter_card' => 'summary_large_image',
-            'seo_twitter_title' => null,
-            'seo_twitter_description' => null,
+            'seo_twitter_title' => config('seo.title'),
+            'seo_twitter_description' => config('seo.description'),
             'seo_google_analytics' => null,
             'seo_google_verification' => null,
         ];
@@ -245,6 +245,30 @@ class ViewController extends Controller
         // Merge only non-empty saved values on top of defaults
         $saved = array_filter((array) $landing, fn ($v) => $v !== null && $v !== '');
         $s = array_merge($defaults, $saved);
+
+        // Retire SEO values shipped by the former template while preserving
+        // genuinely customized admin values.
+        $legacySeoValues = [
+            'seo_title' => 'SalaTime — Complete Islamic Companion App | Quran, Prayer & AI',
+            'seo_description' => 'SalaTime is your complete Islamic companion app. Read Quran, get accurate prayer times, AI Islamic guidance, Qibla finder, Zakat calculator, and more. Free on iOS & Android.',
+            'seo_og_title' => 'SalaTime — Complete Islamic Companion App',
+            'seo_og_description' => 'Read Quran, get prayer times, AI Islamic guidance, Qibla finder, and Zakat calculator. Download SalaTime free on iOS & Android.',
+            'seo_twitter_title' => 'SalaTime — Complete Islamic Companion App',
+            'seo_twitter_description' => 'Read Quran, get prayer times, AI Islamic guidance, Qibla finder, and more. Download SalaTime free on iOS & Android.',
+        ];
+
+        foreach ($legacySeoValues as $key => $legacyValue) {
+            if (($s[$key] ?? null) === $legacyValue) {
+                $s[$key] = str_contains($key, 'title') ? config('seo.title') : config('seo.description');
+            }
+        }
+
+        // The landing page has one canonical URL. Never allow the historical
+        // template domain or a second host to be emitted from saved settings.
+        $s['seo_canonical_url'] = config('seo.site_url').'/';
+        if (empty($s['seo_og_image']) || $s['seo_og_image'] === 'assets/img/logo.png') {
+            $s['seo_og_image'] = config('seo.social_image');
+        }
 
         // Features JSON is stored separately
         $s['features'] = [];

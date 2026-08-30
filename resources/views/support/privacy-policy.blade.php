@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ config('settings.application.company_name') }} – Privacy Policy</title>
     <meta name="description" content="Privacy Policy for {{ config('settings.application.company_name') }}">
+    <meta name="robots" content="index,follow">
+    <link rel="canonical" href="{{ config('seo.site_url') }}/privacy-policy">
     <link rel="shortcut icon" href="{{ asset(config('settings.application.web_icon') ?? 'favicon.ico') }}" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">

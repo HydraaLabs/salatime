@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="robots" content="noindex,nofollow,noarchive">
     <link rel="icon" type="image/png" href="/assets/favicon/favicon-96x96.png?v=20260827" sizes="96x96" />
     <link rel="shortcut icon" href="/favicon.ico?v=20260827" />
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png?v=20260827" />
@@ -14,7 +15,7 @@
     <meta property="og:image" content="{{config('settings.application.web_logo')}}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:url" content="{{ env('APP_URL') }}">
+    <meta property="og:url" content="{{ config('seo.site_url') }}">
     <meta property="og:type" content="website">
     <link rel="apple-touch-icon" href="{{config('settings.application.web_icon')}}"/>
     <link rel="apple-touch-icon-precomposed" href="{{config('settings.application.web_icon')}}"/>

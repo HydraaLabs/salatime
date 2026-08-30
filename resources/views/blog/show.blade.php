@@ -1,16 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    @php
+        $articleTitle = $post->meta_title ?: $post->title;
+        $articleDescription = $post->meta_description ?: Str::limit($post->excerpt ?? strip_tags($post->content), 160);
+        $articleUrl = config('seo.site_url') . '/blog/' . rawurlencode($post->slug);
+        $articleImage = $post->thumbnail ? asset($post->thumbnail) : asset(config('seo.social_image'));
+        $articleSchema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Article',
+            'headline' => $articleTitle,
+            'description' => $articleDescription,
+            'image' => [$articleImage],
+            'datePublished' => optional($post->published_at)->toAtomString(),
+            'dateModified' => optional($post->updated_at)->toAtomString(),
+            'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => $articleUrl],
+            'publisher' => [
+                '@type' => 'Organization',
+                'name' => 'SalaTime',
+                'logo' => ['@type' => 'ImageObject', 'url' => asset($s['web_logo'] ?? 'assets/img/logo.png')],
+            ],
+        ];
+    @endphp
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $post->meta_title ?: $post->title }} – {{ $s['app_name'] ?? 'SalaTime' }}</title>
-    <meta name="description" content="{{ $post->meta_description ?: Str::limit($post->excerpt ?? strip_tags($post->content), 160) }}">
+    <title>{{ $articleTitle }} – {{ $s['app_name'] ?? 'SalaTime' }}</title>
+    <meta name="description" content="{{ $articleDescription }}">
+    <meta name="robots" content="index,follow,max-image-preview:large">
     <meta property="og:type" content="article">
-    <meta property="og:title" content="{{ $post->meta_title ?: $post->title }}">
-    <meta property="og:description" content="{{ $post->meta_description ?: Str::limit($post->excerpt ?? strip_tags($post->content), 160) }}">
-    @if($post->thumbnail)<meta property="og:image" content="{{ asset($post->thumbnail) }}">@endif
-    <meta property="og:url" content="{{ url()->current() }}">
-    <link rel="canonical" href="{{ url()->current() }}">
+    <meta property="og:site_name" content="SalaTime">
+    <meta property="og:title" content="{{ $articleTitle }}">
+    <meta property="og:description" content="{{ $articleDescription }}">
+    <meta property="og:image" content="{{ $articleImage }}">
+    <meta property="og:url" content="{{ $articleUrl }}">
+    <meta property="article:published_time" content="{{ optional($post->published_at)->toAtomString() }}">
+    <meta property="article:modified_time" content="{{ optional($post->updated_at)->toAtomString() }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $articleTitle }}">
+    <meta name="twitter:description" content="{{ $articleDescription }}">
+    <meta name="twitter:image" content="{{ $articleImage }}">
+    <link rel="canonical" href="{{ $articleUrl }}">
+    <script type="application/ld+json">{!! json_encode($articleSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
     <link rel="icon" href="{{ asset('favicon.ico') }}?v=20260827">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">

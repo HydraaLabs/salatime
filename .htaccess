@@ -1,4 +1,15 @@
 <IfModule mod_rewrite.c>
 RewriteEngine On
+
+# Keep one indexable origin: HTTPS without www. Cloudflare forwards the
+# original protocol through X-Forwarded-Proto, so this does not create loops.
+RewriteCond %{HTTP_HOST} ^www\.salatime\.net$ [NC]
+RewriteRule ^ https://salatime.net%{REQUEST_URI} [R=301,L,NE]
+
+RewriteCond %{HTTP_HOST} ^salatime\.net$ [NC]
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
+RewriteRule ^ https://salatime.net%{REQUEST_URI} [R=301,L,NE]
+
 RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>

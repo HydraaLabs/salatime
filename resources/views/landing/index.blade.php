@@ -19,6 +19,45 @@
         $twTitle    = !empty($s['seo_twitter_title']) ? $s['seo_twitter_title'] : $ogTitle;
         $twDesc     = !empty($s['seo_twitter_description']) ? $s['seo_twitter_description'] : $ogDesc;
         $ogImage    = !empty($s['seo_og_image']) ? asset($s['seo_og_image']) : (!empty($s['web_logo']) ? asset($s['web_logo']) : null);
+        $canonical  = $s['seo_canonical_url'] ?? (config('seo.site_url') . '/');
+        $hasAppStoreLink = !empty($s['app_store_url']) && $s['app_store_url'] !== '#' && str_starts_with($s['app_store_url'], 'https://apps.apple.com/');
+        $structuredData = [
+            '@context' => 'https://schema.org',
+            '@graph' => [
+                [
+                    '@type' => 'WebSite',
+                    '@id' => $canonical . '#website',
+                    'url' => $canonical,
+                    'name' => $s['app_name'] ?? 'SalaTime',
+                    'description' => $seoDesc,
+                    'inLanguage' => 'en',
+                ],
+                [
+                    '@type' => 'Organization',
+                    '@id' => $canonical . '#organization',
+                    'name' => $s['app_name'] ?? 'SalaTime',
+                    'url' => $canonical,
+                    'logo' => asset($s['web_logo'] ?? 'assets/img/logo.png'),
+                    'sameAs' => [$s['play_store_url'] ?? config('seo.play_store_url')],
+                ],
+                [
+                    '@type' => 'MobileApplication',
+                    '@id' => $canonical . '#android-app',
+                    'name' => $s['app_name'] ?? 'SalaTime',
+                    'description' => $seoDesc,
+                    'applicationCategory' => 'LifestyleApplication',
+                    'operatingSystem' => 'Android',
+                    'url' => $canonical,
+                    'downloadUrl' => $s['play_store_url'] ?? config('seo.play_store_url'),
+                    'image' => $ogImage,
+                    'offers' => [
+                        '@type' => 'Offer',
+                        'price' => '0',
+                        'priceCurrency' => 'USD',
+                    ],
+                ],
+            ],
+        ];
     @endphp
 
     <title>{{ $seoTitle }}</title>
@@ -26,20 +65,33 @@
     <meta name="theme-color" content="#071f17">
     @if(!empty($s['seo_keywords']))<meta name="keywords" content="{{ $s['seo_keywords'] }}">@endif
     <meta name="robots" content="{{ $s['seo_robots'] ?? 'index,follow' }}">
-    @if(!empty($s['seo_canonical_url']))<link rel="canonical" href="{{ $s['seo_canonical_url'] }}">@endif
+    <link rel="canonical" href="{{ $canonical }}">
     @if(!empty($s['seo_google_verification']))<meta name="google-site-verification" content="{{ $s['seo_google_verification'] }}">@endif
 
     <meta property="og:type" content="website">
+    <meta property="og:locale" content="en_US">
     <meta property="og:site_name" content="{{ $s['app_name'] ?? 'SalaTime' }}">
     <meta property="og:title" content="{{ $ogTitle }}">
     <meta property="og:description" content="{{ $ogDesc }}">
-    @if($ogImage)<meta property="og:image" content="{{ $ogImage }}">@endif
-    @if(!empty($s['seo_canonical_url']))<meta property="og:url" content="{{ $s['seo_canonical_url'] }}">@endif
+    @if($ogImage)
+    <meta property="og:image" content="{{ $ogImage }}">
+    <meta property="og:image:secure_url" content="{{ $ogImage }}">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="SalaTime Android app for prayer times, Quran and Qibla">
+    @endif
+    <meta property="og:url" content="{{ $canonical }}">
 
     <meta name="twitter:card" content="{{ $s['seo_twitter_card'] ?? 'summary_large_image' }}">
     <meta name="twitter:title" content="{{ $twTitle }}">
     <meta name="twitter:description" content="{{ $twDesc }}">
-    @if($ogImage)<meta name="twitter:image" content="{{ $ogImage }}">@endif
+    @if($ogImage)
+    <meta name="twitter:image" content="{{ $ogImage }}">
+    <meta name="twitter:image:alt" content="SalaTime Android app for prayer times, Quran and Qibla">
+    @endif
+
+    <script type="application/ld+json">{!! json_encode($structuredData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
 
     <link rel="icon" href="{{ asset('favicon.ico') }}?v=20260827">
 
@@ -1048,6 +1100,7 @@
 
                 <!-- CTA Buttons -->
                 <div class="hero-actions flex flex-wrap gap-4 mb-10">
+                    @if($hasAppStoreLink)
                     <a href="{{ $s['app_store_url'] }}" class="hero-primary inline-flex items-center gap-3 px-6 py-4 rounded-2xl text-gray-900 font-bold text-base transition-all"
                        style="background: linear-gradient(135deg, var(--gold), var(--gold-light));">
                         <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
@@ -1055,6 +1108,7 @@
                         </svg>
                         <span data-i18n="hero.app_store">App Store</span>
                     </a>
+                    @endif
                     <a href="{{ $s['play_store_url'] }}" class="hero-secondary inline-flex items-center gap-3 px-6 py-4 rounded-2xl font-bold text-base transition-all"
                        style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(8px);">
                         <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
@@ -2041,6 +2095,7 @@
                 </p>
 
                 <div class="flex flex-wrap justify-center gap-4 mb-12">
+                    @if($hasAppStoreLink)
                     <!-- App Store button -->
                     <a href="{{ $s['app_store_url'] }}" class="inline-flex items-center gap-4 px-8 py-4 rounded-2xl transition-all hover:scale-105 btn-pulse"
                        style="background: linear-gradient(135deg, var(--gold), var(--gold-light));">
@@ -2052,6 +2107,7 @@
                             <div class="text-gray-900 font-bold text-lg leading-tight" data-i18n="download.app_store">App Store</div>
                         </div>
                     </a>
+                    @endif
 
                     <!-- Google Play button -->
                     <a href="{{ $s['play_store_url'] }}" class="inline-flex items-center gap-4 px-8 py-4 rounded-2xl transition-all hover:scale-105"

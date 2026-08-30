@@ -79,11 +79,11 @@ class LandingSettingSeeder extends Seeder
         $settings = [
             // Hero
             'app_name'               => 'SalaTime',
-            'hero_badge_text'        => 'The Islamic Companion App',
+            'hero_badge_text'        => 'Available on Android',
             'hero_title'             => 'Your Complete Islamic Companion',
             'hero_subtitle'          => 'Faith in Your Hands',
             'hero_description'       => 'Your complete Islamic companion app. Bringing the beauty of Islam to your fingertips with modern technology.',
-            'app_store_url'          => 'https://apps.apple.com',
+            'app_store_url'          => '#',
             'play_store_url'         => 'https://play.google.com/store/apps/details?id=net.salatime.app&pli=1',
 
             // Stats
@@ -158,16 +158,17 @@ class LandingSettingSeeder extends Seeder
             'footer_description'     => 'Your complete Islamic companion app. Bringing the beauty of Islam to your fingertips with modern technology.',
 
             // SEO
-            'seo_title'              => 'SalaTime — Complete Islamic Companion App | Quran, Prayer & AI',
-            'seo_description'        => 'SalaTime is your complete Islamic companion app. Read Quran, get accurate prayer times, AI Islamic guidance, Qibla finder, Zakat calculator, and more. Free on iOS & Android.',
+            'seo_title'              => config('seo.title'),
+            'seo_description'        => config('seo.description'),
             'seo_keywords'           => 'Islamic app, Quran app, prayer times, Qibla finder, Zakat calculator, AI Islamic chat, Muslim app, Dhikr, Dua, Adhan, Islamic companion, Flutter Islamic app',
-            'seo_canonical_url'      => 'https://zabi.theme29.com',
+            'seo_canonical_url'      => config('seo.site_url').'/',
             'seo_robots'             => 'index, follow',
-            'seo_og_title'           => 'SalaTime — Complete Islamic Companion App',
-            'seo_og_description'     => 'Read Quran, get prayer times, AI Islamic guidance, Qibla finder, and Zakat calculator. Download SalaTime free on iOS & Android.',
+            'seo_og_title'           => config('seo.title'),
+            'seo_og_description'     => config('seo.description'),
+            'seo_og_image'           => config('seo.social_image'),
             'seo_twitter_card'       => 'summary_large_image',
-            'seo_twitter_title'      => 'SalaTime — Complete Islamic Companion App',
-            'seo_twitter_description'=> 'Read Quran, get prayer times, AI Islamic guidance, Qibla finder, and more. Download SalaTime free on iOS & Android.',
+            'seo_twitter_title'      => config('seo.title'),
+            'seo_twitter_description'=> config('seo.description'),
             'seo_google_analytics'   => '',
             'seo_google_verification'=> '',
         ];
