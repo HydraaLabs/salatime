@@ -69,6 +69,7 @@ Route::middleware('public.api.cache:content,86400')->group(function () {
     Route::get('wallpaper-category', [WallpaperCategoryController::class, 'wallpaperCategory']);
 });
 Route::any('today-prayer-time', [PrayerTimeController::class, 'getPrayerTime']);
+Route::post('prayer-time-calendar', [PrayerTimeController::class, 'getPrayerCalendar']);
 Route::get('prayer-by-location', [PrayerTimeController::class, 'prayerByLocation']);
 Route::get('settings', [SettingsController::class, 'index']);
 Route::middleware('public.api.cache:settings,600')->group(function () {

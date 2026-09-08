@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Quran\API\PrayerTime;
 
 use App\Http\Controllers\Controller;
 use App\Models\Quran\Prayer\PrayerTime;
+use App\Services\Prayer\PrayerCalendarService;
 use App\Vendor\PrayerTimes\Method;
 use Carbon\Carbon;
 use DateTime;
@@ -51,6 +52,57 @@ class PrayerTimeController extends Controller
                     'message' => 'Invalid request type',
                     'data' => $this->defaultPrayerTimeResponse(),
                 ]);
+        }
+    }
+
+    /**
+     * Return the complete J-7 to J+45 prayer calendar in one HTTP request.
+     */
+    public function getPrayerCalendar(Request $request, PrayerCalendarService $calendarService)
+    {
+        $request->validate([
+            'type' => 'required|in:manual,automatic',
+            'date' => 'required|date_format:Y-m-d',
+        ]);
+
+        if ($request->get('type') === 'manual') {
+            $context = $request->validate([
+                'type' => 'required|in:manual',
+                'date' => 'required|date_format:Y-m-d',
+                'city' => 'required|string|max:255',
+            ]);
+        } else {
+            $context = $request->validate([
+                'type' => 'required|in:automatic',
+                'date' => 'required|date_format:Y-m-d',
+                'lat' => 'required|numeric|between:-90,90',
+                'lng' => 'required|numeric|between:-180,180',
+                'prayer_method' => 'required|in:0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,99',
+                'school' => 'required|in:HANAFI,STANDARD',
+                'timezone' => 'required|timezone',
+            ]);
+        }
+
+        try {
+            if ($context['type'] === 'manual') {
+                $data = $calendarService->manual($context);
+            } else {
+                $data = $calendarService->automatic($context);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Prayer time calendar retrieved successfully.',
+                'data' => $data,
+            ]);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to fetch prayer time calendar.',
+                'data' => null,
+            ], 500);
         }
     }
 
