@@ -80,9 +80,17 @@
         .brand img { width: 170px; height: 46px; object-fit: contain; }
         .brand-tagline { max-width: 145px; color: #b9d6cb; font-weight: 500; font-size: .72rem; line-height: 1.25; }
         .nav-actions { display: flex; align-items: center; gap: 10px; }
-        .language-links { display: flex; align-items: center; gap: 4px; }
-        .language-links a { padding: 7px 8px; color: #bad5ca; font-size: .8rem; font-weight: 700; border-radius: 8px; }
-        .language-links a[aria-current="page"], .language-links a:hover { color: white; background: rgba(255,255,255,.12); }
+        .language-picker { position: relative; padding: 0; border: 0; border-radius: 12px; background: transparent; color: white; }
+        .language-picker > summary { display: flex; align-items: center; gap: 9px; min-height: 44px; padding: 9px 13px; list-style: none; border: 1px solid rgba(255,255,255,.2); border-radius: 12px; background: rgba(255,255,255,.08); font-size: .9rem; white-space: nowrap; }
+        .language-picker > summary::-webkit-details-marker { display: none; }
+        .language-picker > summary:hover, .language-picker[open] > summary { background: rgba(255,255,255,.16); }
+        .language-flag { font-size: 1.3rem; line-height: 1; }
+        .language-chevron { width: 14px; height: 14px; transition: transform .15s; }
+        .language-picker[open] .language-chevron { transform: rotate(180deg); }
+        .language-links { position: absolute; inset-inline-end: 0; top: calc(100% + 9px); display: grid; gap: 4px; min-width: 190px; padding: 7px; border: 1px solid var(--line); border-radius: 14px; background: white; color: var(--ink); box-shadow: var(--shadow); }
+        .language-links a { display: flex; align-items: center; gap: 11px; min-height: 44px; padding: 10px 12px; font-size: .9rem; font-weight: 700; border-radius: 9px; }
+        .language-links a[aria-current="page"], .language-links a:hover { color: var(--green-800); background: var(--mint); }
+        .language-check { margin-inline-start: auto; }
         .button {
             display: inline-flex;
             align-items: center;
@@ -157,6 +165,7 @@
         .footer-row { display: flex; justify-content: space-between; gap: 22px; align-items: center; }
         .footer-row a:hover { color: white; }
         @media (max-width: 900px) {
+            .brand-tagline { display: none; }
             .hero-grid, .content-grid { grid-template-columns: 1fr; }
             .prayer-grid { grid-template-columns: repeat(3, 1fr); }
             .city-grid { grid-template-columns: repeat(2, 1fr); }
@@ -167,7 +176,7 @@
             .nav { min-height: 66px; }
             .brand-tagline, .nav-actions > .button { display: none; }
             .brand img { width: 138px; height: 40px; }
-            .language-links a { padding: 6px; }
+            .language-picker > summary { padding: 9px 10px; gap: 7px; }
             .hero { padding: 38px 0 60px; }
             .prayer-grid { grid-template-columns: repeat(2, 1fr); margin-top: -25px; }
             .city-grid { grid-template-columns: 1fr; }
@@ -184,12 +193,22 @@
                 <span class="brand-tagline">{{ __('prayer_pages.brand_tagline') }}</span>
             </a>
             <div class="nav-actions">
-                <nav class="language-links" aria-label="{{ __('prayer_pages.languages') }}">
-                    @foreach($alternates as $language => $url)
-                    @php($shortLanguage = strtolower(strtok($language, '-')))
-                    <a href="{{ $url }}" hreflang="{{ $language }}" lang="{{ $shortLanguage }}" @if($shortLanguage === $locale) aria-current="page" @endif>{{ strtoupper($shortLanguage) }}</a>
-                    @endforeach
-                </nav>
+                <details class="language-picker">
+                    <summary aria-label="{{ __('prayer_pages.languages') }}: {{ $localeConfig['name'] }}">
+                        <span class="language-flag" aria-hidden="true">{{ $localeConfig['flag'] }}</span>
+                        <span lang="{{ $locale }}">{{ $localeConfig['name'] }}</span>
+                        <svg class="language-chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </summary>
+                    <nav class="language-links" aria-label="{{ __('prayer_pages.languages') }}">
+                        @foreach(config('prayer_pages.locales') as $languageCode => $languageSettings)
+                        <a href="{{ $alternates[$languageSettings['language_tag']] }}" hreflang="{{ $languageSettings['language_tag'] }}" lang="{{ $languageCode }}" @if($languageCode === $locale) aria-current="page" @endif>
+                            <span class="language-flag" aria-hidden="true">{{ $languageSettings['flag'] }}</span>
+                            <span>{{ $languageSettings['name'] }}</span>
+                            @if($languageCode === $locale)<span class="language-check" aria-hidden="true">✓</span>@endif
+                        </a>
+                        @endforeach
+                    </nav>
+                </details>
                 <a class="button" href="{{ config('seo.play_store_url') }}" rel="noopener">{{ __('prayer_pages.download') }}</a>
             </div>
         </div>
@@ -205,5 +224,19 @@
             <span><a href="{{ $worldUrl }}">{{ __('prayer_pages.world_heading') }}</a> · <a href="{{ url('privacy-policy') }}">{{ __('prayer_pages.privacy') }}</a></span>
         </div>
     </footer>
+<script>
+(() => {
+    const picker = document.querySelector('.language-picker');
+    document.addEventListener('click', event => {
+        if (!picker.contains(event.target)) picker.open = false;
+    });
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && picker.open) {
+            picker.open = false;
+            picker.querySelector('summary').focus();
+        }
+    });
+})();
+</script>
 </body>
 </html>

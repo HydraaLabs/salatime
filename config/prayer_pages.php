@@ -6,6 +6,8 @@ return [
 
     'locales' => [
         'fr' => [
+            'name' => 'Français',
+            'flag' => '🇫🇷',
             'world_prefix' => 'fr/horaires-priere',
             'prefix' => 'fr/horaires-priere/maroc',
             'language_tag' => 'fr',
@@ -13,6 +15,8 @@ return [
             'country_name' => 'Maroc',
         ],
         'ar' => [
+            'name' => 'العربية',
+            'flag' => '🇸🇦',
             'world_prefix' => 'ar/prayer-times',
             'prefix' => 'ar/prayer-times/morocco',
             'language_tag' => 'ar',
@@ -20,6 +24,8 @@ return [
             'country_name' => 'المغرب',
         ],
         'en' => [
+            'name' => 'English',
+            'flag' => '🇬🇧',
             'world_prefix' => 'en/prayer-times',
             'prefix' => 'en/prayer-times/morocco',
             'language_tag' => 'en',
@@ -27,6 +33,8 @@ return [
             'country_name' => 'Morocco',
         ],
         'es' => [
+            'name' => 'Español',
+            'flag' => '🇪🇸',
             'world_prefix' => 'es/horarios-oracion',
             'prefix' => 'es/horarios-oracion/marruecos',
             'language_tag' => 'es',
