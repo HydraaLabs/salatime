@@ -562,7 +562,7 @@ class PrayerTimes
      */
     private function asrTime($factor, $time)
     {
-        $julianDate = $this->gregorianToJulianDate();
+        $julianDate = $this->julianDate($this->date->format('Y'), $this->date->format('n'), $this->date->format('d')) - $this->longitude / (15 * 24);
 
         $decl = ($this->sunPosition($julianDate + $time))->declination;
 

@@ -2153,6 +2153,7 @@
                     <ul class="space-y-2 text-sm text-gray-400">
                         <li><a href="#quran" class="hover:text-white transition-colors" data-i18n="footer.holy_quran">Holy Quran</a></li>
                         <li><a href="#prayer" class="hover:text-white transition-colors" data-i18n="footer.prayer_times">Prayer Times</a></li>
+                        <li><a href="{{ route('prayer-pages.en.world') }}" class="hover:text-white transition-colors">Prayer Times by City</a></li>
                         <li><a href="#ai" class="hover:text-white transition-colors" data-i18n="footer.ai_chat">AI Chat</a></li>
                         <li><a href="#features" class="hover:text-white transition-colors" data-i18n="footer.qibla">Qibla Finder</a></li>
                         <li><a href="#features" class="hover:text-white transition-colors" data-i18n="footer.zakat">Zakat Calculator</a></li>

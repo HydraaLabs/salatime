@@ -8,6 +8,7 @@ use App\Http\Controllers\Installer\DatabaseManagerController;
 use App\Http\Controllers\Installer\InitialSetupController;
 use App\Http\Controllers\Installer\InstallerController;
 use App\Http\Controllers\Installer\PurchaseKeyController;
+use App\Http\Controllers\PrayerPageController;
 use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Quran\Auth\ForgotPasswordController;
 use App\Http\Controllers\Quran\Auth\ResetPasswordController;
@@ -72,6 +73,42 @@ Route::middleware('not_install')->group(function (Router $router) {
 
 Route::get('/', [ViewController::class, 'landingPage'])->name('landing')->middleware('install');
 Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
+
+// These public calendars are identical for all visitors and need no session cookies.
+Route::withoutMiddleware([
+    \App\Http\Middleware\EncryptCookies::class,
+    \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+    \Illuminate\Session\Middleware\StartSession::class,
+    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+    \App\Http\Middleware\VerifyCsrfToken::class,
+])->group(function () {
+    foreach (config('prayer_pages.locales') as $locale => $settings) {
+        $prefix = trim($settings['prefix'], '/');
+
+        Route::get($prefix, [PrayerPageController::class, 'index'])
+            ->defaults('locale', $locale)
+            ->defaults('countryCode', 'MA')
+            ->name("prayer-pages.$locale.index");
+        Route::get($prefix.'/{city}', [PrayerPageController::class, 'show'])
+            ->where('city', '[a-z0-9-]+')
+            ->defaults('locale', $locale)
+            ->defaults('countryCode', 'MA')
+            ->name("prayer-pages.$locale.show");
+    }
+
+    foreach (config('prayer_pages.locales') as $locale => $settings) {
+        $prefix = $settings['world_prefix'];
+        Route::get($prefix, [PrayerPageController::class, 'index'])
+            ->defaults('locale', $locale)->name("prayer-pages.$locale.world");
+        Route::get($prefix.'/{country}', [PrayerPageController::class, 'index'])
+            ->where('country', '[a-z0-9-]+')->defaults('locale', $locale)->name("prayer-pages.$locale.country");
+        Route::get($prefix.'/{country}/{city}', [PrayerPageController::class, 'show'])
+            ->where(['country' => '[a-z0-9-]+', 'city' => '[a-z0-9-]+'])
+            ->defaults('locale', $locale)->name("prayer-pages.$locale.city");
+    }
+
+});
+
 Route::get('/admin', function () {
     return redirect()->route('login');
 });
@@ -205,7 +242,7 @@ Route::middleware(['admin', 'install'])->group(callback: function () {
     Route::get('theme-presets', [SettingsController::class, 'themePresets'])->name('setting.theme-presets');
     Route::post('home-layout', [SettingsController::class, 'homeLayoutUpdate'])->name('setting.home-layout.update');
     Route::get('home-layout-presets', [SettingsController::class, 'homeLayoutPresets'])->name('setting.home-layout.presets');
-    Route::post('privacy-support', [SettingsController::class, 'privacySupportUpdate'])->name('setting.update');
+    Route::post('privacy-support', [SettingsController::class, 'privacySupportUpdate'])->name('setting.privacy-support.update');
     Route::get('landing-settings', [LandingSettingController::class, 'index'])->name('landing-setting.index');
     Route::post('landing-settings', [LandingSettingController::class, 'update'])
         ->middleware('invalidate.application-cache:settings')

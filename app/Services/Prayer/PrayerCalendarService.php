@@ -15,7 +15,7 @@ class PrayerCalendarService
 
     public const TOTAL_DAYS = self::PAST_DAYS + self::FUTURE_DAYS + 1;
 
-    private const CACHE_VERSION = 'v1';
+    private const CACHE_VERSION = 'v2';
 
     private const AUTOMATIC_CACHE_DAYS = 30;
 

@@ -45,4 +45,75 @@ class SeoTest extends TestCase
             ->assertOk()
             ->assertSee('name="robots" content="noindex,nofollow,noarchive"', false);
     }
+
+    public function test_french_city_page_is_server_rendered_with_local_prayer_times(): void
+    {
+        $canonical = config('seo.site_url').'/fr/horaires-priere/maroc/fes';
+
+        $response = $this->get('/fr/horaires-priere/maroc/fes');
+
+        $response
+            ->assertOk()
+            ->assertHeader('Cache-Control')
+            ->assertSee('<html lang="fr" dir="ltr">', false)
+            ->assertSee('<title>Horaires de prière à Fès, Maroc aujourd’hui | SalaTime</title>', false)
+            ->assertSee('<link rel="canonical" href="'.$canonical.'">', false)
+            ->assertSee('hreflang="ar"', false)
+            ->assertSee('Calendrier des prières sur 7 jours à Fès')
+            ->assertSee('méthode Maroc')
+            ->assertSee('type="application/ld+json"', false)
+            ->assertSee('FAQPage');
+
+        $this->assertLessThanOrEqual(60, $response->getMaxAge());
+    }
+
+    public function test_arabic_city_page_uses_rtl_and_translated_content(): void
+    {
+        $this->get('/ar/prayer-times/morocco/casablanca')
+            ->assertOk()
+            ->assertSee('<html lang="ar" dir="rtl">', false)
+            ->assertSee('مواقيت الصلاة في الدار البيضاء')
+            ->assertSee('الصلاة القادمة');
+    }
+
+    public function test_city_directory_links_to_curated_city_pages(): void
+    {
+        $this->get('/es/horarios-oracion/marruecos')
+            ->assertOk()
+            ->assertSee('Horarios de oración en Marruecos')
+            ->assertSee('/es/horarios-oracion/marruecos/casablanca', false)
+            ->assertSee('/es/horarios-oracion/marruecos/fes', false);
+    }
+
+    public function test_every_configured_city_page_is_available_in_every_locale(): void
+    {
+        foreach (config('prayer_pages.locales') as $locale => $settings) {
+            $prefix = '/'.trim($settings['prefix'], '/');
+
+            $this->get($prefix)
+                ->assertOk()
+                ->assertSee('hreflang="x-default"', false);
+
+            foreach (config('prayer_pages.cities') as $slug => $city) {
+                $this->get($prefix.'/'.$slug)
+                    ->assertOk()
+                    ->assertSee($city['names'][$locale])
+                    ->assertSee('<link rel="canonical" href="'.config('seo.site_url').$prefix.'/'.$slug.'">', false);
+            }
+        }
+    }
+
+    public function test_unknown_prayer_city_returns_404(): void
+    {
+        $this->get('/fr/horaires-priere/maroc/ville-inconnue')->assertNotFound();
+    }
+
+    public function test_sitemap_contains_localized_prayer_city_pages(): void
+    {
+        $this->get('/sitemap.xml')
+            ->assertOk()
+            ->assertSee('<loc>'.config('seo.site_url').'/fr/horaires-priere/maroc/fes</loc>', false)
+            ->assertSee('<loc>'.config('seo.site_url').'/ar/prayer-times/morocco/casablanca</loc>', false)
+            ->assertSee('<loc>'.config('seo.site_url').'/es/horarios-oracion/marruecos/rabat</loc>', false);
+    }
 }

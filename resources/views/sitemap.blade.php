@@ -20,6 +20,14 @@
         <changefreq>monthly</changefreq>
         <priority>0.4</priority>
     </url>
+    @foreach($prayerPages as $page)
+    <url>
+        <loc>{{ $page['loc'] }}</loc>
+        @if($page['lastmod'])<lastmod>{{ $page['lastmod'] }}</lastmod>@endif
+        <changefreq>{{ $page['changefreq'] }}</changefreq>
+        <priority>{{ $page['priority'] }}</priority>
+    </url>
+    @endforeach
     @if($posts->isNotEmpty())
     <url>
         <loc>{{ config('seo.site_url') }}/blog</loc>
