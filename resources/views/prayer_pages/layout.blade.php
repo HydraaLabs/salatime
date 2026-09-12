@@ -6,7 +6,7 @@
     <title>@yield('title')</title>
     <meta name="description" content="@yield('description')">
     <meta name="robots" content="index,follow,max-image-preview:large">
-    <meta name="theme-color" content="#0b4a38">
+    <meta name="theme-color" content="{{ config('brand.primary') }}">
     <link rel="canonical" href="{{ $canonical }}">
     @foreach($alternates as $language => $url)
     <link rel="alternate" hreflang="{{ $language }}" href="{{ $url }}">
@@ -33,18 +33,18 @@
         :root {
             --ink: #102a22;
             --muted: #5d716a;
-            --green-950: #052b21;
-            --green-900: #073b2d;
-            --green-800: #0b4a38;
-            --green-700: #116249;
-            --green-600: #16825f;
-            --mint: #e8f5ef;
+            --green-950: {{ config('brand.primary') }};
+            --green-900: {{ config('brand.primary') }};
+            --green-800: {{ config('brand.primary') }};
+            --green-700: {{ config('brand.secondary') }};
+            --green-600: {{ config('brand.secondary') }};
+            --mint: {{ config('brand.soft') }};
             --line: #dcebe4;
             --gold: #d6a83b;
             --surface: #ffffff;
-            --page: #f4f8f6;
+            --page: {{ config('brand.canvas') }};
             --radius: 22px;
-            --shadow: 0 20px 55px rgba(5, 43, 33, .09);
+            --shadow: 0 20px 55px rgba(47, 82, 51, .09);
         }
         * { box-sizing: border-box; }
         [hidden] { display: none !important; }
@@ -71,7 +71,7 @@
             top: 0;
             z-index: 20;
             border-bottom: 1px solid rgba(255,255,255,.1);
-            background: rgba(5,43,33,.96);
+            background: rgba(47,82,51,.96);
             backdrop-filter: blur(16px);
             color: white;
         }
@@ -111,7 +111,7 @@
             padding: 60px 0 72px;
             background:
                 radial-gradient(circle at 80% 8%, rgba(214,168,59,.22), transparent 25%),
-                radial-gradient(circle at 15% 90%, rgba(39,151,112,.26), transparent 30%),
+                radial-gradient(circle at 15% 90%, rgba(107,154,110,.26), transparent 30%),
                 linear-gradient(145deg, var(--green-950), var(--green-800));
             color: white;
         }
@@ -130,7 +130,7 @@
         .section-title { margin: 0 0 9px; font-size: clamp(1.65rem, 3vw, 2.35rem); line-height: 1.2; letter-spacing: -.025em; }
         .section-intro { margin: 0 0 28px; color: var(--muted); max-width: 760px; }
         .prayer-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin-top: -34px; position: relative; z-index: 3; }
-        .prayer-card { padding: 19px 12px; border: 1px solid var(--line); border-radius: 17px; background: var(--surface); text-align: center; box-shadow: 0 15px 40px rgba(5,43,33,.06); }
+        .prayer-card { padding: 19px 12px; border: 1px solid var(--line); border-radius: 17px; background: var(--surface); text-align: center; box-shadow: 0 15px 40px rgba(47,82,51,.06); }
         .prayer-card.is-next { border-color: var(--gold); box-shadow: 0 15px 40px rgba(214,168,59,.18); transform: translateY(-4px); }
         .prayer-icon { color: var(--gold); font-size: 1.45rem; }
         .prayer-name { display: block; margin: 4px 0; color: var(--muted); font-size: .83rem; font-weight: 700; }
@@ -139,7 +139,7 @@
         .table-wrap { overflow-x: auto; }
         table { width: 100%; min-width: 760px; border-collapse: collapse; }
         th, td { padding: 15px 17px; border-bottom: 1px solid var(--line); text-align: center; white-space: nowrap; }
-        th { background: #edf6f2; color: var(--green-800); font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
+        th { background: {{ config('brand.soft') }}; color: var(--green-800); font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
         th:first-child, td:first-child { text-align: start; font-weight: 750; }
         tr:last-child td { border-bottom: 0; }
         tr.is-today td { background: #fbf6e7; }
@@ -150,7 +150,7 @@
         .notice { margin-top: 17px; padding: 14px 16px; border-inline-start: 4px solid var(--gold); border-radius: 10px; background: #fbf6e7; color: #67531f; font-size: .9rem; }
         .city-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; }
         .city-card { display: flex; min-height: 96px; padding: 18px; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--line); border-radius: 16px; background: white; transition: .2s ease; }
-        .city-card:hover { transform: translateY(-3px); border-color: #94c9b4; box-shadow: 0 14px 35px rgba(5,43,33,.08); }
+        .city-card:hover { transform: translateY(-3px); border-color: {{ config('brand.dark_accent') }}; box-shadow: 0 14px 35px rgba(47,82,51,.08); }
         .city-card strong { display: block; font-size: 1.05rem; }
         .city-card small { display: block; color: var(--muted); font-size: .78rem; }
         .city-card span { color: var(--green-600); font-weight: 900; }

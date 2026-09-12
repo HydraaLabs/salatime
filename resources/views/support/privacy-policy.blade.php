@@ -137,6 +137,7 @@
 
     <div class="content-wrap">
         <div class="policy-card">
+            @include('support.partials.account-privacy')
             {!! config('settings.application.privacy_policy') !!}
         </div>
     </div>

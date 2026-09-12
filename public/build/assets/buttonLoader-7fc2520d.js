@@ -1,0 +1,1 @@
+import{_ as e}from"./_plugin-vue_export-helper-c27b6911.js";import{o,c as r}from"./app-895eb171.js";const t={name:"ButtonLoader"},s={class:"spinner-border spinner-border-sm",role:"status","aria-hidden":"true"};function n(a,c,p,d,_,i){return o(),r("span",s)}const f=e(t,[["render",n]]);export{f as default};

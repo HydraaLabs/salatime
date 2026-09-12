@@ -12,8 +12,8 @@
     $__isDark = $__mode === 'dark';
 
     // Fallbacks keep things safe if a preset is missing a token.
-    $__primary   = $__c['primary']        ?? '#1A6B4A';
-    $__secondary = $__c['secondary']      ?? '#2D8A63';
+    $__primary   = $__c['primary']        ?? '#2F5233';
+    $__secondary = $__c['secondary']      ?? '#4C7A50';
     $__accent    = $__c['accent']         ?? '#E8B84B';
     $__bg        = $__c['background']      ?? '#FFFFFF';
     $__surface   = $__c['surface']        ?? '#F5F7FB';
@@ -29,8 +29,8 @@
         --theme-accent: {{ $__accent }};
         --theme-error: {{ $__error }};
 
-        --theme-primary-rgb: {{ theme_hex_to_rgb($__primary, '26, 107, 74') }};
-        --theme-secondary-rgb: {{ theme_hex_to_rgb($__secondary, '45, 138, 99') }};
+        --theme-primary-rgb: {{ theme_hex_to_rgb($__primary, '47, 82, 51') }};
+        --theme-secondary-rgb: {{ theme_hex_to_rgb($__secondary, '76, 122, 80') }};
         --theme-accent-rgb: {{ theme_hex_to_rgb($__accent, '232, 184, 75') }};
         --theme-error-rgb: {{ theme_hex_to_rgb($__error, '224, 92, 92') }};
 

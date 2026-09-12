@@ -201,9 +201,9 @@ const exampleFileUrl = urlGenerator('assets/prayer_times.xlsx');
 <style scoped>
 /* Theme fallbacks so the component looks right even outside the admin layout */
 .pt-import-content {
-    --pt-primary: var(--theme-primary, #1A6B4A);
-    --pt-secondary: var(--theme-secondary, #2D8A63);
-    --pt-primary-rgb: var(--theme-primary-rgb, 26, 107, 74);
+    --pt-primary: var(--theme-primary, #2F5233);
+    --pt-secondary: var(--theme-secondary, #4C7A50);
+    --pt-primary-rgb: var(--theme-primary-rgb, 47, 82, 51);
     --pt-text: var(--theme-text, #1A1F2E);
     --pt-text-muted: var(--theme-text-muted, #5A6478);
     --pt-card: var(--theme-card, #FFFFFF);

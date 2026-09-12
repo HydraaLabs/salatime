@@ -263,7 +263,7 @@ const themePresets = ref({});
 const useCustom = ref(false);
 const customMode = ref('light');
 const customColors = ref({
-    primary: '#1A6B4A', secondary: '#2D8A63', accent: '#E8B84B',
+    primary: '#2F5233', secondary: '#4C7A50', accent: '#E8B84B',
     background: '#FFFFFF', surface: '#F5F7FB', text_primary: '#1A1F2E',
     text_secondary: '#5A6478', error: '#E05C5C',
 });

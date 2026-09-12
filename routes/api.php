@@ -40,6 +40,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    abort_if($request->user() instanceof \App\Models\Mobile\MobileAccount, 403);
     return $request->user();
 });
 
@@ -102,3 +103,6 @@ Route::post('donation/sslcommerz/ipn', [SslCommerzDonationController::class, 'ip
 Route::get('payment-methods', [PaymentMethodController::class, 'customerPaymentMethod']);
 Route::post('ai/chat', [AIChatController::class, 'chat']);
 Route::post('ai/generate-names', [AIChatController::class, 'generateNames']);
+
+// Mobile accounts are isolated from administrator users and sessions.
+require __DIR__.'/mobile.php';

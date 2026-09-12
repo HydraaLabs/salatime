@@ -1,0 +1,1 @@
+import{Y as s}from"./app-895eb171.js";import{a as n}from"./appFunction-d1cebf19.js";const t=s.create({headers:{Accept:"application/json","Content-Type":"application/json"}});t.defaults.timeout=1e4;t.defaults.baseURL=n.baseUrl();t.interceptors.response.use(function(e){return e},function(e){return e.response&&e.response.status,Promise.reject(e)});export{t as i};

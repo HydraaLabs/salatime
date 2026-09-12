@@ -1,5 +1,7 @@
 <?php
 
+$brand = require __DIR__ . "/brand.php";
+
 return [
 
     /*
@@ -28,11 +30,11 @@ return [
             'name' => 'Emerald',
             'mode' => 'light',
             'colors' => [
-                'primary' => '#1A6B4A',
-                'secondary' => '#2D8A63',
+                'primary' => $brand['primary'],
+                'secondary' => $brand['secondary'],
                 'accent' => '#E8B84B',
                 'background' => '#FFFFFF',
-                'surface' => '#F5F7FB',
+                'surface' => $brand['canvas'],
                 'text_primary' => '#1A1F2E',
                 'text_secondary' => '#5A6478',
                 'error' => '#E05C5C',
@@ -43,8 +45,8 @@ return [
             'name' => 'Midnight',
             'mode' => 'dark',
             'colors' => [
-                'primary' => '#3DDC97',
-                'secondary' => '#2AA876',
+                'primary' => $brand['dark_accent'],
+                'secondary' => $brand['light'],
                 'accent' => '#E8B84B',
                 'background' => '#0F1420',
                 'surface' => '#1A1F2E',

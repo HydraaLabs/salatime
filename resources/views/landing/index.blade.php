@@ -62,7 +62,7 @@
 
     <title>{{ $seoTitle }}</title>
     <meta name="description" content="{{ $seoDesc }}">
-    <meta name="theme-color" content="#071f17">
+    <meta name="theme-color" content="{{ config('brand.primary') }}">
     @if(!empty($s['seo_keywords']))<meta name="keywords" content="{{ $s['seo_keywords'] }}">@endif
     <meta name="robots" content="{{ $s['seo_robots'] ?? 'index,follow' }}">
     <link rel="canonical" href="{{ $canonical }}">
@@ -144,9 +144,9 @@
 
     <style>
         :root {
-            --green-dark: #0a2e1e;
-            --green-mid: #1a5c38;
-            --green-light: #2d7a50;
+            --green-dark: {{ config('brand.primary') }};
+            --green-mid: {{ config('brand.secondary') }};
+            --green-light: {{ config('brand.light') }};
             --gold: #d4a843;
             --gold-light: #f0c060;
 
@@ -239,14 +239,14 @@
         html.dark section.lp-theme .text-gray-500 { color: var(--lp-text-soft) !important; }
         html.dark section.lp-theme .text-gray-400,
         html.dark section.lp-theme .text-gray-300 { color: var(--lp-text-faint) !important; }
-        html.dark section.lp-theme .text-emerald-700 { color: #34d399 !important; }
+        html.dark section.lp-theme .text-emerald-700 { color: {{ config('brand.dark_accent') }} !important; }
         html.dark section.lp-theme .border-gray-50,
         html.dark section.lp-theme .border-gray-100,
         html.dark section.lp-theme .border-gray-200 { border-color: var(--lp-border) !important; }
         html.dark section.lp-theme .hover\:bg-gray-100:hover { background-color: rgba(255,255,255,0.08) !important; }
 
         /* Light pastel chip → theme-tinted so it doesn't glow against the dark panel */
-        html.dark #qa-surah-place { background: rgba(52,211,153,0.16) !important; color: #6ee7b7 !important; }
+        html.dark #qa-surah-place { background: rgba(141,184,145,0.16) !important; color: {{ config('brand.dark_accent') }} !important; }
 
         html.dark #ng-error { background: rgba(239,68,68,0.15) !important; color: #fca5a5 !important; }
         html.dark #qa-progress-track { background-color: var(--lp-track) !important; }
@@ -509,9 +509,9 @@
         /* ── 2026 visual refresh ─────────────────────────────── */
         :root {
             --st-ink: #071711;
-            --st-emerald: #0b4b35;
-            --st-mint: #6ee7b7;
-            --st-canvas: #f4f8f5;
+            --st-emerald: {{ config('brand.primary') }};
+            --st-mint: {{ config('brand.dark_accent') }};
+            --st-canvas: {{ config('brand.canvas') }};
             --st-shadow: 0 24px 70px rgba(5, 35, 24, 0.14);
         }
 
@@ -611,7 +611,7 @@
             background:
                 radial-gradient(circle at 77% 30%, rgba(106, 231, 183, .18), transparent 27%),
                 radial-gradient(circle at 12% 82%, rgba(var(--theme-accent-rgb), .16), transparent 24%),
-                linear-gradient(122deg, #061b14 0%, #0b3a2a 46%, #0d5b3d 100%);
+                linear-gradient(122deg, {{ config('brand.primary') }} 0%, {{ config('brand.primary') }} 46%, {{ config('brand.secondary') }} 100%);
         }
         .hero-modern::before {
             content: '';
@@ -705,7 +705,7 @@
         .phone-screen {
             background:
                 radial-gradient(circle at 50% 12%, rgba(var(--theme-accent-rgb), .11), transparent 30%),
-                linear-gradient(160deg, #071f17 0%, #0f5a3e 100%);
+                linear-gradient(160deg, {{ config('brand.primary') }} 0%, {{ config('brand.secondary') }} 100%);
         }
         .hero-orbit {
             position: absolute;
@@ -811,7 +811,7 @@
             background:
                 radial-gradient(circle at 86% 10%, rgba(110,231,183,.13), transparent 28%),
                 radial-gradient(circle at 6% 90%, rgba(var(--theme-accent-rgb),.13), transparent 24%),
-                linear-gradient(135deg, #061b14, #0b432f 56%, #0d5b3d) !important;
+                linear-gradient(135deg, {{ config('brand.primary') }}, {{ config('brand.primary') }} 56%, {{ config('brand.secondary') }}) !important;
         }
         #donate::before,
         #ai::before,
@@ -2040,7 +2040,7 @@
 
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 @foreach([
-                    ['📿', 'Tasbih Counter', 'Digital dhikr counter with customizable phrases and haptic feedback.', '#d4edda', '#1a5c38', 'dhikr.tasbih', 'dhikr.tasbih_desc'],
+                    ['📿', 'Tasbih Counter', 'Digital dhikr counter with customizable phrases and haptic feedback.', '#d4edda', config('brand.secondary'), 'dhikr.tasbih', 'dhikr.tasbih_desc'],
                     ['🤲', 'Dua Collection', 'Comprehensive duas for morning, evening, travel, eating, and special occasions.', '#fef3c7', '#92400e', 'dhikr.dua', 'dhikr.dua_desc'],
                     ['💎', '99 Names of Allah', 'All Asma ul Husna with meanings, transliteration, and virtues.', '#ede9fe', '#6d28d9', 'dhikr.names', 'dhikr.names_desc'],
                     ['📜', 'Haram Code', 'Islamic guidance system to help you navigate everyday decisions.', '#fce7f3', '#9d174d', 'dhikr.haram', 'dhikr.haram_desc'],
@@ -2777,7 +2777,7 @@
                     bullets = t[key].split('\n').map(b => b.trim()).filter(Boolean);
                 }
                 if (bullets && bullets.length) {
-                    const checkColor = ul.className.indexOf('text-white') !== -1 ? '#d4a843' : '#1a5c38';
+                    const checkColor = ul.className.indexOf('text-white') !== -1 ? '#d4a843' : '{{ config('brand.secondary') }}';
                     ul.innerHTML = bullets.map(function(b) {
                         return '<li class="flex items-center gap-2"><span style="color: ' + checkColor + ';">✓</span> ' + escapeHtml(b) + '</li>';
                     }).join('');
@@ -3385,8 +3385,8 @@
             const boyBtn  = document.getElementById('ng-btn-boy');
             const girlBtn = document.getElementById('ng-btn-girl');
             if (gender === 'boy') {
-                boyBtn.style.borderColor  = '#1a5c38';
-                boyBtn.style.background   = '#1a5c38';
+                boyBtn.style.borderColor  = '{{ config('brand.secondary') }}';
+                boyBtn.style.background   = '{{ config('brand.secondary') }}';
                 boyBtn.style.color        = 'white';
                 girlBtn.style.borderColor = 'var(--lp-border)';
                 girlBtn.style.background  = 'var(--lp-surface)';
@@ -3618,7 +3618,7 @@
                 const opt = document.createElement('option');
                 opt.value = s.id;
                 opt.textContent = s.id + '. ' + s.ar + '  –  ' + s.en;
-                opt.style.background = '#0a2e1e';
+                opt.style.background = '{{ config('brand.primary') }}';
                 sel.appendChild(opt);
             });
 
@@ -3660,7 +3660,7 @@
                         const opt = document.createElement('option');
                         opt.value = rec.id;
                         opt.textContent = rec.name;
-                        opt.style.background = '#0a2e1e';
+                        opt.style.background = '{{ config('brand.primary') }}';
                         rSel.appendChild(opt);
                     });
                     if (list.length > 0) rSel.value = list[0].id;
@@ -3966,7 +3966,7 @@
 
                 // Shared vertical gradient (created once per frame is fine)
                 const grad = ctx2d.createLinearGradient(0, H, 0, 0);
-                grad.addColorStop(0,    '#1a5c38');
+                grad.addColorStop(0,    '{{ config('brand.secondary') }}');
                 grad.addColorStop(0.55, '#2d8a54');
                 grad.addColorStop(1,    '#d4a843');
 

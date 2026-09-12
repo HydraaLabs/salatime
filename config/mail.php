@@ -46,6 +46,22 @@ return [
             'local_domain' => env('MAIL_EHLO_DOMAIN'),
         ],
 
+        // Account codes use their own transport only when all credentials and
+        // the sender are configured. Database-managed site mail stays separate.
+        'mobile_accounts' => [
+            'transport' => 'smtp',
+            'host' => env('MOBILE_MAIL_HOST'),
+            'port' => env('MOBILE_MAIL_PORT', 587),
+            'encryption' => env('MOBILE_MAIL_ENCRYPTION', 'tls'),
+            'username' => env('MOBILE_MAIL_USERNAME'),
+            'password' => env('MOBILE_MAIL_PASSWORD'),
+            'timeout' => 15,
+            'from' => [
+                'address' => env('MOBILE_MAIL_FROM_ADDRESS'),
+                'name' => env('MOBILE_MAIL_FROM_NAME', 'SalaTime'),
+            ],
+        ],
+
         'ses' => [
             'transport' => 'ses',
         ],
