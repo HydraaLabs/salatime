@@ -11,7 +11,9 @@
     <p>While you are signed in, the app synchronizes supported settings with your SalaTime account so they can be restored on another device. These include language and appearance, prayer calculation and time adjustments, prayer notifications and reminder choices, widget settings, automatic silence settings, Hijri date adjustment and reading preferences. These preferences are sent to SalaTime's account service separately from Google sign-in.</p>
     <p>This synchronization does not upload personal audio files, local file paths, precise GPS positions, device permission grants or passwords. Personal notification sounds remain on the device and must be imported again on another device. Settings remain usable locally while offline.</p>
 
+    @include('support.partials.reading-privacy')
+
     <h3>Deleting your account</h3>
-    <p>To delete your SalaTime account, open the app's settings, open your account and choose <strong>Delete account</strong>. You may be asked to confirm your password or sign in again. Deletion removes the account, linked sign-in identifiers, saved cloud preferences, verification records and sign-in sessions from the active account database. Backup retention is described in the general policy below.</p>
-    <p>Deleting a SalaTime account does not delete your Google account. App settings and personal sound files kept only on your device remain local. Signing out alone does not delete your SalaTime account or its cloud preferences.</p>
+    <p>To delete your SalaTime account, open the app's settings, open your account and choose <strong>Delete account</strong>. You may be asked to confirm your password or sign in again. Deletion removes the account, linked sign-in identifiers, saved cloud preferences, synchronized reading history and its synchronization records, verification records and sign-in sessions from the active account database. Backup retention is described in the general policy below.</p>
+    <p>Deleting a SalaTime account does not delete your Google account. App settings and personal sound files kept only on your device remain local. Signing out alone does not delete your SalaTime account or its cloud preferences and synchronized reading history.</p>
 </section>
