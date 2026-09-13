@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Mobile\AuthController;
 use App\Http\Controllers\Mobile\PreferencesController;
+use App\Http\Controllers\Mobile\ReadingProgressController;
 use App\Http\Middleware\AuthenticateMobileAccount;
 use App\Http\Middleware\MobileApiEnabled;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +34,8 @@ Route::prefix('mobile')->group(function () {
         Route::middleware(AuthenticateMobileAccount::class)->group(function () {
             Route::get('preferences', [PreferencesController::class, 'show']);
             Route::put('preferences', [PreferencesController::class, 'update'])->middleware('throttle:mobile-preferences');
+            Route::get('reading-progress', [ReadingProgressController::class, 'show'])->middleware('throttle:mobile-preferences');
+            Route::post('reading-progress/batch', [ReadingProgressController::class, 'batch'])->middleware('throttle:mobile-preferences');
         });
     });
 });
