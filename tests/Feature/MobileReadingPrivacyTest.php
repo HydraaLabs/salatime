@@ -103,4 +103,59 @@ class MobileReadingPrivacyTest extends TestCase
         $this->assertStringContainsString('&lt;img src=x', $html);
         $this->assertStringNotContainsString('<img src=x', $html);
     }
+
+    public function test_account_and_data_deletion_request_is_public_in_all_site_languages(): void
+    {
+        $response = $this->get('/privacy-policy');
+        $response->assertOk();
+        $html = $response->getContent();
+        $document = new DOMDocument;
+        @$document->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        $xpath = new DOMXPath($document);
+        $this->assertSame(1, $xpath->query('//*[@id="delete-account"]')->length);
+        $expected = ['title', 'request', 'link', 'subject', 'data_only', 'verification', 'scope'];
+        $english = trans('account_deletion', [], 'en');
+        foreach (array_keys(config('prayer_pages.locales')) as $locale) {
+            $text = trans('account_deletion', [], $locale);
+            $this->assertSame($expected, array_keys($text));
+            $nodes = $xpath->query('//*[@id="delete-account-'.$locale.'"]');
+            $this->assertSame(1, $nodes->length);
+            $section = $nodes->item(0);
+            $this->assertSame($locale, $section->getAttribute('lang'));
+            $this->assertSame($locale === 'ar' ? 'rtl' : 'ltr', $section->getAttribute('dir'));
+            $this->assertSame($locale === 'en', $section->hasAttribute('open'));
+            foreach ($text as $key => $value) {
+                $this->assertNotEmpty(trim($value));
+                if ($locale !== 'en') {
+                    $this->assertNotSame($english[$key], $value);
+                }
+                if ($key !== 'subject') {
+                    $this->assertStringContainsString($value, $section->textContent);
+                }
+            }
+            $links = $xpath->query('.//a', $section);
+            $this->assertSame(1, $links->length);
+            $this->assertSame('mailto:contact@salatime.net?subject='.rawurlencode($text['subject']), $links->item(0)->getAttribute('href'));
+            $this->assertStringContainsString('contact@salatime.net', $links->item(0)->textContent);
+        }
+        $this->assertSame(0, $xpath->query('//*[@id="delete-account"]//form | //*[@id="delete-account"]//script')->length);
+        $this->assertStringContainsString('without reinstalling the app or signing in', $english['request']);
+        $this->assertStringContainsString('keep your account and delete only data', $english['data_only']);
+        $this->assertStringContainsString('Never send your password', $english['verification']);
+        $this->assertStringContainsString('active account database', $english['scope']);
+    }
+
+    public function test_deletion_request_text_and_email_subject_are_escaped(): void
+    {
+        trans('account_deletion', [], 'fr');
+        app('translator')->addLines([
+            'account_deletion.request' => '<script>alert(1)</script>',
+            'account_deletion.subject' => 'Test" onclick="alert(1)',
+        ], 'fr');
+        $html = view('support.partials.account-deletion')->render();
+        $this->assertStringContainsString('&lt;script&gt;alert(1)&lt;/script&gt;', $html);
+        $this->assertStringNotContainsString('<script>', $html);
+        $this->assertStringContainsString('subject=Test%22%20onclick%3D%22alert%281%29', $html);
+        $this->assertStringNotContainsString('onclick="', $html);
+    }
 }

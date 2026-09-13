@@ -13,6 +13,8 @@
 
     @include('support.partials.reading-privacy')
 
+    @include('support.partials.account-deletion')
+
     <h3>Deleting your account</h3>
     <p>To delete your SalaTime account, open the app's settings, open your account and choose <strong>Delete account</strong>. You may be asked to confirm your password or sign in again. Deletion removes the account, linked sign-in identifiers, saved cloud preferences, synchronized reading history and its synchronization records, verification records and sign-in sessions from the active account database. Backup retention is described in the general policy below.</p>
     <p>Deleting a SalaTime account does not delete your Google account. App settings and personal sound files kept only on your device remain local. Signing out alone does not delete your SalaTime account or its cloud preferences and synchronized reading history.</p>
