@@ -198,6 +198,7 @@
             <span>© {{ date('Y') }} SalaTime · {{ __('prayer_pages.source') }} : <a href="https://www.geonames.org/">GeoNames</a> (<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>)</span>
             <span><a href="{{ $worldUrl }}">{{ __('prayer_pages.world_heading') }}</a> · <a href="{{ url('privacy-policy') }}">{{ __('prayer_pages.privacy') }}</a></span>
         </div>
+        <div class="container">@include('shared.source-links')</div>
     </footer>
 @include('shared.language-picker-script')
 </body>

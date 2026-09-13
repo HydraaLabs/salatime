@@ -144,7 +144,8 @@
             <a href="{{ url('privacy-policy') }}">Privacy Policy</a>
             <a href="{{ url('support') }}">Support</a>
         </p>
-    </footer>
+        @include('shared.source-links')
+</footer>
 
 </body>
 </html>

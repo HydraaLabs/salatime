@@ -185,6 +185,7 @@
         <a href="{{ url('privacy-policy') }}">Privacy Policy</a>
         <a href="{{ url('terms-and-conditions') }}">Terms</a>
     </p>
+    @include('shared.source-links')
 </footer>
 
 </body>

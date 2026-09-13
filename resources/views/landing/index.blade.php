@@ -1826,6 +1826,7 @@
                     <div class="font-arabic text-gray-600 text-lg">
                         بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ
                     </div>
+                    @include('shared.source-links', ['sourceLinksAlign' => 'flex-start'])
                 </div>
 
                 <!-- Features -->
@@ -2373,6 +2374,14 @@
         };
 
         // ── Prayer names per language ────────────────────────────
+        // Reuse the same labels as the server-rendered public footers.
+        @php($SOURCE_LINK_TRANSLATIONS = collect(['en', 'fr', 'ar', 'es', 'bn', 'hi'])->mapWithKeys(fn ($code) => [$code => __('source_links', [], $code)]))
+        const SOURCE_LINK_TRANSLATIONS = @json($SOURCE_LINK_TRANSLATIONS);
+        Object.entries(SOURCE_LINK_TRANSLATIONS).forEach(([code, labels]) => {
+            TRANSLATIONS[code]['footer.source_site'] = labels.site;
+            TRANSLATIONS[code]['footer.source_app'] = labels.app;
+        });
+
         const PRAYER_NAMES = {
             en: { Fajr:'Fajr', Sunrise:'Sunrise', Dhuhr:'Dhuhr', Asr:'Asr', Maghrib:'Maghrib', Isha:'Isha', Next:'Next', detecting:'Detecting location…', sample:'Sample Times' },
             ar: { Fajr:'الفجر', Sunrise:'الشروق', Dhuhr:'الظهر', Asr:'العصر', Maghrib:'المغرب', Isha:'العشاء', Next:'التالي', detecting:'جارٍ تحديد الموقع…', sample:'أوقات نموذجية' },

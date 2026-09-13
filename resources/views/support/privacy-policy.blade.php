@@ -149,7 +149,8 @@
             <a href="{{ url('terms-and-conditions') }}">Terms & Conditions</a>
             <a href="{{ url('support') }}">Support</a>
         </p>
-    </footer>
+        @include('shared.source-links')
+</footer>
 
 </body>
 </html>
