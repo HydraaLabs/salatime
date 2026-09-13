@@ -139,6 +139,8 @@ class MobileReadingPrivacyTest extends TestCase
             $this->assertStringContainsString('contact@salatime.net', $links->item(0)->textContent);
         }
         $this->assertSame(0, $xpath->query('//*[@id="delete-account"]//form | //*[@id="delete-account"]//script')->length);
+        $this->assertSame(4, substr_count($html, '<!--email_off-->'));
+        $this->assertSame(4, substr_count($html, '<!--/email_off-->'));
         $this->assertStringContainsString('without reinstalling the app or signing in', $english['request']);
         $this->assertStringContainsString('keep your account and delete only data', $english['data_only']);
         $this->assertStringContainsString('Never send your password', $english['verification']);
