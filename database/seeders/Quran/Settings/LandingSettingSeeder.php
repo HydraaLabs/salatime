@@ -149,10 +149,10 @@ class LandingSettingSeeder extends Seeder
             'download_title'           => 'Start Your Islamic Journey Today',
             'download_title_highlight' => 'Today',
             'download_description'     => 'Join hundreds of thousands of Muslims worldwide who use SalaTime for their daily Islamic needs. Download for free today.',
-            'codecanyon_url'           => 'https://codecanyon.net/item/zabi-islamic-flutter-android-iso-app/50458856',
+            'codecanyon_url'           => 'https://github.com/HydraaLabs/salatime',
             'codecanyon_prompt_text'   => 'Want to resell or customize?',
             'codecanyon_link_text'     => 'Get the source code on CodeCanyon →',
-            'show_codecanyon_link'     => '1',
+            'show_codecanyon_link'     => '0',
 
             // Footer
             'footer_description'     => 'Your complete Islamic companion app. Bringing the beauty of Islam to your fingertips with modern technology.',
@@ -174,7 +174,7 @@ class LandingSettingSeeder extends Seeder
         ];
 
         foreach ($settings as $name => $value) {
-            Setting::query()->updateOrCreate(
+            Setting::query()->firstOrCreate(
                 ['name' => $name, 'context' => 'landing'],
                 ['name' => $name, 'value' => $value, 'context' => 'landing']
             );

@@ -17,7 +17,7 @@
                 </div>
                 <div class="notice-text">
                     Before proceeding, ensure your server meets the required PHP version, extensions, and file permissions.
-                    <a href="https://zabi.theme29.com/documentation" target="_blank" rel="noopener noreferrer">View documentation</a>
+                    <a href="https://github.com/HydraaLabs/salatime#installation" target="_blank" rel="noopener noreferrer">View documentation</a>
                 </div>
             </div>
 

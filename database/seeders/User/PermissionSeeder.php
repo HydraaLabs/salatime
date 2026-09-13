@@ -266,6 +266,8 @@ class PermissionSeeder extends Seeder
 
         ];
 
-        Permission::query()->insert($permissions);
+        foreach ($permissions as $permission) {
+            Permission::query()->firstOrCreate(['name' => $permission['name']], $permission);
+        }
     }
 }

@@ -15,7 +15,7 @@ class InstallationMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (config('theme29.purchase_code') && config('theme29.installed')) {
+        if (config('theme29.installed')) {
             return $next($request);
         }
         return redirect()->route('install.view');

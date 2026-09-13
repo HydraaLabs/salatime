@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Dashboard\DashboardController;
-use App\Http\Controllers\InstallDemoDataController;
 use App\Http\Controllers\Installer\CompanySettingController;
 use App\Http\Controllers\Installer\DatabaseManagerController;
 use App\Http\Controllers\Installer\InitialSetupController;
@@ -321,9 +320,7 @@ Route::middleware(['auth', 'authorize'])->group(callback: function (Router $rout
     $router->post('logout', [LoginController::class, 'logOut'])->name('logout');
 });
 
-Route::get('install-demo-data', [InstallDemoDataController::class, 'run'])
-    ->name('install-demo-data');
-Route::get('symlink', [InstallDemoDataController::class, 'symlink']);
+// Installation and storage linking are explicit CLI operations.
 
 // Serve public storage files through Laravel (Apache FollowSymLinks is
 // disabled on this shared host, so the public/storage symlink returns 403)

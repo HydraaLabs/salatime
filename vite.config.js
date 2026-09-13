@@ -4,10 +4,10 @@ import vue from "@vitejs/plugin-vue";
 import path from "path";
 
 export default ({ mode }) => {
-    const env = loadEnv(mode, process.cwd(), "");
+    const env = loadEnv(mode, process.cwd(), "VITE_");
     return defineConfig({
         define: {
-            "process.env": env,
+            "process.env.IS_DEMO": JSON.stringify(env.VITE_IS_DEMO ?? "false"),
         },
         plugins: [
             laravel({

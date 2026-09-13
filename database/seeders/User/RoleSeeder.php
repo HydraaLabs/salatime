@@ -23,6 +23,8 @@ class RoleSeeder extends Seeder
             ]
         ];
 
-        Role::query()->insert($roles);
+        foreach ($roles as $role) {
+            Role::query()->firstOrCreate(['alias' => $role['alias']], $role);
+        }
     }
 }

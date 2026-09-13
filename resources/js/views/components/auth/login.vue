@@ -155,7 +155,7 @@ const updateCredentials = () => {
 };
 
 onMounted(updateCredentials);
-watch(formData, (n, o) => { if (n.role !== o.role && isDemoVersion.value) updateCredentials(); });
+watch(formData, (n, o) => { if (n.role !== o.role && isDemoVersion.value === 'true') updateCredentials(); });
 
 const submit = () => {
     preloader.value = true;

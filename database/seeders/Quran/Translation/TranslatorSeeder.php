@@ -15,6 +15,7 @@ class TranslatorSeeder extends Seeder
     {
         Translator::query()->insert([
             [
+                'id' => 1,
                 'full_name' => 'Ahmed Ali',
                 'short_name' => 'Ahmed Ali *',
                 'language' => 'English',
@@ -23,6 +24,7 @@ class TranslatorSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
+                'id' => 2,
                 'full_name' => 'জহুরুল হক',
                 'short_name' => 'Hoque',
                 'language' => 'Bengali',
@@ -31,6 +33,7 @@ class TranslatorSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
+                'id' => 3,
                 'full_name' => 'Bornez',
                 'short_name' => 'Bornez',
                 'language' => 'Spanish',
@@ -38,6 +41,7 @@ class TranslatorSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],  [
+                'id' => 4,
                 'full_name' => 'تفسير الجلالين',
                 'short_name' => 'تفسير الجلالين',
                 'language' => 'Arabic',

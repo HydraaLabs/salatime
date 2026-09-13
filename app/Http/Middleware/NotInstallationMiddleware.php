@@ -18,6 +18,6 @@ class NotInstallationMiddleware
         if (!config('theme29.installed')) {
             return $next($request);
         }
-        return redirect()->route('install.view');
+        return redirect()->route('landing');
     }
 }
