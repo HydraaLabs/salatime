@@ -8,7 +8,7 @@ class PrayerPageCatalog
     {
         $morocco = [
             'names' => array_map(fn ($locale) => $locale['country_name'], config('prayer_pages.locales')),
-            'slugs' => ['fr' => 'maroc', 'ar' => 'morocco', 'en' => 'morocco', 'es' => 'marruecos'],
+            'slugs' => ['fr' => 'maroc', 'ar' => 'morocco', 'en' => 'morocco', 'es' => 'marruecos', 'bn' => 'morocco', 'hi' => 'morocco'],
             'method' => config('prayer_pages.method'),
             'school' => 'STANDARD',
             'cities' => array_map(fn ($city) => $city + ['timezone' => config('prayer_pages.timezone')], config('prayer_pages.cities')),

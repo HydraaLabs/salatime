@@ -15,7 +15,7 @@ from datetime import date
 from pathlib import Path
 from babel import Locale
 
-LOCALES = ['fr', 'ar', 'en', 'es']
+LOCALES = ['en', 'ar', 'bn', 'hi', 'es', 'fr']
 METHODS = {
     'MA': 'MOROCCO', 'DZ': 'ALGERIA', 'TN': 'TUNISIA', 'EG': 'EGYPT',
     'SA': 'MAKKAH', 'AE': 'GULF', 'QA': 'QATAR', 'KW': 'KUWAIT',
@@ -49,7 +49,7 @@ for gid, r in sorted(selected.items(), key=lambda item: (item[1][8], item[1][2])
     if code not in countries:
         localized = {loc: Locale.parse(loc).territories.get(code, code) for loc in LOCALES}
         countries[code] = {'names': localized, 'slugs': {
-            loc: slug(localized['en' if loc == 'ar' else loc]) for loc in LOCALES
+            loc: slug(localized['en' if loc in ['ar', 'bn', 'hi'] else loc]) for loc in LOCALES
         }, 'method': METHODS.get(code, 'MWL'),
             'school': 'HANAFI' if code in ['PK', 'BD', 'IN', 'AF', 'TR'] else 'STANDARD', 'cities': {}}
     city_slug = slug(r[2]) + '-' + gid

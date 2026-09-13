@@ -381,113 +381,8 @@
         /* Mobile menu */
         #mobile-menu { display: none; }
         #mobile-menu.open { display: block; }
-
-        /* ── Language switcher ── */
-        #lang-menu { display: none; }
-        #lang-menu.open { display: block; }
-        .lang-option { text-align: left; background: none; border: none; cursor: pointer; }
-        .lang-option.active-lang { background: rgba(255,255,255,0.12) !important; }
-        [dir="rtl"] .lang-option { text-align: right; }
-
-        /* ── Donation Form ───────────────────────────────────── */
-        .donate-label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 6px;
-            letter-spacing: 0.2px;
-        }
-
-        .donate-input {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1.5px solid #e5e7eb;
-            border-radius: 10px;
-            font-size: 13px;
-            color: #111827;
-            background: #f9fafb;
-            outline: none;
-            transition: border-color .15s, box-shadow .15s;
-            appearance: none;
-            -webkit-appearance: none;
-        }
-        .donate-input:focus {
-            border-color: var(--gold);
-            box-shadow: 0 0 0 3px rgba(var(--theme-accent-rgb),.12);
-            background: #fff;
-        }
-        .donate-input::placeholder { color: #9ca3af; }
-
-        /* remove browser number-input arrows & red validation ring */
-        .donate-input[type=number]::-webkit-inner-spin-button,
-        .donate-input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        .donate-input[type=number] { -moz-appearance: textfield; }
-        .donate-input:invalid { box-shadow: none; }
-
-        .donate-input-wrap { position: relative; }
-        .donate-input-prefix {
-            position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
-            font-size: 13px; color: #6b7280; pointer-events: none; font-weight: 500;
-        }
-        .donate-input-suffix {
-            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-            pointer-events: none; display: flex; align-items: center;
-        }
-        .donate-input-prefixed  { padding-left: 26px; }
-        .donate-select          { padding-right: 32px; cursor: pointer; }
-
-        /* Preset amount buttons */
-        .donate-preset-btn {
-            padding: 9px 4px;
-            border-radius: 10px;
-            border: 1.5px solid #e5e7eb;
-            background: #f9fafb;
-            color: #374151;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all .15s;
-        }
-        .donate-preset-btn:hover { border-color: var(--gold); color: #92400e; }
-
-        /* Payment method cards */
-        .donate-payment-card {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            padding: 10px 4px;
-            border: 1.5px solid #e5e7eb;
-            border-radius: 12px;
-            background: #fff;
-            cursor: pointer;
-            transition: all .15s;
-        }
-        .donate-payment-card:hover { border-color: var(--gold); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.06); }
-        .donate-gw-icon {
-            width: 34px; height: 34px;
-            border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-        }
-        .donate-gw-label {
-            font-size: 10px;
-            font-weight: 600;
-            color: #6b7280;
-            text-align: center;
-            line-height: 1.2;
-        }
-        .donate-check {
-            display: none;
-            position: absolute;
-            top: -5px; right: -5px;
-            width: 16px; height: 16px;
-            border-radius: 50%;
-            background: var(--gold);
-            align-items: center; justify-content: center;
-        }
+        #mobile-menu { max-height: calc(100dvh - 110px); overflow-y: auto; }
+        @media (min-width: 1280px) { #mobile-menu.open { display: none; } }
 
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(16px); }
@@ -544,7 +439,7 @@
         section.lp-theme h2,
         #ai h2,
         #ai-chat h2,
-        #donate h2,
+
         #download h2 {
             letter-spacing: -0.045em;
             line-height: 1.06;
@@ -805,7 +700,6 @@
         }
         #features .feature-card-featured .feature-icon { color: var(--gold-light); }
 
-        #donate,
         #ai,
         #download {
             background:
@@ -813,7 +707,7 @@
                 radial-gradient(circle at 6% 90%, rgba(var(--theme-accent-rgb),.13), transparent 24%),
                 linear-gradient(135deg, {{ config('brand.primary') }}, {{ config('brand.primary') }} 56%, {{ config('brand.secondary') }}) !important;
         }
-        #donate::before,
+
         #ai::before,
         #download::before {
             content: '';
@@ -823,12 +717,6 @@
             background-image: radial-gradient(rgba(255,255,255,.13) .7px, transparent .7px);
             background-size: 18px 18px;
             opacity: .16;
-        }
-        #donate { padding-top: 90px; padding-bottom: 90px; }
-        #donate .bg-white.rounded-2xl {
-            border: 1px solid rgba(255,255,255,.4);
-            border-radius: 26px;
-            box-shadow: 0 30px 80px rgba(0,0,0,.24), inset 0 1px 0 #fff;
         }
         #ai { position: relative; }
         #ai > div,
@@ -921,8 +809,6 @@
             .stats-shell { border-radius: 24px; padding: 8px; }
             .stat-item { padding: 18px 8px; }
             .stat-item p { font-size: 12px; }
-            #donate { padding-top: 72px; padding-bottom: 72px; }
-            #donate-payment-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
             #features,
             #quran,
             #quran-audio,
@@ -948,6 +834,7 @@
             .reveal { opacity: 1; transform: none; }
         }
     </style>
+    @include('shared.language-picker-styles')
 
     {{-- Active theme colors + light/dark mode (overrides the fallbacks above) --}}
     @include('partials.theme-vars')
@@ -971,46 +858,18 @@
             </a>
 
             <!-- Desktop Nav -->
-            <div class="hidden md:flex items-center gap-8">
+            <div class="hidden xl:flex items-center gap-8">
                 <a href="#features" class="nav-link-modern transition-colors" data-i18n="nav.features">Features</a>
                 <a href="#quran" class="nav-link-modern transition-colors" data-i18n="nav.quran">Quran</a>
                 <a href="#quran-audio" class="nav-link-modern transition-colors" data-i18n="nav.listen">Listen</a>
                 <a href="#prayer" class="nav-link-modern transition-colors" data-i18n="nav.prayer">Prayer</a>
                 <a href="#ai" class="nav-link-modern transition-colors" data-i18n="nav.ai">AI</a>
                 <a href="#download" class="nav-link-modern transition-colors" data-i18n="nav.download">Download</a>
-                <a href="#donate" class="nav-link-modern transition-colors" data-i18n="nav.donate">Donate</a>
             </div>
 
             <!-- CTA + Language Switcher -->
-            <div class="hidden md:flex items-center gap-3">
-                <!-- Language switcher -->
-                <div class="relative" id="lang-dropdown">
-                    <button id="lang-menu-button" onclick="toggleLangDropdown(event)" aria-haspopup="true" aria-expanded="false" aria-controls="lang-menu" class="nav-control flex items-center gap-1.5 text-white/70 hover:text-white text-xs font-semibold transition-colors px-3 py-2 rounded-lg hover:bg-white/10 border border-white/20">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span id="current-lang-label">EN</span>
-                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
-                    </button>
-                    <div id="lang-menu" class="absolute top-full right-0 mt-2 py-1.5 w-44 rounded-2xl shadow-2xl z-50" style="background: rgba(8,38,24,0.98); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.12);">
-                        <button onclick="setLanguage('en')" class="lang-option w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/10 transition-colors" data-lang="en">
-                            <span>🇬🇧</span><span class="text-white/90">English</span>
-                        </button>
-                        <button onclick="setLanguage('ar')" class="lang-option w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/10 transition-colors" data-lang="ar">
-                            <span>🇸🇦</span><span class="text-white/90">العربية</span>
-                        </button>
-                        <button onclick="setLanguage('bn')" class="lang-option w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/10 transition-colors" data-lang="bn">
-                            <span>🇧🇩</span><span class="text-white/90">বাংলা</span>
-                        </button>
-                        <button onclick="setLanguage('hi')" class="lang-option w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/10 transition-colors" data-lang="hi">
-                            <span>🇮🇳</span><span class="text-white/90">हिंदी</span>
-                        </button>
-                        <button onclick="setLanguage('es')" class="lang-option w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/10 transition-colors" data-lang="es">
-                            <span>🇪🇸</span><span class="text-white/90">Español</span>
-                        </button>
-                        <button onclick="setLanguage('fr')" class="lang-option w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/10 transition-colors" data-lang="fr">
-                            <span>🇫🇷</span><span class="text-white/90">Français</span>
-                        </button>
-                    </div>
-                </div>
+            <div class="hidden xl:flex items-center gap-3">
+                @include('shared.language-picker', ['locale' => 'en', 'clientSide' => true])
                 <!-- Theme toggle -->
                 <button onclick="toggleTheme()" class="nav-control flex items-center justify-center w-9 h-9 rounded-lg text-white/70 hover:text-white transition-colors hover:bg-white/10 border border-white/20" title="Toggle theme" aria-label="Toggle theme">
                     <svg class="theme-icon-sun hidden w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
@@ -1023,7 +882,7 @@
             </div>
 
             <!-- Mobile hamburger -->
-            <button id="menu-btn" class="nav-control md:hidden text-white w-10 h-10 inline-flex items-center justify-center" onclick="toggleMenu()" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
+            <button id="menu-btn" class="nav-control xl:hidden text-white w-10 h-10 inline-flex items-center justify-center" onclick="toggleMenu()" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
@@ -1031,25 +890,15 @@
         </div>
 
         <!-- Mobile Menu -->
-        <div id="mobile-menu" class="md:hidden mt-4 rounded-2xl p-4" style="background: rgba(var(--theme-primary-rgb),0.95); backdrop-filter: blur(12px);">
+        <div id="mobile-menu" class="xl:hidden mt-4 rounded-2xl p-4" style="background: rgba(var(--theme-primary-rgb),0.95); backdrop-filter: blur(12px);">
             <a href="#features" class="block py-2 px-4 text-white/80 hover:text-white" onclick="toggleMenu()" data-i18n="nav.features">Features</a>
             <a href="#quran" class="block py-2 px-4 text-white/80 hover:text-white" onclick="toggleMenu()" data-i18n="nav.quran">Quran</a>
             <a href="#quran-audio" class="block py-2 px-4 text-white/80 hover:text-white" onclick="toggleMenu()" data-i18n="nav.listen">Listen</a>
             <a href="#prayer" class="block py-2 px-4 text-white/80 hover:text-white" onclick="toggleMenu()" data-i18n="nav.prayer">Prayer</a>
             <a href="#ai" class="block py-2 px-4 text-white/80 hover:text-white" onclick="toggleMenu()" data-i18n="nav.ai">AI</a>
             <a href="#download" class="block py-2 px-4 text-white/80 hover:text-white" onclick="toggleMenu()" data-i18n="nav.download">Download</a>
-            <a href="#donate" class="block py-2 px-4 text-white/80 hover:text-white" onclick="toggleMenu()" data-i18n="nav.donate">Donate</a>
-            <!-- Mobile language grid -->
-            <div class="mt-3 pt-3 border-t border-white/10">
-                <p class="text-white/40 text-xs px-4 mb-2 uppercase tracking-wider">Language</p>
-                <div class="grid grid-cols-3 gap-1 px-2">
-                    <button onclick="setLanguage('en');toggleMenu()" class="lang-option flex items-center gap-1.5 px-2 py-2 rounded-lg text-xs text-white/80 hover:bg-white/10" data-lang="en">🇬🇧 EN</button>
-                    <button onclick="setLanguage('ar');toggleMenu()" class="lang-option flex items-center gap-1.5 px-2 py-2 rounded-lg text-xs text-white/80 hover:bg-white/10" data-lang="ar">🇸🇦 AR</button>
-                    <button onclick="setLanguage('bn');toggleMenu()" class="lang-option flex items-center gap-1.5 px-2 py-2 rounded-lg text-xs text-white/80 hover:bg-white/10" data-lang="bn">🇧🇩 BN</button>
-                    <button onclick="setLanguage('hi');toggleMenu()" class="lang-option flex items-center gap-1.5 px-2 py-2 rounded-lg text-xs text-white/80 hover:bg-white/10" data-lang="hi">🇮🇳 HI</button>
-                    <button onclick="setLanguage('es');toggleMenu()" class="lang-option flex items-center gap-1.5 px-2 py-2 rounded-lg text-xs text-white/80 hover:bg-white/10" data-lang="es">🇪🇸 ES</button>
-                    <button onclick="setLanguage('fr');toggleMenu()" class="lang-option flex items-center gap-1.5 px-2 py-2 rounded-lg text-xs text-white/80 hover:bg-white/10" data-lang="fr">🇫🇷 FR</button>
-                </div>
+            <div class="px-4 py-3">
+                @include('shared.language-picker', ['locale' => 'en', 'clientSide' => true])
             </div>
             <div class="mt-3 pt-3 border-t border-white/10">
                 <button onclick="toggleTheme()" class="w-full flex items-center justify-between py-2 px-4 text-white/80 hover:text-white">
@@ -1229,174 +1078,6 @@
                 <div class="stat-item reveal" style="transition-delay: 0.3s;">
                     <div class="stat-counter">{{ $s['downloads_count'] }}</div>
                     <p class="text-gray-500 mt-1 font-medium" data-i18n="stats.downloads">Downloads</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ===================== DONATION ===================== -->
-    <section id="donate" class="py-14 relative overflow-hidden" style="background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 100%);">
-        <div class="max-w-6xl mx-auto px-6 relative">
-            <div class="text-center mb-8 reveal">
-                <div class="section-divider"></div>
-                <h2 class="text-3xl font-black text-white mb-2" data-i18n="donate.title" data-i18n-en="{{ $s['donation_title'] ?? 'Support Our Mission' }}">{{ $s['donation_title'] ?? 'Support Our Mission' }}</h2>
-                <p class="text-white/60 text-sm max-w-xl mx-auto" data-i18n="donate.desc" data-i18n-en="{{ $s['donation_description'] ?? 'Your generosity keeps SalaTime free for millions of Muslims worldwide.' }}">{{ $s['donation_description'] ?? 'Your generosity keeps SalaTime free for millions of Muslims worldwide.' }}</p>
-            </div>
-
-            <div class="grid lg:grid-cols-5 gap-8 items-start">
-                <!-- Left: Why Donate -->
-                <div class="lg:col-span-2 reveal space-y-4">
-                    <div class="rounded-xl p-4" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);">
-                        <div class="font-arabic text-center text-white/90 text-lg leading-loose mb-2" dir="rtl" data-i18n-en="{{ $s['donation_verse_arabic'] }}">
-                            {{ $s['donation_verse_arabic'] }}
-                        </div>
-                        <p class="text-white/50 text-center text-xs" data-i18n="donate.verse_trans" data-i18n-en="{{ $s['donation_verse_translation'] }}">{{ $s['donation_verse_translation'] }}</p>
-                    </div>
-
-                    <div class="space-y-3">
-                        @foreach($s['donation_why'] as $i => $item)
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-sm" style="background: rgba(var(--theme-accent-rgb),0.2);">{{ $item['icon'] ?? '' }}</div>
-                            <div>
-                                <h4 class="font-semibold text-white text-xs mb-0.5" data-i18n="donate.why.{{ $i }}.title" data-i18n-en="{{ $item['title'] ?? '' }}">{{ $item['title'] ?? '' }}</h4>
-                                <p class="text-white/50 text-xs" data-i18n="donate.why.{{ $i }}.desc" data-i18n-en="{{ $item['description'] ?? '' }}">{{ $item['description'] ?? '' }}</p>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-
-                    <div>
-                        <p class="text-white/40 text-xs uppercase tracking-wider mb-2" data-i18n="donate.accepted" data-i18n-en="{{ $s['donation_accepted_label'] }}">{{ $s['donation_accepted_label'] }}</p>
-                        <div class="flex flex-wrap gap-1.5">
-                            @foreach(array_filter(array_map('trim', explode("\n", $s['donation_gateways'] ?? ''))) as $gw)
-                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold" style="background:var(--green-mid);color:#fff;border:1px solid rgba(255,255,255,0.18);">{{ $gw }}</span>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right: Donation Form -->
-                <div class="lg:col-span-3 reveal" style="transition-delay:0.2s;">
-                    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-
-                        <!-- Form header -->
-                        <div class="px-6 pt-6 pb-5 border-b" style="border-color:#f3f4f6;">
-                            <h3 class="text-gray-900 font-bold text-base mb-0.5" data-i18n="donate.form_title">Make a Donation</h3>
-                            <p class="text-gray-400 text-xs" data-i18n="donate.form_subtitle">Every contribution makes a difference</p>
-                        </div>
-
-                        <div class="px-6 py-5 space-y-4">
-
-                            <!-- Amount -->
-                            <div>
-                                <label class="donate-label" data-i18n="donate.amount_label">Select Amount</label>
-                                <div class="grid grid-cols-4 gap-2 mb-2">
-                                    @foreach([10, 25, 50, 100] as $preset)
-                                    <button type="button" onclick="selectDonationAmount({{ $preset }})"
-                                        class="donate-preset-btn"
-                                        data-amount="{{ $preset }}">${{ $preset }}</button>
-                                    @endforeach
-                                </div>
-                                <div class="donate-input-wrap">
-                                    <span class="donate-input-prefix">$</span>
-                                    <input type="number" id="donate-amount" min="1"
-                                        class="donate-input donate-input-prefixed"
-                                        placeholder="Enter custom amount"
-                                        oninput="clearDonationPresets()">
-                                </div>
-                            </div>
-
-                            <!-- Category + Name side by side -->
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="donate-label" data-i18n="donate.category_label">Category</label>
-                                    <div class="donate-input-wrap">
-                                        <select id="donate-category" class="donate-input donate-select">
-                                            <option value="">Select a cause…</option>
-                                        </select>
-                                        <span class="donate-input-suffix">
-                                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="donate-label" data-i18n="donate.name_label">Your Name</label>
-                                    <input type="text" id="donate-name"
-                                        class="donate-input"
-                                        placeholder="Optional">
-                                </div>
-                            </div>
-
-                            <!-- Email -->
-                            <div>
-                                <label class="donate-label"><span data-i18n="donate.email_label" data-i18n-en="Email Address">Email Address</span> <span style="color:#ef4444;">*</span></label>
-                                <input type="email" id="donate-email"
-                                    class="donate-input"
-                                    placeholder="you@example.com">
-                            </div>
-
-                            <!-- Payment Method -->
-                            <div>
-                                <label class="donate-label" data-i18n="donate.payment_label">Payment Method</label>
-                                <div id="donate-payment-grid" class="grid grid-cols-5 gap-2">
-                                    @foreach([
-                                        ['razorpay',   'Razorpay',   '#1a237e'],
-                                        ['paystack',   'Paystack',   '#00695c'],
-                                        ['stripe',     'Stripe',     '#635BFF'],
-                                        ['paypal',     'PayPal',     '#003087'],
-                                        ['sslcommerz', 'SSLCommerz', '#c62828'],
-                                    ] as $gw)
-                                    <button type="button"
-                                        class="donate-payment-card"
-                                        data-gateway="{{ $gw[0] }}"
-                                        onclick="selectPaymentGateway('{{ $gw[0] }}')">
-                                        <div class="donate-gw-icon" style="background:{{ $gw[2] }};">
-                                            @if($gw[0]==='razorpay')
-                                                <svg viewBox="0 0 24 24" fill="white" width="14" height="14"><path d="M21 3L3 10.53v.98l6.84 2.65L21 3zm0 0l-8.16 9.95 3 1.15L21 3z"/></svg>
-                                            @elseif($gw[0]==='paystack')
-                                                <svg viewBox="0 0 24 24" fill="white" width="14" height="14"><path d="M2 8h20v2.5H2zm0 5h20V15.5H2zm0 5h12V20.5H2z"/></svg>
-                                            @elseif($gw[0]==='stripe')
-                                                <svg viewBox="0 0 24 24" fill="white" width="14" height="14"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z"/></svg>
-                                            @elseif($gw[0]==='paypal')
-                                                <svg viewBox="0 0 24 24" fill="white" width="14" height="14"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.93 4.778-4.005 7.201-9.138 7.201h-2.19a.563.563 0 0 0-.556.479l-1.187 7.527h-.506l-.24 1.516a.56.56 0 0 0 .554.647h3.882c.46 0 .85-.334.922-.788.06-.26.76-4.852.816-5.09a.932.932 0 0 1 .923-.788h.58c3.76 0 6.705-1.528 7.565-5.946.36-1.847.174-3.388-.777-4.471z"/></svg>
-                                            @else
-                                                <svg viewBox="0 0 24 24" fill="white" width="14" height="14"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-                                            @endif
-                                        </div>
-                                        <span class="donate-gw-label">{{ $gw[1] }}</span>
-                                        <div class="donate-check">
-                                            <svg fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24" width="8" height="8"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                        </div>
-                                    </button>
-                                    @endforeach
-                                </div>
-                            </div>
-
-                            <!-- PayPal button container -->
-                            <div id="paypal-button-container" class="hidden"></div>
-
-                            <!-- Submit -->
-                            <button id="donate-submit-btn" onclick="submitDonation()" type="button"
-                                class="w-full py-3 rounded-xl font-bold text-gray-900 text-sm transition-all hover:opacity-90 hover:shadow-lg"
-                                style="background:linear-gradient(135deg,var(--gold),var(--gold-light));">
-                                <span id="donate-btn-text" data-i18n="donate.btn">Donate Now</span>
-                                <span id="donate-btn-loader" class="hidden ml-2">
-                                    <svg class="inline w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                                    </svg>
-                                </span>
-                            </button>
-
-                            <div id="donate-feedback" class="hidden px-4 py-3 rounded-xl text-xs font-medium text-center"></div>
-
-                        </div>
-
-                        <!-- Form footer -->
-                        <div class="px-6 py-3 border-t text-center" style="border-color:#f3f4f6;background:#fafafa;">
-                            <p class="text-gray-400 text-xs" data-i18n="donate.privacy_note">🔒 Secure & encrypted. We never store card details.</p>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -2153,7 +1834,7 @@
                     <ul class="space-y-2 text-sm text-gray-400">
                         <li><a href="#quran" class="hover:text-white transition-colors" data-i18n="footer.holy_quran">Holy Quran</a></li>
                         <li><a href="#prayer" class="hover:text-white transition-colors" data-i18n="footer.prayer_times">Prayer Times</a></li>
-                        <li><a href="{{ route('prayer-pages.en.world') }}" class="hover:text-white transition-colors">Prayer Times by City</a></li>
+                        <li><a data-prayer-directory href="{{ route('prayer-pages.en.world') }}" class="hover:text-white transition-colors">Prayer Times by City</a></li>
                         <li><a href="#ai" class="hover:text-white transition-colors" data-i18n="footer.ai_chat">AI Chat</a></li>
                         <li><a href="#features" class="hover:text-white transition-colors" data-i18n="footer.qibla">Qibla Finder</a></li>
                         <li><a href="#features" class="hover:text-white transition-colors" data-i18n="footer.zakat">Zakat Calculator</a></li>
@@ -2180,6 +1861,11 @@
         </div>
     </footer>
 
+    @include('shared.language-picker-script')
+    <script>
+        @php($PRAYER_DIRECTORY = collect(config('prayer_pages.locales'))->mapWithKeys(fn ($settings, $code) => [$code => ['url' => route("prayer-pages.$code.world"), 'label' => __('prayer_pages.world_heading', [], $code)]]))
+        const PRAYER_DIRECTORY = @json($PRAYER_DIRECTORY);
+    </script>
     <!-- ===================== SCRIPTS ===================== -->
     <script>
         // ── Navbar scroll ────────────────────────────────────────
@@ -2195,13 +1881,6 @@
             const isOpen = menu.classList.toggle('open');
             button.setAttribute('aria-expanded', String(isOpen));
             button.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
-        }
-
-        // Present the product before asking for support.
-        const donationSection = document.getElementById('donate');
-        const downloadSection = document.getElementById('download');
-        if (donationSection && downloadSection && donationSection.nextElementSibling !== downloadSection) {
-            downloadSection.parentNode.insertBefore(donationSection, downloadSection);
         }
 
         // ── Reveal on scroll ─────────────────────────────────────
@@ -2716,18 +2395,6 @@
         let currentLang = 'en';
         let cachedPrayers = null;
 
-        // ── Language dropdown ────────────────────────────────────
-        function toggleLangDropdown(e) {
-            e.stopPropagation();
-            const menu = document.getElementById('lang-menu');
-            const isOpen = menu.classList.toggle('open');
-            document.getElementById('lang-menu-button').setAttribute('aria-expanded', String(isOpen));
-        }
-        document.addEventListener('click', () => {
-            document.getElementById('lang-menu').classList.remove('open');
-            document.getElementById('lang-menu-button').setAttribute('aria-expanded', 'false');
-        });
-
         // ── Apply translations ───────────────────────────────────
         function setLanguage(lang) {
             if (!TRANSLATIONS[lang]) return;
@@ -2740,13 +2407,10 @@
             document.documentElement.setAttribute('dir', meta.dir);
             document.body.style.fontFamily = meta.font;
 
-            // Update label
-            document.querySelectorAll('#current-lang-label').forEach(el => el.textContent = meta.label);
-
-            // Close dropdown + highlight active
-            document.getElementById('lang-menu').classList.remove('open');
-            document.querySelectorAll('.lang-option').forEach(btn => {
-                btn.classList.toggle('active-lang', btn.dataset.lang === lang);
+            window.updateLanguagePickers(lang);
+            document.querySelectorAll('[data-prayer-directory]').forEach(link => {
+                link.href = PRAYER_DIRECTORY[lang].url;
+                link.textContent = PRAYER_DIRECTORY[lang].label;
             });
 
             // Translate all data-i18n elements
@@ -2857,8 +2521,9 @@
 
         // ── Init language from localStorage ─────────────────────
         (function () {
-            const saved = localStorage.getItem('zabi_lang') || 'en';
-            if (saved !== 'en') setLanguage(saved);
+            const requested = new URLSearchParams(location.search).get('lang');
+            const saved = requested || localStorage.getItem('zabi_lang') || 'en';
+            setLanguage(TRANSLATIONS[saved] ? saved : 'en');
         })();
 
         // ── Theme toggle ─────────────────────────────────────────
@@ -2874,389 +2539,6 @@
         }
 
         updateThemeIcons(document.documentElement.classList.contains('dark'));
-
-        // ════════════════════════════════════════════════════════
-        // DONATION MODULE
-        // ════════════════════════════════════════════════════════
-
-        // ════════════════════════════════════════════════════════
-        // DONATION MODULE
-        // ════════════════════════════════════════════════════════
-
-        let selectedGateway = null;
-        let paypalSdkLoaded = false;
-
-        function selectDonationAmount(amount) {
-            document.getElementById('donate-amount').value = amount;
-            document.querySelectorAll('.donate-preset-btn').forEach(btn => {
-                const active = parseInt(btn.dataset.amount) === amount;
-                btn.style.borderColor = active ? '#d4a843' : '#e5e7eb';
-                btn.style.background  = active ? 'linear-gradient(135deg,#d4a843,#f0c060)' : '#f9fafb';
-                btn.style.color       = active ? '#1a1a1a' : '#374151';
-            });
-        }
-
-        function clearDonationPresets() {
-            document.querySelectorAll('.donate-preset-btn').forEach(btn => {
-                btn.style.borderColor = '#e5e7eb';
-                btn.style.background  = '#f9fafb';
-                btn.style.color       = '#374151';
-            });
-        }
-
-        function selectPaymentGateway(gateway) {
-            selectedGateway = gateway;
-            document.querySelectorAll('.donate-payment-card').forEach(card => {
-                const active = card.dataset.gateway === gateway;
-                card.style.borderColor = active ? '#d4a843' : '#e5e7eb';
-                card.style.background  = active ? '#fffbeb' : '#fff';
-                card.querySelector('.donate-check').style.display = active ? 'flex' : 'none';
-            });
-
-            const paypalContainer = document.getElementById('paypal-button-container');
-            const submitBtn       = document.getElementById('donate-submit-btn');
-
-            if (gateway === 'paypal') {
-                submitBtn.classList.add('hidden');
-                paypalContainer.classList.remove('hidden');
-                initPaypalButtons();
-            } else {
-                submitBtn.classList.remove('hidden');
-                paypalContainer.classList.add('hidden');
-            }
-        }
-
-        function loadDonationCategories() {
-            fetch('/api/donation-categories')
-                .then(r => r.json())
-                .then(res => {
-                    const sel = document.getElementById('donate-category');
-                    (res.data || []).forEach(cat => {
-                        const opt = document.createElement('option');
-                        opt.value = cat.id;
-                        opt.textContent = cat.name;
-                        sel.appendChild(opt);
-                    });
-                })
-                .catch(() => {});
-        }
-
-        function showDonationFeedback(message, success) {
-            const el = document.getElementById('donate-feedback');
-            el.textContent = message;
-            el.style.background = success ? '#d1fae5' : '#fee2e2';
-            el.style.color      = success ? '#065f46' : '#991b1b';
-            el.classList.remove('hidden');
-            if (success) setTimeout(() => el.classList.add('hidden'), 8000);
-        }
-
-        function getDonationFormValues() {
-            return {
-                amount:   parseFloat(document.getElementById('donate-amount').value),
-                category: document.getElementById('donate-category').value,
-                email:    document.getElementById('donate-email').value.trim(),
-                name:     document.getElementById('donate-name').value.trim() || null,
-            };
-        }
-
-        function validateDonationForm() {
-            const { amount, category, email } = getDonationFormValues();
-            if (!amount || amount < 1)                             { showDonationFeedback('Please enter a valid amount (min $1).', false); return false; }
-            if (!category)                                          { showDonationFeedback('Please select a donation category.', false); return false; }
-            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showDonationFeedback('Please enter a valid email address.', false); return false; }
-            if (!selectedGateway)                                   { showDonationFeedback('Please select a payment method.', false); return false; }
-            return true;
-        }
-
-        function resetDonationForm() {
-            document.getElementById('donate-amount').value   = '';
-            document.getElementById('donate-category').value = '';
-            document.getElementById('donate-email').value    = '';
-            document.getElementById('donate-name').value     = '';
-            clearDonationPresets();
-            selectedGateway = null;
-            document.querySelectorAll('.donate-payment-card').forEach(c => {
-                c.style.borderColor = '#e5e7eb';
-                c.style.background  = '#fff';
-                c.querySelector('.donate-check').style.display = 'none';
-            });
-            document.getElementById('paypal-button-container').classList.add('hidden');
-            document.getElementById('donate-submit-btn').classList.remove('hidden');
-        }
-
-        // ── Stripe Checkout ──────────────────────────────────────
-        function submitStripe(formValues) {
-            return fetch('/api/donation/stripe/checkout', {
-                method:  'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body:    JSON.stringify({ ...formValues, category_id: parseInt(formValues.category), currency: 'USD' }),
-            })
-            .then(r => r.json())
-            .then(res => {
-                if (res.status && res.checkout_url) {
-                    window.location.href = res.checkout_url;
-                } else {
-                    showDonationFeedback(res.message || 'Stripe error. Please try again.', false);
-                }
-            });
-        }
-
-        // ── PayPal ───────────────────────────────────────────────
-        function initPaypalButtons() {
-            const container = document.getElementById('paypal-button-container');
-            if (paypalSdkLoaded && window.paypal) {
-                renderPaypalButtons(container);
-                return;
-            }
-            fetch('/api/donation/paypal/client-id')
-                .then(r => r.json())
-                .then(res => {
-                    if (!res.status) { showDonationFeedback('PayPal is not configured.', false); return; }
-                    const script = document.createElement('script');
-                    script.src = `https://www.paypal.com/sdk/js?client-id=${res.client_id}&currency=USD`;
-                    script.onload = () => { paypalSdkLoaded = true; renderPaypalButtons(container); };
-                    document.head.appendChild(script);
-                })
-                .catch(() => showDonationFeedback('Could not load PayPal. Please try another method.', false));
-        }
-
-        function renderPaypalButtons(container) {
-            container.innerHTML = '';
-            window.paypal.Buttons({
-                createOrder: function(data, actions) {
-                    if (!validateDonationForm()) return actions.reject();
-                    const { amount, category, email, name } = getDonationFormValues();
-                    return fetch('/api/donation/paypal/create-order', {
-                        method:  'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                        body:    JSON.stringify({ amount, category_id: parseInt(category), email, name, currency: 'USD' }),
-                    })
-                    .then(r => r.json())
-                    .then(res => {
-                        if (!res.status) throw new Error(res.message);
-                        container.dataset.donationId = res.donation_id;
-                        return res.order_id;
-                    });
-                },
-                onApprove: function(data, actions) {
-                    const donationId = container.dataset.donationId;
-                    return fetch('/api/donation/paypal/capture-order', {
-                        method:  'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                        body:    JSON.stringify({ order_id: data.orderID, donation_id: donationId }),
-                    })
-                    .then(r => r.json())
-                    .then(res => {
-                        if (res.status) {
-                            showDonationFeedback('JazakAllah Khair! PayPal payment successful. 🤲', true);
-                            resetDonationForm();
-                        } else {
-                            showDonationFeedback(res.message || 'Payment verification failed.', false);
-                        }
-                    });
-                },
-                onError: function(err) {
-                    showDonationFeedback('PayPal error. Please try again.', false);
-                },
-                style: { layout: 'horizontal', color: 'gold', shape: 'rect', label: 'donate', height: 36 },
-            }).render(container);
-        }
-
-        // ── Razorpay ─────────────────────────────────────────────
-        function submitRazorpay(formValues) {
-            return new Promise((resolve) => {
-                fetch('/api/donation/razorpay/create-order', {
-                    method:  'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body:    JSON.stringify({ ...formValues, category_id: parseInt(formValues.category), currency: 'INR' }),
-                })
-                .then(r => r.json())
-                .then(res => {
-                    if (!res.status) { showDonationFeedback(res.message || 'Razorpay error. Please try again.', false); resolve(); return; }
-                    const open = () => {
-                        const rzp = new window.Razorpay({
-                            key:         res.key_id,
-                            amount:      res.amount,
-                            currency:    res.currency,
-                            name:        'SalaTime — Islamic App',
-                            description: res.description,
-                            order_id:    res.order_id,
-                            prefill:     { name: res.name, email: res.email },
-                            theme:       { color: '#d4a843' },
-                            handler: function(response) {
-                                fetch('/api/donation/razorpay/verify', {
-                                    method:  'POST',
-                                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                                    body:    JSON.stringify({
-                                        razorpay_payment_id: response.razorpay_payment_id,
-                                        razorpay_order_id:   response.razorpay_order_id,
-                                        razorpay_signature:  response.razorpay_signature,
-                                        donation_id:         res.donation_id,
-                                    }),
-                                })
-                                .then(r => r.json())
-                                .then(v => {
-                                    if (v.status) { showDonationFeedback('JazakAllah Khair! Razorpay payment successful. 🤲', true); resetDonationForm(); }
-                                    else          { showDonationFeedback(v.message || 'Payment verification failed.', false); }
-                                })
-                                .catch(() => showDonationFeedback('Verification error. Please contact support.', false));
-                            },
-                        });
-                        rzp.open();
-                        resolve();
-                    };
-                    if (window.Razorpay) { open(); return; }
-                    const s = document.createElement('script');
-                    s.src = 'https://checkout.razorpay.com/v1/checkout.js';
-                    s.onload  = open;
-                    s.onerror = () => { showDonationFeedback('Could not load Razorpay. Please try another method.', false); resolve(); };
-                    document.head.appendChild(s);
-                })
-                .catch(() => { showDonationFeedback('Network error. Please check your connection.', false); resolve(); });
-            });
-        }
-
-        // ── Paystack ─────────────────────────────────────────────
-        function submitPaystack(formValues) {
-            return new Promise((resolve) => {
-                fetch('/api/donation/paystack/initialize', {
-                    method:  'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body:    JSON.stringify({ ...formValues, category_id: parseInt(formValues.category), currency: 'NGN' }),
-                })
-                .then(r => r.json())
-                .then(res => {
-                    if (!res.status) { showDonationFeedback(res.message || 'Paystack error. Please try again.', false); resolve(); return; }
-                    const open = () => {
-                        const handler = window.PaystackPop.setup({
-                            key:      res.public_key,
-                            email:    res.email,
-                            amount:   res.amount,
-                            currency: res.currency,
-                            ref:      res.reference,
-                            callback: function(response) {
-                                fetch('/api/donation/paystack/verify', {
-                                    method:  'POST',
-                                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                                    body:    JSON.stringify({ reference: response.reference, donation_id: res.donation_id }),
-                                })
-                                .then(r => r.json())
-                                .then(v => {
-                                    if (v.status) { showDonationFeedback('JazakAllah Khair! Paystack payment successful. 🤲', true); resetDonationForm(); }
-                                    else          { showDonationFeedback(v.message || 'Payment verification failed.', false); }
-                                })
-                                .catch(() => showDonationFeedback('Verification error. Please contact support.', false));
-                            },
-                            onClose: function() {},
-                        });
-                        handler.openIframe();
-                        resolve();
-                    };
-                    if (window.PaystackPop) { open(); return; }
-                    const s = document.createElement('script');
-                    s.src = 'https://js.paystack.co/v1/inline.js';
-                    s.onload  = open;
-                    s.onerror = () => { showDonationFeedback('Could not load Paystack. Please try another method.', false); resolve(); };
-                    document.head.appendChild(s);
-                })
-                .catch(() => { showDonationFeedback('Network error. Please check your connection.', false); resolve(); });
-            });
-        }
-
-        // ── SSLCommerz ───────────────────────────────────────────
-        function submitSslCommerz(formValues) {
-            return fetch('/api/donation/sslcommerz/initiate', {
-                method:  'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body:    JSON.stringify({ ...formValues, category_id: parseInt(formValues.category), currency: 'BDT' }),
-            })
-            .then(r => r.json())
-            .then(res => {
-                if (res.status && res.gateway_url) {
-                    window.location.href = res.gateway_url;
-                } else {
-                    showDonationFeedback(res.message || 'SSLCommerz error. Please try again.', false);
-                }
-            });
-        }
-
-        // ── Main submit handler ──────────────────────────────────
-        function submitDonation() {
-            if (!validateDonationForm()) return;
-
-            const formValues = getDonationFormValues();
-            const btn        = document.getElementById('donate-submit-btn');
-            const btnTxt     = document.getElementById('donate-btn-text');
-            const loader     = document.getElementById('donate-btn-loader');
-
-            btn.disabled       = true;
-            btnTxt.textContent = 'Processing…';
-            loader.classList.remove('hidden');
-
-            const done = () => {
-                btn.disabled       = false;
-                btnTxt.textContent = (TRANSLATIONS[currentLang] || TRANSLATIONS.en)['donate.btn'] || 'Donate Now';
-                loader.classList.add('hidden');
-            };
-
-            let promise;
-            if      (selectedGateway === 'stripe')     promise = submitStripe(formValues);
-            else if (selectedGateway === 'razorpay')   promise = submitRazorpay(formValues);
-            else if (selectedGateway === 'paystack')   promise = submitPaystack(formValues);
-            else if (selectedGateway === 'sslcommerz') promise = submitSslCommerz(formValues);
-            else                                       promise = Promise.resolve();
-
-            promise.catch(() => showDonationFeedback('Network error. Please check your connection.', false))
-                   .finally(done);
-        }
-
-        // ── On-load: check payment return params ─────────────────
-        (function checkPaymentReturn() {
-            const params   = new URLSearchParams(window.location.search);
-            const donation = params.get('donation');
-
-            if (donation === 'success') {
-                const sessionId  = params.get('session_id');
-                const donationId = params.get('donation_id');
-                if (sessionId && donationId) {
-                    fetch('/api/donation/stripe/verify', {
-                        method:  'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                        body:    JSON.stringify({ session_id: sessionId, donation_id: donationId }),
-                    }).catch(() => {});
-                }
-                setTimeout(() => {
-                    const el = document.getElementById('donate-feedback');
-                    if (el) { el.textContent = 'JazakAllah Khair! Your Stripe payment was successful. 🤲'; el.style.background='#d1fae5'; el.style.color='#065f46'; el.classList.remove('hidden'); }
-                    document.getElementById('donate')?.scrollIntoView({ behavior: 'smooth' });
-                }, 500);
-                history.replaceState({}, '', window.location.pathname);
-            } else if (donation === 'ssl_success') {
-                setTimeout(() => {
-                    const el = document.getElementById('donate-feedback');
-                    if (el) { el.textContent = 'JazakAllah Khair! Your SSLCommerz payment was successful. 🤲'; el.style.background='#d1fae5'; el.style.color='#065f46'; el.classList.remove('hidden'); }
-                    document.getElementById('donate')?.scrollIntoView({ behavior: 'smooth' });
-                }, 500);
-                history.replaceState({}, '', window.location.pathname);
-            } else if (donation === 'ssl_fail') {
-                setTimeout(() => {
-                    const el = document.getElementById('donate-feedback');
-                    if (el) { el.textContent = 'Payment failed. Please try again.'; el.style.background='#fee2e2'; el.style.color='#991b1b'; el.classList.remove('hidden'); }
-                    document.getElementById('donate')?.scrollIntoView({ behavior: 'smooth' });
-                }, 500);
-                history.replaceState({}, '', window.location.pathname);
-            } else if (donation === 'cancelled') {
-                setTimeout(() => {
-                    const el = document.getElementById('donate-feedback');
-                    if (el) { el.textContent = 'Payment was cancelled.'; el.style.background='#fee2e2'; el.style.color='#991b1b'; el.classList.remove('hidden'); }
-                    document.getElementById('donate')?.scrollIntoView({ behavior: 'smooth' });
-                }, 500);
-                history.replaceState({}, '', window.location.pathname);
-            }
-        })();
-
-        // Load categories on page load
-        loadDonationCategories();
 
         // ════════════════════════════════════════════════════════
         // AI CHAT MODULE

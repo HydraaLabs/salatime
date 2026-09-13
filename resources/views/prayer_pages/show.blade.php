@@ -78,7 +78,7 @@
 
 @section('content')
     <div class="container breadcrumbs" aria-label="{{ __('prayer_pages.breadcrumb') }}">
-        <a href="{{ config('seo.site_url') }}/">{{ __('prayer_pages.home') }}</a><span>›</span>
+        <a href="{{ config('seo.site_url') }}/?lang={{ $locale }}">{{ __('prayer_pages.home') }}</a><span>›</span>
         <a href="{{ $worldUrl }}">{{ __('prayer_pages.world_heading') }}</a><span>›</span>
         <a href="{{ $countryUrl }}">{{ $countryName }}</a><span>›</span>
         <span>{{ $cityName }}</span>

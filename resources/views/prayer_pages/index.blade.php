@@ -27,7 +27,7 @@
 @endpush
 @section('content')
 <div class="container breadcrumbs" aria-label="{{ __('prayer_pages.breadcrumb') }}">
-    <a href="{{ config('seo.site_url') }}/">{{ __('prayer_pages.home') }}</a><span>›</span>
+    <a href="{{ config('seo.site_url') }}/?lang={{ $locale }}">{{ __('prayer_pages.home') }}</a><span>›</span>
     @if($country)<a href="{{ $worldUrl }}">{{ __('prayer_pages.world_heading') }}</a><span>›</span><span>{{ $countryName }}</span>
     @else<span>{{ $heading }}</span>@endif
 </div>
