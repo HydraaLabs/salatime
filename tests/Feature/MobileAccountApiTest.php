@@ -30,7 +30,8 @@ class MobileAccountApiTest extends TestCase
         $app->afterBootstrapping(LoadConfiguration::class, function ($app) {
             $app['config']->set(['database.default' => 'sqlite', 'database.connections.sqlite.database' => ':memory:',
                 'cache.default' => 'array', 'mail.default' => 'array', 'queue.default' => 'sync',
-                'mobile_auth.enabled' => true, 'mobile_auth.mail_enabled' => true]);
+                'mobile_auth.enabled' => true, 'mobile_auth.mail_enabled' => true,
+                'mobile_auth.apple.client_ids' => [], 'mobile_auth.apple.private_key_path' => '']);
         });
         $app->make(Kernel::class)->bootstrap();
 
@@ -319,6 +320,57 @@ class MobileAccountApiTest extends TestCase
         $this->assertDatabaseCount('mobile_accounts', 0);
         $this->assertDatabaseCount('personal_access_tokens', 0);
         Http::assertNotSent(fn ($request) => $request->url() === 'https://appleid.apple.com/auth/token');
+    }
+
+    public function test_native_apple_sign_in_preserves_name_on_returning_authorizations(): void
+    {
+        $this->appleConfiguration();
+        config(['mobile_auth.apple.ios_client_id' => 'net.salatime.test',
+            'mobile_auth.apple.client_id' => '', 'mobile_auth.apple.redirect_uri' => '']);
+        $this->getJson('/api/mobile/auth/config')->assertOk()
+            ->assertJsonPath('data.apple.ios_enabled', true)
+            ->assertJsonPath('data.apple.android_enabled', false);
+        $this->getJson('/api/mobile/auth/challenge?provider=apple&platform=android')->assertServiceUnavailable();
+        $id = null;
+        $exchangeResponses = Http::sequence();
+        Http::fake([
+            'appleid.apple.com/auth/keys' => Http::response(['keys' => [$this->jwk]]),
+            'appleid.apple.com/auth/token' => $exchangeResponses,
+        ]);
+        foreach ([['name' => 'First Apple name'], [], ['name' => ''], ['name' => null]] as $name) {
+            $challenge = $this->getJson('/api/mobile/auth/challenge?provider=apple&platform=ios')->assertOk()->json('data');
+            $jwt = $this->appleToken($challenge['nonce']);
+            $exchangeResponses->push(['id_token' => $jwt, 'refresh_token' => 'fake-native-refresh-token']);
+            $session = $this->postJson('/api/mobile/auth/apple', $challenge + $name + [
+                'identity_token' => $jwt, 'authorization_code' => 'native-code',
+            ])->assertOk()->assertJsonPath('data.user.name', 'First Apple name')->json('data');
+            $id ??= $session['user']['id'];
+            $this->assertSame($id, $session['user']['id']);
+            Http::assertSent(fn ($request) => $request->url() === 'https://appleid.apple.com/auth/token'
+                && $request['client_id'] === 'net.salatime.test' && ! isset($request['redirect_uri']));
+        }
+        $this->assertDatabaseCount('mobile_accounts', 1);
+        $this->assertDatabaseCount('mobile_identities', 1);
+        Notification::assertSentToTimes(MobileAccount::find($id), AccountWelcome::class, 1);
+    }
+
+    public function test_apple_configuration_hides_platforms_without_a_valid_audience_or_redirect(): void
+    {
+        $this->appleConfiguration();
+        config(['mobile_auth.apple.ios_client_id' => 'unconfigured.native.app']);
+        $this->getJson('/api/mobile/auth/config')->assertOk()
+            ->assertJsonPath('data.apple.ios_enabled', false)
+            ->assertJsonPath('data.apple.android_enabled', true);
+        $this->getJson('/api/mobile/auth/challenge?provider=apple&platform=ios')->assertServiceUnavailable();
+        foreach (['http://example.test/callback', '', 'https:///bad'] as $redirect) {
+            config(['mobile_auth.apple.redirect_uri' => $redirect]);
+            $this->getJson('/api/mobile/auth/config')->assertOk()->assertJsonPath('data.apple.android_enabled', false);
+            $this->getJson('/api/mobile/auth/challenge?provider=apple&platform=android')->assertServiceUnavailable();
+        }
+        config(['mobile_auth.apple.redirect_uri' => 'https://example.test/callback',
+            'mobile_auth.apple.client_id' => 'not-accepted-service']);
+        $this->getJson('/api/mobile/auth/config')->assertOk()->assertJsonPath('data.apple.android_enabled', false);
+        Http::assertNothingSent();
     }
 
     public function test_every_catalog_sound_is_portable_and_unknown_names_are_rejected(): void

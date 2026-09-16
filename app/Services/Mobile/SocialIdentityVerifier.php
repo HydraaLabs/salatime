@@ -29,7 +29,29 @@ class SocialIdentityVerifier
         }
 
         return config('mobile_auth.apple.team_id') && config('mobile_auth.apple.key_id') &&
-            is_file((string) config('mobile_auth.apple.private_key_path'));
+            is_file((string) config('mobile_auth.apple.private_key_path')) &&
+            is_readable((string) config('mobile_auth.apple.private_key_path'));
+    }
+
+    public function appleEnabledFor(string $platform): bool
+    {
+        if (! $this->enabled('apple')) {
+            return false;
+        }
+        $clientIds = config('mobile_auth.apple.client_ids', []);
+        if ($platform === 'ios') {
+            $clientId = config('mobile_auth.apple.ios_client_id');
+
+            return is_string($clientId) && $clientId !== '' && in_array($clientId, $clientIds, true);
+        }
+        $clientId = config('mobile_auth.apple.client_id');
+        $redirect = (string) config('mobile_auth.apple.redirect_uri');
+        $package = (string) config('mobile_auth.apple.android_package');
+
+        return $platform === 'android' && is_string($clientId) && $clientId !== '' &&
+            in_array($clientId, $clientIds, true) && filter_var($redirect, FILTER_VALIDATE_URL) &&
+            parse_url($redirect, PHP_URL_SCHEME) === 'https' &&
+            preg_match('/^[A-Za-z][A-Za-z0-9_]*(?:\\.[A-Za-z][A-Za-z0-9_]*)+$/', $package) === 1;
     }
 
     public function verify(string $provider, string $token, ?string $nonce = null): array

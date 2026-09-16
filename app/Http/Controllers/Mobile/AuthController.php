@@ -26,7 +26,13 @@ class AuthController extends Controller
         return response()->json(['data' => ['enabled' => (bool) config('mobile_auth.enabled'),
             'email' => ['enabled' => (bool) config('mobile_auth.enabled'), 'verification_enabled' => (bool) config('mobile_auth.mail_enabled'), 'password_reset_enabled' => (bool) config('mobile_auth.mail_enabled')],
             'google' => ['enabled' => (bool) config('mobile_auth.enabled') && $this->identities->enabled('google'), 'server_client_id' => config('mobile_auth.google.server_client_id'), 'ios_client_id' => config('mobile_auth.google.ios_client_id')],
-            'apple' => ['enabled' => (bool) config('mobile_auth.enabled') && $this->identities->enabled('apple'), 'client_id' => config('mobile_auth.apple.client_id'), 'redirect_uri' => config('mobile_auth.apple.redirect_uri')],
+            'apple' => [
+                'enabled' => (bool) config('mobile_auth.enabled') && $this->identities->enabled('apple'),
+                'ios_enabled' => (bool) config('mobile_auth.enabled') && $this->identities->appleEnabledFor('ios'),
+                'android_enabled' => (bool) config('mobile_auth.enabled') && $this->identities->appleEnabledFor('android'),
+                'client_id' => config('mobile_auth.apple.client_id'),
+                'redirect_uri' => config('mobile_auth.apple.redirect_uri'),
+            ],
         ]]);
     }
 
@@ -176,7 +182,7 @@ class AuthController extends Controller
     public function challenge(Request $request)
     {
         $data = $request->validate(['provider' => 'required|in:apple', 'platform' => 'sometimes|in:android,ios']);
-        abort_unless($this->identities->enabled('apple'), 503, 'Apple sign-in is not configured.');
+        abort_unless($this->identities->appleEnabledFor($data['platform'] ?? 'ios'), 503, 'Apple sign-in is not configured.');
 
         return response()->json(['data' => $this->challenges->issue($data['platform'] ?? 'ios')]);
     }
@@ -216,7 +222,7 @@ class AuthController extends Controller
         if ($link && ! $request->user()->email_verified_at) {
             return response()->json(['message' => 'Verify your email before linking a sign-in provider.', 'code' => 'email_verification_required'], 403);
         }
-        $rules = ['device_name' => 'sometimes|string|max:100', 'name' => 'sometimes|string|max:100'];
+        $rules = ['device_name' => 'sometimes|string|max:100', 'name' => 'sometimes|nullable|string|max:100'];
         $rules += $provider === 'google' ? ['id_token' => 'required|string|max:16384'] : [
             'identity_token' => 'required|string|max:16384', 'authorization_code' => 'required|string|max:4096',
             'challenge_id' => 'required|uuid', 'nonce' => 'required|string|size:64', 'state' => 'required|string|max:200',

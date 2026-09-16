@@ -11,6 +11,7 @@ return [
     ],
     'apple' => [
         'client_ids' => array_values(array_filter(array_map('trim', explode(',', env('MOBILE_APPLE_CLIENT_IDS', ''))))),
+        'ios_client_id' => env('MOBILE_APPLE_IOS_CLIENT_ID', 'net.salatime.app'),
         'client_id' => env('MOBILE_APPLE_SERVICE_ID', ''),
         'team_id' => env('MOBILE_APPLE_TEAM_ID', ''),
         'key_id' => env('MOBILE_APPLE_KEY_ID', ''),
