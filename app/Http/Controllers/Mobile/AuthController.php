@@ -181,6 +181,10 @@ class AuthController extends Controller
 
     public function challenge(Request $request)
     {
+        // Existing Flutter clients send TargetPlatform.iOS.name as "iOS".
+        if (is_string($request->input('platform'))) {
+            $request->merge(['platform' => strtolower($request->input('platform'))]);
+        }
         $data = $request->validate(['provider' => 'required|in:apple', 'platform' => 'sometimes|in:android,ios']);
         abort_unless($this->identities->appleEnabledFor($data['platform'] ?? 'ios'), 503, 'Apple sign-in is not configured.');
 

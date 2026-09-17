@@ -337,8 +337,9 @@ class MobileAccountApiTest extends TestCase
             'appleid.apple.com/auth/keys' => Http::response(['keys' => [$this->jwk]]),
             'appleid.apple.com/auth/token' => $exchangeResponses,
         ]);
-        foreach ([['name' => 'First Apple name'], [], ['name' => ''], ['name' => null]] as $name) {
-            $challenge = $this->getJson('/api/mobile/auth/challenge?provider=apple&platform=ios')->assertOk()->json('data');
+        foreach ([['name' => 'First Apple name'], [], ['name' => ''], ['name' => null]] as $index => $name) {
+            $platform = $index === 0 ? 'iOS' : 'ios';
+            $challenge = $this->getJson('/api/mobile/auth/challenge?provider=apple&platform='.$platform)->assertOk()->json('data');
             $jwt = $this->appleToken($challenge['nonce']);
             $exchangeResponses->push(['id_token' => $jwt, 'refresh_token' => 'fake-native-refresh-token']);
             $session = $this->postJson('/api/mobile/auth/apple', $challenge + $name + [
@@ -352,6 +353,28 @@ class MobileAccountApiTest extends TestCase
         $this->assertDatabaseCount('mobile_accounts', 1);
         $this->assertDatabaseCount('mobile_identities', 1);
         Notification::assertSentToTimes(MobileAccount::find($id), AccountWelcome::class, 1);
+    }
+
+    public function test_apple_challenge_normalizes_platform_without_bypassing_validation_or_availability(): void
+    {
+        $this->appleConfiguration();
+        config(['mobile_auth.apple.ios_client_id' => 'net.salatime.test',
+            'mobile_auth.apple.client_id' => '', 'mobile_auth.apple.redirect_uri' => '']);
+        foreach (['iOS', 'ios', 'IOS'] as $platform) {
+            $challenge = $this->getJson('/api/mobile/auth/challenge?provider=apple&platform='.$platform)->assertOk()->json('data');
+            $this->assertSame('ios', Cache::get('mobile_apple_challenge_'.$challenge['challenge_id'])['platform']);
+        }
+        $this->post('/api/mobile/auth/apple/callback', ['state' => $challenge['state'], 'code' => 'test-code'])->assertStatus(400);
+        foreach (['android', 'Android'] as $platform) {
+            $this->getJson('/api/mobile/auth/challenge?provider=apple&platform='.$platform)->assertServiceUnavailable();
+        }
+        foreach (['macOS', '', ['ios']] as $platform) {
+            $this->getJson('/api/mobile/auth/challenge?'.http_build_query(['provider' => 'apple', 'platform' => $platform]))
+                ->assertUnprocessable()->assertJsonValidationErrors('platform');
+        }
+        $this->assertDatabaseCount('mobile_accounts', 0);
+        $this->assertDatabaseCount('mobile_identities', 0);
+        Http::assertNothingSent();
     }
 
     public function test_apple_configuration_hides_platforms_without_a_valid_audience_or_redirect(): void
