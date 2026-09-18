@@ -26,7 +26,7 @@ class UserInvitationMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'User Invitation Mail',
+            subject: 'Votre invitation SalaTime',
         );
     }
 

@@ -19,10 +19,13 @@ class AccountCode extends Notification
     public function toMail($notifiable): MailMessage
     {
         $message = (new MailMessage)
-            ->subject($this->purpose === 'verify' ? 'SalaTime — verify your email' : 'SalaTime — password reset')
-            ->line($this->purpose === 'verify' ? 'Enter this code in SalaTime to verify your email address.' : 'Enter this code in SalaTime to reset your password.')
-            ->line($this->code)
-            ->line('This code expires in 15 minutes. If you did not request it, you can ignore this message.');
+            ->subject($this->purpose === 'verify' ? 'SalaTime — Vérifiez votre adresse e-mail' : 'SalaTime — Réinitialisez votre mot de passe')
+            ->view(['html' => 'mail.mobile.code', 'text' => 'mail.mobile.code-text'], [
+                'name' => trim((string) ($notifiable->name ?? '')),
+                'code' => $this->code,
+                'verify' => $this->purpose === 'verify',
+                'siteUrl' => 'https://salatime.net',
+            ]);
 
         return $this->usingAccountTransport($message);
     }

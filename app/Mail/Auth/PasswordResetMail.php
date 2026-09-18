@@ -28,7 +28,7 @@ class PasswordResetMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Password Reset Mail',
+            subject: 'SalaTime — Réinitialisez votre mot de passe',
         );
     }
 
