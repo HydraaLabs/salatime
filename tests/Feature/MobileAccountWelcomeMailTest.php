@@ -4,10 +4,13 @@ namespace Tests\Feature;
 
 use App\Models\Mobile\MobileAccount;
 use App\Notifications\Mobile\AccountWelcome;
+use App\Services\Mobile\AccountLocale;
 use DOMDocument;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Bootstrap\LoadConfiguration;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Symfony\Component\Mime\Email;
 use Tests\TestCase;
@@ -41,10 +44,10 @@ class MobileAccountWelcomeMailTest extends TestCase
         $this->assertSame('Bienvenue sur SalaTime', $email->getSubject());
         $this->assertSame('reader@example.test', $email->getTo()[0]->getAddress());
         $this->assertStringContainsString('<html lang="fr"', $html);
-        $this->assertStringContainsString('Bonjour Amine,', $html);
+        $this->assertSame('Bonjour Amine,', $this->htmlDocument($html)->getElementsByTagName('h1')->item(0)->textContent);
         $this->assertStringContainsString('Bonjour Amine,', $text);
         $this->assertStringContainsString('Vos préférences vous suivent', $html);
-        $this->assertStringContainsString('VOS PRÉFÉRENCES VOUS SUIVENT', $text);
+        $this->assertStringContainsString('Vos préférences vous suivent', $text);
         $this->assertStringContainsString('à la suite de la création de votre compte SalaTime', $text);
         $this->assertStringNotContainsString('<table', $text);
         $this->assertStringNotContainsString('<style', $text);
@@ -113,7 +116,7 @@ class MobileAccountWelcomeMailTest extends TestCase
         $this->assertCount(0, Mail::mailer('array')->getSymfonyTransport()->messages());
         $this->assertSame('accounts@example.test', $email->getFrom()[0]->getAddress());
         $this->assertSame('SalaTime accounts', $email->getFrom()[0]->getName());
-        $this->assertStringContainsString('Bonjour Amine,', $email->getHtmlBody());
+        $this->assertSame('Bonjour Amine,', $this->htmlDocument($email->getHtmlBody())->getElementsByTagName('h1')->item(0)->textContent);
         $this->assertStringContainsString('Bonjour Amine,', $email->getTextBody());
     }
 
@@ -129,10 +132,134 @@ class MobileAccountWelcomeMailTest extends TestCase
         $this->assertSame('SalaTime', $email->getFrom()[0]->getName());
     }
 
-    private function renderWelcome(string $name, string $mailer = 'array'): Email
+    /** @dataProvider welcomeLanguages */
+    public function test_welcome_uses_the_account_language_for_every_part_of_the_email(string $locale, string $subject, string $direction): void
+    {
+        // Per-account rendering must work independently of the website's current locale.
+        app()->setLocale($locale === 'fr' ? 'en' : 'fr');
+        $email = $this->renderWelcome('Amine & Lina', 'array', $locale);
+        $html = $email->getHtmlBody();
+        $text = $email->getTextBody();
+        $copy = require lang_path($locale.'/mobile_welcome.php');
+        $this->assertSame($subject, $email->getSubject());
+        $this->assertCount(14, $copy);
+        foreach ($copy as $key => $phrase) {
+            $this->assertIsString($phrase);
+            $this->assertNotSame('', $phrase);
+            if ($key === 'subject') {
+                continue;
+            }
+            $phrase = str_replace(':name', 'Amine & Lina', $phrase);
+            if ($key === 'greeting') {
+                $this->assertSame($phrase, $this->htmlDocument($html)->getElementsByTagName('h1')->item(0)->textContent);
+            } else {
+                $this->assertStringContainsString(e($phrase), $html, $locale.' HTML '.$key);
+            }
+            // The preheader and header tagline have no duplicate in the text alternative.
+            if (! in_array($key, ['eyebrow', 'preheader', 'tagline'], true)) {
+                $this->assertStringContainsString($phrase, $text, $locale.' text '.$key);
+            }
+        }
+        $document = $this->htmlDocument($html);
+        $root = $document->getElementsByTagName('html')->item(0);
+        $this->assertSame($locale, $root->getAttribute('lang'));
+        $this->assertSame($direction, $root->getAttribute('dir'));
+        $this->assertSame('auto', $document->getElementsByTagName('bdi')->item(0)->getAttribute('dir'));
+        $this->assertSame('Amine & Lina', $document->getElementsByTagName('bdi')->item(0)->textContent);
+        $this->assertStringNotContainsString(':name', $html.$text);
+        if ($locale !== 'fr') {
+            $this->assertStringNotContainsString('Politique de confidentialité', $html.$text);
+            $this->assertStringNotContainsString('Vos préférences vous suivent', $html.$text);
+        }
+        $directory = getenv('SALATIME_WELCOME_PREVIEW_DIR');
+        if (is_string($directory) && $directory !== '') {
+            if (! is_dir($directory)) {
+                mkdir($directory, 0755, true);
+            }
+            $this->assertNotFalse(file_put_contents($directory.'/welcome-'.$locale.'.html', $html));
+        }
+    }
+
+    public static function welcomeLanguages(): array
+    {
+        return [
+            'English' => ['en', 'Welcome to SalaTime', 'ltr'],
+            'French' => ['fr', 'Bienvenue sur SalaTime', 'ltr'],
+            'Arabic' => ['ar', 'مرحبًا بك في SalaTime', 'rtl'],
+            'Turkish' => ['tr', 'SalaTime’a hoş geldiniz', 'ltr'],
+            'Urdu' => ['ur', 'SalaTime میں خوش آمدید', 'rtl'],
+            'Indonesian' => ['id', 'Selamat datang di SalaTime', 'ltr'],
+            'Malay' => ['ms', 'Selamat datang ke SalaTime', 'ltr'],
+            'Spanish' => ['es', 'Te damos la bienvenida a SalaTime', 'ltr'],
+            'Bengali' => ['bn', 'SalaTime-এ স্বাগতম', 'ltr'],
+            'Persian' => ['fa', 'به SalaTime خوش آمدید', 'rtl'],
+        ];
+    }
+
+    public function test_translations_cover_exactly_the_selectable_account_languages(): void
+    {
+        $this->assertSame(AccountLocale::SUPPORTED, array_column(self::welcomeLanguages(), 0));
+        $keys = array_keys(require lang_path('en/mobile_welcome.php'));
+        foreach (AccountLocale::SUPPORTED as $locale) {
+            $this->assertSame($keys, array_keys(require lang_path($locale.'/mobile_welcome.php')));
+        }
+    }
+
+    /** @dataProvider fallbackLanguages */
+    public function test_missing_or_unsupported_account_language_falls_back_to_english(?string $locale): void
+    {
+        app()->setLocale('fr');
+        $email = $this->renderWelcome('Amine', 'array', $locale);
+        $this->assertSame('Welcome to SalaTime', $email->getSubject());
+        $this->assertStringContainsString('<html lang="en" dir="ltr"', $email->getHtmlBody());
+        $this->assertStringContainsString('Hello Amine,', $email->getTextBody());
+    }
+
+    public static function fallbackLanguages(): array
+    {
+        return [[null], [''], ['de'], ['hi'], ['<script>']];
+    }
+
+    public function test_regional_locale_uses_the_matching_translation(): void
+    {
+        $email = $this->renderWelcome('Amine', 'array', 'ar-MA');
+        $this->assertSame('مرحبًا بك في SalaTime', $email->getSubject());
+        $this->assertStringContainsString('<html lang="ar" dir="rtl"', $email->getHtmlBody());
+    }
+
+    public function test_registration_delivers_the_welcome_in_the_persisted_language_through_the_real_mail_channel(): void
+    {
+        $this->assertSame(':memory:', DB::connection()->getDatabaseName());
+        (require database_path('migrations/2019_12_14_000001_create_personal_access_tokens_table.php'))->up();
+        (require database_path('migrations/2026_09_12_190000_create_mobile_accounts_tables.php'))->up();
+        (require database_path('migrations/2026_10_06_010000_add_locale_to_mobile_accounts.php'))->up();
+        config(['mobile_auth.enabled' => true, 'mobile_auth.mail_enabled' => true]);
+        app()->setLocale('fr');
+        Http::preventStrayRequests();
+
+        $this->postJson('/api/mobile/auth/register', [
+            'name' => 'Amine', 'email' => 'reader@example.test',
+            'password' => 'a-secure-password-123', 'password_confirmation' => 'a-secure-password-123',
+            'locale' => 'ar',
+        ], ['Accept-Language' => 'en-US'])->assertCreated()->assertJsonPath('data.user.locale', 'ar');
+
+        $this->assertDatabaseHas('mobile_accounts', ['email' => 'reader@example.test', 'locale' => 'ar']);
+        $this->assertDatabaseCount('mobile_preferences', 0);
+        $messages = Mail::mailer('array')->getSymfonyTransport()->messages();
+        $this->assertCount(2, $messages); // Verification code and a single welcome, both in memory.
+        $email = $messages->last()->getOriginalMessage();
+        $this->assertSame('مرحبًا بك في SalaTime', $email->getSubject());
+        $this->assertStringContainsString('<html lang="ar" dir="rtl"', $email->getHtmlBody());
+        $this->assertStringContainsString('مرحبًا Amine،', $email->getTextBody());
+        $this->assertStringNotContainsString('Bonjour', $email->getHtmlBody().$email->getTextBody());
+        $this->app->terminate();
+        $this->assertCount(2, Mail::mailer('array')->getSymfonyTransport()->messages());
+    }
+
+    private function renderWelcome(string $name, string $mailer = 'array', ?string $locale = 'fr'): Email
     {
         // Unsaved account and in-memory mailer exercise the real MailChannel and MIME rendering.
-        (new MobileAccount(['name' => $name, 'email' => 'reader@example.test']))
+        (new MobileAccount(['name' => $name, 'email' => 'reader@example.test', 'locale' => $locale]))
             ->notify(new AccountWelcome);
         $messages = Mail::mailer($mailer)->getSymfonyTransport()->messages();
         $this->assertCount(1, $messages);

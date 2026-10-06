@@ -6,6 +6,7 @@ use App\Models\Mobile\MobileAccount;
 use App\Models\User;
 use App\Notifications\Mobile\AccountCode;
 use App\Notifications\Mobile\AccountWelcome;
+use App\Services\Mobile\AccountLocale;
 use Firebase\JWT\JWT;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Foundation\Application;
@@ -29,7 +30,7 @@ class MobileAccountApiTest extends TestCase
         // Applied before providers boot: no query can reach the existing DB.
         $app->afterBootstrapping(LoadConfiguration::class, function ($app) {
             $app['config']->set(['database.default' => 'sqlite', 'database.connections.sqlite.database' => ':memory:',
-                'cache.default' => 'array', 'mail.default' => 'array', 'queue.default' => 'sync',
+                'cache.default' => 'array', 'mail.default' => 'array', 'queue.default' => 'sync', 'logging.default' => 'null',
                 'mobile_auth.enabled' => true, 'mobile_auth.mail_enabled' => true,
                 'mobile_auth.apple.client_ids' => [], 'mobile_auth.apple.private_key_path' => '']);
         });
@@ -44,6 +45,7 @@ class MobileAccountApiTest extends TestCase
         $this->assertSame(':memory:', DB::connection()->getDatabaseName());
         (require database_path('migrations/2019_12_14_000001_create_personal_access_tokens_table.php'))->up();
         (require database_path('migrations/2026_09_12_190000_create_mobile_accounts_tables.php'))->up();
+        (require database_path('migrations/2026_10_06_010000_add_locale_to_mobile_accounts.php'))->up();
         Schema::create('users', function ($table) {
             $table->id();
             $table->string('first_name');
@@ -99,6 +101,156 @@ class MobileAccountApiTest extends TestCase
         $this->getJson('/api/mobile/auth/me', $this->bearer($token))->assertUnauthorized();
         $this->postJson('/api/mobile/auth/login', ['email' => 'mobile@example.test', 'password' => 'a-secure-password-123'])->assertOk()->assertJsonPath('data.user.id', $session['user']['id']);
         Notification::assertSentToTimes(MobileAccount::first(), AccountWelcome::class, 1);
+    }
+
+    public function test_registration_persists_each_selectable_language_before_the_welcome_callback(): void
+    {
+        foreach (AccountLocale::SUPPORTED as $locale) {
+            Cache::flush();
+            $session = $this->postJson('/api/mobile/auth/register', $this->credentials($locale.'@example.test') + ['locale' => $locale], ['Accept-Language' => 'en-US'])
+                ->assertCreated()->assertJsonPath('data.user.locale', $locale)->json('data');
+            $account = MobileAccount::findOrFail($session['user']['id']);
+            $this->assertSame($locale, $account->locale);
+            Notification::assertSentTo($account, AccountWelcome::class, function ($notification, $channels, $notifiable) use ($locale) {
+                return $notifiable->locale === $locale
+                    && AccountLocale::forAccount($notifiable) === $locale
+                    && DB::table('mobile_accounts')->where('id', $notifiable->id)->value('locale') === $locale;
+            });
+        }
+    }
+
+    public function test_registration_normalizes_body_locale_and_negotiates_older_client_headers(): void
+    {
+        $cases = [
+            [['locale' => 'fr_FR'], 'ar', 'fr'],
+            [['locale' => 'AR-sa'], 'fr', 'ar'],
+            [[], 'de-DE, fr-FR;q=0.8, ar;q=0.5', 'fr'],
+            [[], 'fr;q=0.2, ur_PK;q=0.9', 'ur'],
+            [[], 'ar;q=0, fr;q=0.5', 'fr'],
+            [[], 'fr;q=0', 'en'],
+            [['locale' => 'hi-IN'], 'fr', 'en'],
+            [[], '*', 'en'],
+            [[], '', 'en'],
+        ];
+        foreach ($cases as $index => [$body, $header, $expected]) {
+            Cache::flush();
+            $this->postJson('/api/mobile/auth/register', $this->credentials('locale-'.$index.'@example.test') + $body, ['Accept-Language' => $header])
+                ->assertCreated()->assertJsonPath('data.user.locale', $expected);
+            $this->assertDatabaseHas('mobile_accounts', ['email' => 'locale-'.$index.'@example.test', 'locale' => $expected]);
+        }
+        foreach ([['fr'], 1, null, str_repeat('x', 36)] as $value) {
+            Cache::flush();
+            $this->postJson('/api/mobile/auth/register', $this->credentials('invalid-locale@example.test') + ['locale' => $value])
+                ->assertUnprocessable()->assertJsonValidationErrors('locale');
+        }
+    }
+
+    public function test_existing_account_language_is_not_changed_by_login_or_read_headers_and_bodies(): void
+    {
+        $account = MobileAccount::create(['name' => 'Existing locale', 'email' => 'existing-locale@example.test', 'password' => 'a-secure-password-123', 'locale' => 'fr']);
+        foreach ([[], ['locale' => 'ar'], ['locale' => 'zz']] as $body) {
+            $session = $this->postJson('/api/mobile/auth/login', ['email' => $account->email, 'password' => 'a-secure-password-123'] + $body, ['Accept-Language' => 'en'])
+                ->assertOk()->assertJsonPath('data.user.locale', 'fr')->json('data');
+            $this->getJson('/api/mobile/auth/me', $this->bearer($session['token']) + ['Accept-Language' => 'ar'])
+                ->assertOk()->assertJsonPath('data.user.locale', 'fr');
+            $this->assertSame('fr', $account->fresh()->locale);
+        }
+        Notification::assertNothingSent();
+    }
+
+    public function test_google_creation_uses_locale_but_returning_sign_in_does_not_replace_it(): void
+    {
+        $token = $this->googleToken();
+        $first = $this->postJson('/api/mobile/auth/google', ['id_token' => $token, 'locale' => 'tr-TR'], ['Accept-Language' => 'fr'])
+            ->assertOk()->assertJsonPath('data.user.locale', 'tr')->json('data');
+        $account = MobileAccount::findOrFail($first['user']['id']);
+        $this->postJson('/api/mobile/auth/google', ['id_token' => $token, 'locale' => 'en'], ['Accept-Language' => 'en'])
+            ->assertOk()->assertJsonPath('data.user.locale', 'tr');
+        $this->assertSame('tr', $account->fresh()->locale);
+        Notification::assertSentToTimes($account, AccountWelcome::class, 1);
+    }
+
+    public function test_preference_language_changes_account_atomically_after_the_version_guard(): void
+    {
+        $session = $this->postJson('/api/mobile/auth/register', $this->credentials() + ['locale' => 'ar'])->assertCreated()->json('data');
+        $headers = $this->bearer($session['token']) + ['Accept-Language' => 'en'];
+        $this->putJson('/api/mobile/preferences', ['version' => 0, 'preferences' => ['schemaVersion' => 1, 'language' => 'tr']], $headers)
+            ->assertOk()->assertJsonPath('data.version', 1);
+        $this->assertDatabaseHas('mobile_accounts', ['id' => $session['user']['id'], 'locale' => 'tr']);
+        $this->putJson('/api/mobile/preferences', ['version' => 0, 'preferences' => ['schemaVersion' => 1, 'language' => 'fr']], $headers)->assertConflict();
+        $this->putJson('/api/mobile/preferences', ['version' => 1, 'preferences' => ['schemaVersion' => 1, 'language' => 'hi']], $headers)->assertUnprocessable();
+        $this->assertDatabaseHas('mobile_accounts', ['id' => $session['user']['id'], 'locale' => 'tr']);
+        $this->putJson('/api/mobile/preferences', ['version' => 1, 'preferences' => ['schemaVersion' => 1]], $headers)->assertOk();
+        $this->getJson('/api/mobile/auth/me', $headers)->assertOk()->assertJsonPath('data.user.locale', 'tr');
+        $this->assertDatabaseHas('mobile_accounts', ['id' => $session['user']['id'], 'locale' => 'tr']);
+    }
+
+    public function test_a_failed_account_locale_write_rolls_back_the_preference_document_and_version(): void
+    {
+        $session = $this->register();
+        MobileAccount::saving(function (MobileAccount $account) {
+            if ($account->isDirty('locale') && $account->locale === 'fr') {
+                throw new \RuntimeException('Simulated account locale write failure');
+            }
+        });
+        try {
+            $this->putJson('/api/mobile/preferences', ['version' => 0, 'preferences' => ['schemaVersion' => 1, 'language' => 'fr']], $this->bearer($session['token']))->assertStatus(500);
+            $this->assertDatabaseCount('mobile_preferences', 0);
+            $this->assertDatabaseHas('mobile_accounts', ['id' => $session['user']['id'], 'locale' => 'en']);
+        } finally {
+            MobileAccount::flushEventListeners();
+        }
+    }
+
+    public function test_legacy_accounts_resolve_the_database_preference_without_read_side_effects(): void
+    {
+        $account = MobileAccount::create(['name' => 'Legacy locale', 'email' => 'legacy-locale@example.test']);
+        DB::table('mobile_preferences')->insert(['mobile_account_id' => $account->id, 'version' => 7,
+            'preferences' => json_encode(['schemaVersion' => 1, 'language' => 'fa_IR']), 'created_at' => now(), 'updated_at' => now()]);
+        $token = $account->createToken('test', ['mobile:account'])->plainTextToken;
+        $this->getJson('/api/mobile/auth/me', $this->bearer($token) + ['Accept-Language' => 'en'])->assertOk()->assertJsonPath('data.user.locale', 'fa');
+        $this->assertNull($account->fresh()->locale);
+        $this->assertSame(7, DB::table('mobile_preferences')->value('version'));
+        $account->forceFill(['locale' => 'ar'])->save();
+        $this->assertSame('ar', AccountLocale::forAccount($account));
+        $this->assertSame('en', AccountLocale::normalize('hi-IN'));
+    }
+
+    public function test_replacing_legacy_preferences_without_language_preserves_the_historical_choice(): void
+    {
+        $account = MobileAccount::create(['name' => 'Legacy reset', 'email' => 'legacy-reset@example.test']);
+        DB::table('mobile_preferences')->insert(['mobile_account_id' => $account->id, 'version' => 7,
+            'preferences' => json_encode(['schemaVersion' => 1, 'language' => 'fa_IR']), 'created_at' => now(), 'updated_at' => now()]);
+        $headers = $this->bearer($account->createToken('test', ['mobile:account'])->plainTextToken);
+        $this->putJson('/api/mobile/preferences', ['version' => 6, 'preferences' => ['schemaVersion' => 1]], $headers)->assertConflict();
+        $this->assertNull($account->fresh()->locale);
+        $this->putJson('/api/mobile/preferences', ['version' => 7, 'preferences' => ['schemaVersion' => 1]], $headers)
+            ->assertOk()->assertJsonPath('data.version', 8);
+        $this->getJson('/api/mobile/auth/me', $headers)->assertOk()->assertJsonPath('data.user.locale', 'fa');
+        $this->assertSame('fa', $account->fresh()->locale);
+    }
+
+    public function test_locale_migration_backfills_only_recognized_preferences_without_modifying_documents(): void
+    {
+        $migration = require database_path('migrations/2026_10_06_010000_add_locale_to_mobile_accounts.php');
+        $migration->down();
+        $accounts = [];
+        foreach (['fr_FR', 'ar-SA', 'hi-IN', null] as $index => $locale) {
+            $account = MobileAccount::create(['name' => 'Migration locale', 'email' => 'migration-'.$index.'@example.test']);
+            $accounts[] = $account;
+            DB::table('mobile_preferences')->insert(['mobile_account_id' => $account->id, 'version' => 10 + $index,
+                'preferences' => json_encode(['schemaVersion' => 1, 'language' => $locale, 'themeMode' => 'dark']),
+                'created_at' => '2026-09-01 12:00:00', 'updated_at' => '2026-09-02 13:00:00']);
+        }
+        $before = DB::table('mobile_preferences')->orderBy('mobile_account_id')->get()->toJson();
+        $accountTimes = DB::table('mobile_accounts')->orderBy('id')->pluck('updated_at')->all();
+        $migration->up();
+        $this->assertSame('fr', $accounts[0]->fresh()->locale);
+        $this->assertSame('ar', $accounts[1]->fresh()->locale);
+        $this->assertNull($accounts[2]->fresh()->locale);
+        $this->assertNull($accounts[3]->fresh()->locale);
+        $this->assertSame($before, DB::table('mobile_preferences')->orderBy('mobile_account_id')->get()->toJson());
+        $this->assertSame($accountTimes, DB::table('mobile_accounts')->orderBy('id')->pluck('updated_at')->all());
     }
 
     public function test_admin_tokens_and_sessions_cannot_access_mobile_accounts(): void
@@ -343,8 +495,8 @@ class MobileAccountApiTest extends TestCase
             $jwt = $this->appleToken($challenge['nonce']);
             $exchangeResponses->push(['id_token' => $jwt, 'refresh_token' => 'fake-native-refresh-token']);
             $session = $this->postJson('/api/mobile/auth/apple', $challenge + $name + [
-                'identity_token' => $jwt, 'authorization_code' => 'native-code',
-            ])->assertOk()->assertJsonPath('data.user.name', 'First Apple name')->json('data');
+                'identity_token' => $jwt, 'authorization_code' => 'native-code', 'locale' => $index === 0 ? 'ur_PK' : 'en',
+            ])->assertOk()->assertJsonPath('data.user.name', 'First Apple name')->assertJsonPath('data.user.locale', 'ur')->json('data');
             $id ??= $session['user']['id'];
             $this->assertSame($id, $session['user']['id']);
             Http::assertSent(fn ($request) => $request->url() === 'https://appleid.apple.com/auth/token'
@@ -352,6 +504,7 @@ class MobileAccountApiTest extends TestCase
         }
         $this->assertDatabaseCount('mobile_accounts', 1);
         $this->assertDatabaseCount('mobile_identities', 1);
+        $this->assertSame('ur', MobileAccount::findOrFail($id)->locale);
         Notification::assertSentToTimes(MobileAccount::find($id), AccountWelcome::class, 1);
     }
 

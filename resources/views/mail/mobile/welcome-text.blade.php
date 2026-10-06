@@ -1,16 +1,16 @@
-Bienvenue chez SalaTime
+{!! $copy['title'] !!}
 
-Bonjour {!! $name !!},
+{!! str_replace(':name', $name, $copy['greeting']) !!}
 
-Heureux de vous accueillir ! Avec SalaTime, gardez vos horaires de prière à portée de main et personnalisez votre expérience à votre rythme.
+{!! $copy['intro'] !!}
 
-VOS PRÉFÉRENCES VOUS SUIVENT
-Votre compte sauvegarde vos préférences : thème, langue et réglages de prière. Connectez-vous sur un autre appareil pour les retrouver.
+{!! $copy['preferences_title'] !!}
+{!! $copy['preferences_body'] !!}
 
-Découvrir SalaTime : {{ $siteUrl }}
+{!! $copy['cta'] !!} : {{ $siteUrl }}
 
-À très bientôt,
-L’équipe SalaTime
+{!! $copy['farewell'] !!}
+{!! $copy['team'] !!}
 
-Vous recevez cet e-mail à la suite de la création de votre compte SalaTime.
-Politique de confidentialité : {{ rtrim($siteUrl, '/') }}/privacy-policy
+{!! $copy['reason'] !!}
+{!! $copy['privacy'] !!} : {{ rtrim($siteUrl, '/') }}/privacy-policy

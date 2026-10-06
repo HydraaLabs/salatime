@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mobile;
 use App\Http\Controllers\Controller;
 use App\Models\Mobile\MobileAccount;
 use App\Models\Mobile\MobileIdentity;
+use App\Services\Mobile\AccountLocale;
 use App\Services\Mobile\AppleChallenge;
 use App\Services\Mobile\EmailCodes;
 use App\Services\Mobile\SocialIdentityVerifier;
@@ -55,9 +56,9 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $this->normalizeEmail($request);
-        $data = $request->validate(['name' => 'required|string|max:100', 'email' => 'required|email:rfc|max:254|unique:mobile_accounts,email', 'password' => $this->passwordRule(), 'device_name' => 'sometimes|string|max:100']);
+        $data = $request->validate(['name' => 'required|string|max:100', 'email' => 'required|email:rfc|max:254|unique:mobile_accounts,email', 'password' => $this->passwordRule(), 'device_name' => 'sometimes|string|max:100', 'locale' => 'sometimes|string|max:35']);
         try {
-            $account = MobileAccount::create(collect($data)->only(['name', 'email', 'password'])->all());
+            $account = MobileAccount::create(collect($data)->only(['name', 'email', 'password'])->all() + ['locale' => AccountLocale::forRegistration($request)]);
         } catch (QueryException $error) {
             if ($error->getCode() === '23000' || $error->getCode() === '23505') {
                 throw ValidationException::withMessages(['email' => 'This email is already registered.']);
@@ -75,7 +76,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $this->normalizeEmail($request);
-        $data = $request->validate(['email' => 'required|email:rfc|max:254', 'password' => 'required|string|max:128', 'device_name' => 'sometimes|string|max:100']);
+        $data = $request->validate(['email' => 'required|email:rfc|max:254', 'password' => 'required|string|max:128', 'device_name' => 'sometimes|string|max:100', 'locale' => 'sometimes|string|max:35']);
         $account = MobileAccount::where('email', $data['email'])->first();
         // A dummy hash keeps unknown-address timing close to password failures.
         $hash = $account?->password ?? '$2y$12$6pDQMGPNDPbcCUVjqmHdbO0bNxX8kbYHgAEvSmwgpZJRp.Hufpe5m';
@@ -226,7 +227,7 @@ class AuthController extends Controller
         if ($link && ! $request->user()->email_verified_at) {
             return response()->json(['message' => 'Verify your email before linking a sign-in provider.', 'code' => 'email_verification_required'], 403);
         }
-        $rules = ['device_name' => 'sometimes|string|max:100', 'name' => 'sometimes|nullable|string|max:100'];
+        $rules = ['device_name' => 'sometimes|string|max:100', 'name' => 'sometimes|nullable|string|max:100', 'locale' => 'sometimes|string|max:35'];
         $rules += $provider === 'google' ? ['id_token' => 'required|string|max:16384'] : [
             'identity_token' => 'required|string|max:16384', 'authorization_code' => 'required|string|max:4096',
             'challenge_id' => 'required|uuid', 'nonce' => 'required|string|size:64', 'state' => 'required|string|max:200',
@@ -268,7 +269,7 @@ class AuthController extends Controller
                         return response()->json(['message' => 'Sign in to your existing account first, then link this provider.', 'code' => 'account_link_required'], 409);
                     }
                     try {
-                        $account = MobileAccount::create(['name' => mb_substr($data['name'] ?? ($claims['name'] ?? 'SalaTime'), 0, 100), 'email' => $email, 'email_verified_at' => now()]);
+                        $account = MobileAccount::create(['name' => mb_substr($data['name'] ?? ($claims['name'] ?? 'SalaTime'), 0, 100), 'email' => $email, 'email_verified_at' => now(), 'locale' => AccountLocale::forRegistration($request)]);
                     } catch (QueryException $error) {
                         if (in_array($error->getCode(), ['23000', '23505'], true)) {
                             return response()->json(['message' => 'Sign in to your existing account first.', 'code' => 'account_link_required'], 409);
@@ -296,6 +297,8 @@ class AuthController extends Controller
 
     private function session(MobileAccount $account, Request $request, int $status = 200)
     {
+        // Locale on auth requests is only used when creating an account.
+        // Existing accounts change language through the versioned preferences API.
         $token = $account->createToken($request->input('device_name', 'SalaTime'), ['mobile:account'], now()->addDays((int) config('mobile_auth.token_days', 30)));
         $oldIds = $account->tokens()->orderByDesc('id')->skip(20)->take(1000)->pluck('id');
         if ($oldIds->isNotEmpty()) {

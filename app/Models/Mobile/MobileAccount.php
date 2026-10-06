@@ -2,6 +2,7 @@
 
 namespace App\Models\Mobile;
 
+use App\Services\Mobile\AccountLocale;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -10,7 +11,7 @@ class MobileAccount extends Authenticatable
 {
     use HasApiTokens, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'email_verified_at'];
+    protected $fillable = ['name', 'email', 'password', 'email_verified_at', 'locale'];
 
     protected $hidden = ['password'];
 
@@ -24,6 +25,7 @@ class MobileAccount extends Authenticatable
     public function publicData(): array
     {
         return ['id' => $this->id, 'name' => $this->name, 'email' => $this->email,
+            'locale' => AccountLocale::forAccount($this),
             'email_verified' => $this->email_verified_at !== null,
             'has_password' => $this->password !== null,
             'providers' => $this->identities()->pluck('provider')->all()];

@@ -17,8 +17,8 @@ Préfixe : `/api/mobile`. Envoyer `Accept: application/json`, `Content-Type: app
 | Méthode et chemin | Corps / résultat |
 |---|---|
 | `GET auth/config` | `{data:{enabled,email:{enabled,verification_enabled,password_reset_enabled},google:{enabled,server_client_id,ios_client_id},apple:{enabled,client_id,redirect_uri}}}` |
-| `POST auth/register` | `name,email,password,password_confirmation,device_name?` → 201, `{data:{user,token}}` |
-| `POST auth/login` | `email,password,device_name?` → `{data:{user,token}}` |
+| `POST auth/register` | `name,email,password,password_confirmation,device_name?,locale?` → 201, `{data:{user,token}}` |
+| `POST auth/login` | `email,password,device_name?,locale?` → `{data:{user,token}}` ; la connexion ne change pas une langue déjà enregistrée |
 | `GET auth/me` | Authentifié, `{data:{user}}` |
 | `POST auth/logout` | Authentifié, révoque uniquement cette session |
 | `DELETE auth/account` | Authentifié, `password` si `user.has_password` |
@@ -26,15 +26,23 @@ Préfixe : `/api/mobile`. Envoyer `Accept: application/json`, `Content-Type: app
 | `POST auth/reset-password` | `email,token,password,password_confirmation` → révoque toutes les sessions |
 | `POST auth/resend-verification` | Authentifié, renvoie un code si nécessaire |
 | `POST auth/verify-email` | Authentifié, `token` → `{data:{user}}` |
-| `POST auth/google` | `id_token,device_name?,name?` → session |
+| `POST auth/google` | `id_token,device_name?,name?,locale?` → session |
 | `GET auth/challenge?provider=apple&platform=android` | `{data:{challenge_id,nonce,state}}` ; utiliser `ios` pour l’application iOS |
-| `POST auth/apple` | `identity_token,authorization_code,challenge_id,nonce,state,device_name?,name?` → session |
+| `POST auth/apple` | `identity_token,authorization_code,challenge_id,nonce,state,device_name?,name?,locale?` → session |
 | `POST auth/apple/callback` | Retour `form_post` Apple pour Android ; état validé avant redirection vers l’application |
 | `POST auth/link/google` / `auth/link/apple` | Même corps que la connexion, session existante authentifiée et email vérifié obligatoires |
 | `GET preferences` | Authentifié, `{data:{version:0,preferences:{},updated_at:null}}` initialement |
 | `PUT preferences` | Authentifié, `{version,preferences}` → document remplacé et version incrémentée |
 
-`user` contient seulement `id,name,email,email_verified,has_password,providers`. `providers` est une liste (`google`, `apple`). Les champs d’administration, mots de passe et tokens de fournisseurs ne sont pas exposés.
+`user` contient seulement `id,name,email,locale,email_verified,has_password,providers`. `locale` est la langue effective du compte. `providers` est une liste (`google`, `apple`). Les champs d’administration, mots de passe et tokens de fournisseurs ne sont pas exposés.
+
+## Langue du compte et du message de bienvenue
+
+Les langues sélectionnables dans Flutter sont `en`, `fr`, `ar`, `tr`, `ur`, `id`, `ms`, `es`, `bn` et `fa`. `locale` est une chaîne optionnelle de 35 caractères maximum dans les requêtes d’authentification. À la création d’un compte email, Google ou Apple, le serveur normalise la valeur du corps (`fr-FR` ou `fr_FR` devient `fr`) et la stocke dans `mobile_accounts.locale` avant de planifier le message de bienvenue. Une valeur non prise en charge revient à `en`. Si le corps ne précise aucune langue, les anciens clients peuvent fournir `Accept-Language` ; le serveur sélectionne une langue prise en charge selon les pondérations positives du header, sinon `en`.
+
+Une connexion ou association sur un compte existant ne change jamais sa langue, même si le corps ou le header indique une autre langue. `GET auth/me` reste sans effet d’écriture. Un choix manuel conservé par Flutter lors de la connexion, ou un changement dans les paramètres, doit être envoyé avec `PUT preferences` et `preferences.language`. Après validation et vérification de la version, le document portable et la langue du compte sont enregistrés dans la même transaction. Une erreur 422 ou un conflit 409 ne modifie ni l’un ni l’autre. Un document qui omet `language`, y compris une réinitialisation d’autres préférences, conserve la langue du compte.
+
+La migration additive `2026_10_06_010000_add_locale_to_mobile_accounts.php` crée la colonne nullable et reprend uniquement les langues reconnues dans les documents historiques `mobile_preferences`. Elle ne modifie ni les documents, ni leurs versions, ni leurs timestamps. Pour un ancien compte dont la colonne reste vide, `AccountLocale::forAccount` lit la langue de sa préférence en base, puis utilise `en` si aucun choix reconnu n’existe. Le message de bienvenue recharge le compte après commit et à la fin de la réponse ; il utilise ainsi la langue stockée en base. Cette migration doit être appliquée avant le déploiement du code qui écrit la colonne ; elle n’est pas exécutée sur la base réelle par les tests.
 
 Les codes mail sont des chaînes de **6 chiffres**, copiables et saisissables dans l’application. Ils expirent après 15 minutes, sont stockés sous forme HMAC liée à `APP_KEY`, utilisables une fois, et bloqués après 5 erreurs par code. Les renvois et tentatives sont également limités par IP et adresse. Un code de vérification est lié au compte authentifié ; un code de reset est lié à l’adresse validée.
 

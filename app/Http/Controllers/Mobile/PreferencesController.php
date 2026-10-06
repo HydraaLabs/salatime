@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mobile;
 
 use App\Http\Controllers\Controller;
 use App\Models\Mobile\MobileAccount;
+use App\Services\Mobile\AccountLocale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -50,7 +51,7 @@ class PreferencesController extends Controller
             'preferences' => ['present', 'array:'.self::TOP],
             'preferences.schemaVersion' => ['required_with:preferences', 'integer', Rule::in([1])],
             'preferences.themeMode' => ['sometimes', Rule::in(['daylight', 'light', 'dark'])],
-            'preferences.language' => ['sometimes', Rule::in(['en', 'fr', 'ar', 'tr', 'ur', 'id', 'ms', 'es', 'bn', 'fa'])],
+            'preferences.language' => ['sometimes', Rule::in(AccountLocale::SUPPORTED)],
             'preferences.country' => ['sometimes', 'string', 'regex:/^[A-Z]{2}$/'],
             'preferences.homeLayout' => ['sometimes', Rule::in(['modern', 'classic'])],
             'preferences.use24HourFormat' => ['sometimes', 'boolean'],
@@ -118,16 +119,23 @@ class PreferencesController extends Controller
         $values['preferences'] = $this->portableSounds($values['preferences']);
 
         return DB::transaction(function () use ($request, $values) {
-            MobileAccount::whereKey($request->user()->id)->lockForUpdate()->firstOrFail();
+            $account = MobileAccount::whereKey($request->user()->id)->lockForUpdate()->firstOrFail();
             $snapshot = $this->snapshot($request->user()->id);
             if ($snapshot['version'] !== (int) $values['version']) {
                 return response()->json(['message' => 'Preferences changed on another device.', 'code' => 'preferences_conflict', 'data' => $snapshot], 409);
             }
+            // Preserve a recognized legacy choice before replacing its only
+            // historical document, even if this update omits language.
+            $locale = $values['preferences']['language'] ?? ($account->locale === null
+                ? AccountLocale::supported($snapshot['preferences']->language ?? null) : null);
             DB::table('mobile_preferences')->updateOrInsert(['mobile_account_id' => $request->user()->id], [
                 'version' => $snapshot['version'] + 1,
                 'preferences' => json_encode($values['preferences'], JSON_THROW_ON_ERROR),
                 'created_at' => now(), 'updated_at' => now(),
             ]);
+            if ($locale !== null) {
+                $account->forceFill(['locale' => $locale])->save();
+            }
 
             return response()->json(['data' => $this->snapshot($request->user()->id)]);
         });
