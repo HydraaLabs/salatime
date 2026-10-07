@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    @include('shared.google-analytics')
     @php
         $articleTitle = $post->meta_title ?: $post->title;
         $articleDescription = $post->meta_description ?: Str::limit($post->excerpt ?? strip_tags($post->content), 160);

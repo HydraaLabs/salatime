@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    @include('shared.google-analytics')
     @php
         $blogCanonical = config('seo.site_url') . '/blog';
         $blogTitle = 'Islamic Prayer, Quran & Qibla Guides – SalaTime';

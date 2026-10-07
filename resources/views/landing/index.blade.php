@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
+    @include('shared.google-analytics')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -94,11 +95,6 @@
     <script type="application/ld+json">{!! json_encode($structuredData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
 
     <link rel="icon" href="{{ asset('favicon.ico') }}?v=20260827">
-
-    @if(!empty($s['seo_google_analytics']))
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ $s['seo_google_analytics'] }}"></script>
-    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{{ $s['seo_google_analytics'] }}');</script>
-    @endif
 
     <!-- Fonts: Inter, Amiri (Quran), Cairo (Arabic UI), Noto Sans Bengali, Noto Sans Devanagari (Hindi) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
