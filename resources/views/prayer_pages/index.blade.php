@@ -68,7 +68,7 @@
 </div></section>
 <section class="section" style="padding-top:0"><div class="container surface app-cta">
     <div><h2>{{ __('prayer_pages.app_heading') }}</h2><p>{{ __('prayer_pages.app_text') }}</p></div>
-    <a class="button" href="{{ config('seo.play_store_url') }}" rel="noopener">{{ __('prayer_pages.open_google_play') }}</a>
+    @include('prayer_pages.store-links')
 </div></section>
 <script>
 (() => {

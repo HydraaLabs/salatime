@@ -7,4 +7,5 @@ return [
     'description' => 'SalaTime is a free Islamic app for accurate prayer times, Quran reading and audio, Qibla direction, Adhan reminders, duas and daily dhikr on Android.',
     'social_image' => 'assets/img/salatime-social.png',
     'play_store_url' => 'https://play.google.com/store/apps/details?id=net.salatime.app&pli=1',
+    'app_store_url' => 'https://apps.apple.com/app/id6812923710',
 ];
