@@ -150,6 +150,9 @@
         details p { margin: 12px 0 0; color: var(--muted); }
         .app-cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 30px; padding: 34px; color: white; background: linear-gradient(135deg, var(--green-950), var(--green-700)); }
         .app-store-links { display: flex; flex-wrap: wrap; gap: 12px; }
+        .store-button { width: 48px; height: 48px; min-height: 48px; padding: 0; flex: 0 0 auto; }
+        .store-button svg { width: 26px; height: 26px; }
+        .store-button:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; }
         .app-cta h2 { margin: 0 0 7px; }
         .app-cta p { margin: 0; color: #c8ddd5; max-width: 700px; }
         footer { margin-top: 70px; padding: 42px 0; color: #a9c5ba; background: var(--green-950); }
@@ -165,7 +168,7 @@
         @media (max-width: 640px) {
             .container { width: min(100% - 22px, 1160px); }
             .nav { min-height: 66px; }
-            .brand-tagline, .nav-actions > .button { display: none; }
+            .brand-tagline, .nav-actions > .app-store-links { display: none; }
             .brand img { width: 138px; height: 40px; }
             .language-picker > summary { padding: 9px 10px; gap: 7px; }
             .hero { padding: 38px 0 60px; }
@@ -186,8 +189,7 @@
             </a>
             <div class="nav-actions">
                 @include('shared.language-picker', ['clientSide' => false])
-                <a class="button" href="{{ config('seo.play_store_url') }}" rel="noopener">{{ __('prayer_pages.download') }}</a>
-                <a class="button" href="{{ config('seo.app_store_url') }}" rel="noopener">App Store</a>
+                @include('prayer_pages.store-links')
             </div>
         </div>
     </header>
