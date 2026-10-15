@@ -1,15 +1,43 @@
 <IfModule mod_rewrite.c>
 RewriteEngine On
+RewriteOptions AllowNoSlash
+
+# Canonicalize the client URL before the internal rewrite into public/.
+# THE_REQUEST stays unchanged across rewrite passes; REQUEST_URI does not.
+# Restrict 301s to reads so API POST bodies are never discarded.
+RewriteCond %{HTTP_HOST} ^(?:www\.)?salatime\.net(?::[0-9]+)?$ [NC]
+RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$
+RewriteCond %{THE_REQUEST} "\s/+public(?:/+([^\s?]*?))?/*(?:\?|\s)" [NC]
+RewriteRule ^ https://salatime.net/%1 [R=301,L,NE]
+
+# Public asset directories retain their slash. Handle them before mod_dir
+# can redirect the internally rewritten /public path or use the proxy's HTTP.
+RewriteCond %{HTTP_HOST} ^(?:www\.)?salatime\.net(?::[0-9]+)?$ [NC]
+RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$
+RewriteCond %{DOCUMENT_ROOT}/public%{REQUEST_URI} -d
+RewriteCond %{THE_REQUEST} "\s/+([^\s?]*[^/\s?])(?:\?|\s)"
+RewriteRule ^ https://salatime.net/%1/ [R=301,L,NE]
+
+RewriteCond %{HTTP_HOST} ^(?:www\.)?salatime\.net(?::[0-9]+)?$ [NC]
+RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/public%{REQUEST_URI} !-d
+RewriteCond %{THE_REQUEST} "\s/+([^\s?]+?)/+(?:\?|\s)"
+RewriteRule ^ https://salatime.net/%1 [R=301,L,NE]
 
 # Keep one indexable origin: HTTPS without www. Cloudflare forwards the
 # original protocol through X-Forwarded-Proto, so this does not create loops.
 RewriteCond %{HTTP_HOST} ^www\.salatime\.net$ [NC]
-RewriteRule ^ https://salatime.net%{REQUEST_URI} [R=301,L,NE]
+RewriteCond %{THE_REQUEST} "\s/+([^\s?]*)(?:\?|\s)"
+RewriteRule ^ https://salatime.net/%1 [R=301,L,NE]
 
 RewriteCond %{HTTP_HOST} ^salatime\.net$ [NC]
 RewriteCond %{HTTPS} !=on
 RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
-RewriteRule ^ https://salatime.net%{REQUEST_URI} [R=301,L,NE]
+RewriteCond %{THE_REQUEST} "\s/+([^\s?]*)(?:\?|\s)"
+RewriteRule ^ https://salatime.net/%1 [R=301,L,NE]
 
+# Avoid rewriting public/index.php into public/public/index.php on later passes.
+RewriteRule ^public(?:/|$) - [L]
 RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>

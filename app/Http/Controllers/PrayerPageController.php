@@ -10,7 +10,7 @@ use Illuminate\Http\Response;
 
 class PrayerPageController extends Controller
 {
-    public function index(Request $request, PrayerPageCatalog $catalog): Response
+    public function index(Request $request, PrayerPageCatalog $catalog, PrayerPageService $service): Response
     {
         [$locale, $localeConfig] = $this->localeContext($request);
         $code = $this->countryCode($request, $catalog, $locale);
@@ -26,11 +26,30 @@ class PrayerPageController extends Controller
         $worldUrl = $catalog->url($locale);
         $alternates = $this->alternates($catalog, $code);
         $cityCount = $countries->sum(fn ($country) => count($country['cities']));
+        $countryOverview = [];
+        $ttl = 3600;
+
+        if ($country !== null) {
+            // The catalog contains major cities/capitals, but no population ranking.
+            // Cover distinct time zones first and keep selection stable across languages.
+            $candidates = collect($cities)->sortBy(fn ($city) => $city['names']['en'], SORT_NATURAL | SORT_FLAG_CASE);
+            $representatives = $candidates->unique('timezone')->take(8);
+            $selectedSlugs = $representatives->pluck('slug')->all();
+            $overviewCities = $representatives->concat($candidates->reject(fn ($city) => in_array($city['slug'], $selectedSlugs, true)))->take(8);
+            foreach ($overviewCities as $city) {
+                $now = CarbonImmutable::now($city['timezone']);
+                $countryOverview[] = $city + [
+                    'today' => $service->schedule($code.'/'.$city['slug'], $city, $now->startOfDay(), 1)[0],
+                ];
+                // A country can span dates: no row may remain cached past its local midnight.
+                $ttl = max(0, min($ttl, $now->diffInSeconds($now->addDay()->startOfDay())));
+            }
+        }
 
         return $this->publicResponse('prayer_pages.index', compact(
             'locale', 'localeConfig', 'country', 'countryName', 'countries', 'cities',
-            'canonical', 'worldUrl', 'alternates', 'cityCount'
-        ));
+            'canonical', 'worldUrl', 'alternates', 'cityCount', 'countryOverview'
+        ), $ttl);
     }
 
     public function show(Request $request, PrayerPageService $service, PrayerPageCatalog $catalog): Response

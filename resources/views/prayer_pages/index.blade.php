@@ -40,6 +40,45 @@
         </div>
     </div>
 </section>
+@if($country)
+<section class="section"><div class="container">
+    <h2 class="section-title">{{ __('prayer_pages.country_today_heading', ['country' => $countryName]) }}</h2>
+    <p class="section-intro">{{ __('prayer_pages.country_today_intro', ['count' => count($countryOverview)]) }}</p>
+    @if(collect($countryOverview)->contains(fn ($city) => $city['today']['polar']))
+        <p class="notice">{{ __('prayer_pages.polar_note') }}</p>
+    @endif
+    <div class="surface table-wrap" tabindex="0" role="region" aria-label="{{ __('prayer_pages.country_today_heading', ['country' => $countryName]) }}">
+        <table class="monthly-calendar">
+            <caption class="sr-only">{{ __('prayer_pages.country_today_heading', ['country' => $countryName]) }}</caption>
+            <thead><tr>
+                <th scope="col">{{ __('prayer_pages.city') }}</th>
+                <th scope="col">{{ __('prayer_pages.date') }} · {{ __('prayer_pages.timezone') }}</th>
+                @foreach(['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as $key)<th scope="col">{{ __('prayer_pages.prayers.'.$key) }}</th>@endforeach
+            </tr></thead>
+            <tbody>
+            @foreach($countryOverview as $city)
+                <tr>
+                    <th scope="row"><a href="{{ $city['url'] }}" style="text-decoration:underline">{{ $city['names'][$locale] }}</a></th>
+                    <td><time datetime="{{ $city['today']['date']->format('Y-m-d') }}">{{ $city['today']['date']->locale($locale)->isoFormat('D MMM YYYY') }}</time><br><small><bdi>{{ $city['timezone'] }}</bdi></small></td>
+                    @foreach($city['today']['times'] as $time)<td dir="ltr">{{ $time }}</td>@endforeach
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
+    <div class="notice">{{ __('prayer_pages.country_time_note', ['country' => $countryName]) }}</div>
+</div></section>
+<section class="section" style="padding-top:0"><div class="container surface info-card">
+    <h2>{{ __('prayer_pages.method_heading') }}</h2>
+    <p>{{ __('prayer_pages.country_calculation_text') }}</p>
+    <ul>
+    @foreach($countryOverview as $city)
+        <li><a href="{{ $city['url'] }}" style="text-decoration:underline">{{ $city['names'][$locale] }}</a> — {{ __('prayer_pages.methods.'.$city['method']) }} · {{ __('prayer_pages.schools.'.$city['school']) }} · <bdi>{{ $city['timezone'] }}</bdi></li>
+    @endforeach
+    </ul>
+    <p>{{ __('prayer_pages.accuracy_note') }}</p>
+</div></section>
+@endif
 <section class="section"><div class="container">
     <label class="search-label" for="city-search">{{ __('prayer_pages.search') }}</label>
     <input class="city-search" type="search" id="city-search" placeholder="{{ __('prayer_pages.search') }}" autocomplete="off" aria-controls="directory">
