@@ -15,6 +15,7 @@ use App\Http\Controllers\Quran\API\Dua\DuaController;
 use App\Http\Controllers\Quran\API\HaramCode\HaramCodeController;
 use App\Http\Controllers\Quran\API\HomeLayout\HomeLayoutController;
 use App\Http\Controllers\Quran\API\Juze\JuzesController;
+use App\Http\Controllers\Quran\API\Mosque\NearbyMosqueController;
 use App\Http\Controllers\Quran\API\PaymentMethod\PaymentMethodController;
 use App\Http\Controllers\Quran\API\PrayerTime\PrayerTimeController;
 use App\Http\Controllers\Quran\API\Reciter\ReciterController;
@@ -72,6 +73,8 @@ Route::middleware('public.api.cache:content,86400')->group(function () {
 Route::any('today-prayer-time', [PrayerTimeController::class, 'getPrayerTime']);
 Route::post('prayer-time-calendar', [PrayerTimeController::class, 'getPrayerCalendar']);
 Route::get('prayer-by-location', [PrayerTimeController::class, 'prayerByLocation']);
+// OpenStreetMap mosques behind a tile cache; see NearbyMosqueService.
+Route::get('mosques/nearby', [NearbyMosqueController::class, 'index']);
 Route::get('settings', [SettingsController::class, 'index']);
 Route::middleware('public.api.cache:settings,600')->group(function () {
     Route::get('theme', [ThemeController::class, 'index']);
