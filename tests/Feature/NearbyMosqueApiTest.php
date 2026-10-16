@@ -10,8 +10,8 @@ use Tests\TestCase;
 
 class NearbyMosqueApiTest extends TestCase
 {
-    private const MAIN = 'https://overpass-api.de/api/interpreter';
-    private const MIRROR = 'https://overpass.kumi.systems/api/interpreter';
+    private const MAIN = 'https://overpass.openstreetmap.fr/api/interpreter';
+    private const MIRROR = 'https://overpass-api.de/api/interpreter';
 
     protected function setUp(): void
     {

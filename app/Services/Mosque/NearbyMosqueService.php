@@ -23,9 +23,11 @@ class NearbyMosqueService
     public const FRESH_DAYS = 7;
     public const KEEP_DAYS = 60;
     public const ENDPOINTS = [
+        // OpenStreetMap France stayed responsive (worldwide data) while the
+        // main server and the kumi mirror were saturated on 2026-10-16.
+        'https://overpass.openstreetmap.fr/api/interpreter',
         'https://overpass-api.de/api/interpreter',
         'https://overpass.kumi.systems/api/interpreter',
-        'https://overpass.private.coffee/api/interpreter',
     ];
     private const USER_AGENT = 'SalaTime/1.0 (+https://salatime.net; contact@salatime.net)';
     private const BUDGET_SECONDS = 24;
@@ -104,7 +106,7 @@ class NearbyMosqueService
             ."way[\"amenity\"=\"place_of_worship\"][\"religion\"=\"muslim\"](around:$radius,$lat,$lng);"
             .');out center;';
         $deadline = microtime(true) + self::BUDGET_SECONDS;
-        // Main server twice (it is often only momentarily full), then mirrors.
+        // First server twice (it is often only momentarily full), then the others.
         $attempts = [self::ENDPOINTS[0], self::ENDPOINTS[1], self::ENDPOINTS[0], self::ENDPOINTS[2]];
         foreach ($attempts as $index => $endpoint) {
             $remaining = $deadline - microtime(true);
@@ -118,7 +120,7 @@ class NearbyMosqueService
                 $response = Http::asForm()
                     ->withHeaders(['User-Agent' => self::USER_AGENT, 'Accept' => 'application/json'])
                     ->connectTimeout(4)
-                    ->timeout((int) max(3, min(20, $remaining - 1)))
+                    ->timeout((int) max(3, min(10, $remaining - 1)))
                     ->post($endpoint, ['data' => $query]);
                 $elements = $response->successful() ? $response->json('elements') : null;
                 if (is_array($elements)) {
