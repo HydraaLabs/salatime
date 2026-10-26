@@ -13,6 +13,8 @@ return [
     'index_intro' => 'আজকের নামাজের সময় ও সাত দিনের সময়সূচি দেখতে আপনার শহর বেছে নিন। সময় মরক্কোর স্থানীয় সময় অঞ্চল অনুযায়ী গণনা করা হয়।',
     'city_title' => 'আজ :city শহরের নামাজের সময় | SalaTime',
     'city_description' => 'আজ :city, :country-এর ফজর, সূর্যোদয়, যোহর, আসর, মাগরিব ও ইশার সময়। :timezone সময় অঞ্চলে সাপ্তাহিক ও মাসিক ক্যালেন্ডার।',
+    'city_title_times' => 'আজ :city নামাজের সময়: ফজর :fajr, মাগরিব :maghrib',
+    'city_description_times' => 'আজ :city, :country: ফজর :fajr, সূর্যোদয় :sunrise, যোহর :dhuhr, আসর :asr, মাগরিব :maghrib, ইশা :isha। :timezone সময় অঞ্চলে সাপ্তাহিক ও মাসিক ক্যালেন্ডার।',
     'city_heading' => ':city শহরের নামাজের সময়',
     'today' => 'আজ, :date',
     'next_prayer' => 'পরবর্তী নামাজ',

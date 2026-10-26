@@ -56,7 +56,6 @@ class SeoTest extends TestCase
             ->assertOk()
             ->assertHeader('Cache-Control')
             ->assertSee('<html lang="fr" dir="ltr">', false)
-            ->assertSee('<title>Horaires de prière à Fès, Maroc aujourd’hui | SalaTime</title>', false)
             ->assertSee('<link rel="canonical" href="'.$canonical.'">', false)
             ->assertSee('hreflang="ar"', false)
             ->assertSee('Calendrier des prières sur 7 jours à Fès')
@@ -64,6 +63,10 @@ class SeoTest extends TestCase
             ->assertSee('type="application/ld+json"', false)
             ->assertSee('FAQPage');
 
+        $this->assertMatchesRegularExpression(
+            '~<title>Horaires de prière Fès aujourd’hui – Fajr \d{2}:\d{2}, Maghrib \d{2}:\d{2}</title>~u',
+            $response->getContent()
+        );
         $this->assertLessThanOrEqual(60, $response->getMaxAge());
     }
 

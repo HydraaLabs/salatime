@@ -13,6 +13,8 @@ return [
     'index_intro' => 'Choisissez votre ville pour consulter les horaires de prière du jour et le calendrier des sept prochains jours, calculés dans le fuseau horaire du Maroc.',
     'city_title' => 'Horaires de prière à :city aujourd’hui | SalaTime',
     'city_description' => 'Horaires de prière à :city, :country : Fajr, lever du soleil, Dhuhr, Asr, Maghrib et Isha. Calendriers hebdomadaire et mensuel, fuseau :timezone.',
+    'city_title_times' => 'Horaires de prière :city aujourd’hui – Fajr :fajr, Maghrib :maghrib',
+    'city_description_times' => 'Aujourd’hui à :city, :country : Fajr :fajr, lever du soleil :sunrise, Dhuhr :dhuhr, Asr :asr, Maghrib :maghrib, Isha :isha. Calendriers hebdomadaire et mensuel, fuseau :timezone.',
     'city_heading' => 'Horaires de prière à :city',
     'today' => 'Aujourd’hui, :date',
     'next_prayer' => 'Prochaine prière',

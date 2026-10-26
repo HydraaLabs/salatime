@@ -13,6 +13,8 @@ return [
     'index_intro' => 'اختر مدينتك لمعرفة مواقيت الصلاة اليوم وجدول الأيام السبعة المقبلة حسب التوقيت المحلي للمغرب.',
     'city_title' => 'مواقيت الصلاة في :city اليوم | SalaTime',
     'city_description' => 'مواقيت الصلاة في :city، :country: الفجر والشروق والظهر والعصر والمغرب والعشاء. جدول أسبوعي وشهري حسب توقيت :timezone.',
+    'city_title_times' => 'مواقيت الصلاة في :city اليوم: الفجر :fajr، المغرب :maghrib',
+    'city_description_times' => 'مواقيت الصلاة اليوم في :city، :country: الفجر :fajr، الشروق :sunrise، الظهر :dhuhr، العصر :asr، المغرب :maghrib، العشاء :isha. جدول أسبوعي وشهري حسب توقيت :timezone.',
     'city_heading' => 'مواقيت الصلاة في :city',
     'today' => 'اليوم، :date',
     'next_prayer' => 'الصلاة القادمة',

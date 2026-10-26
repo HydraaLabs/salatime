@@ -36,6 +36,28 @@ class WorldPrayerPagesTest extends TestCase
         }
     }
 
+    public function test_city_title_and_description_show_today_times_in_every_locale(): void
+    {
+        $catalog = app(PrayerPageCatalog::class);
+        foreach (array_keys(config('prayer_pages.locales')) as $locale) {
+            $html = $this->get($catalog->url($locale, 'FR', 'paris-2988507'))->assertOk()->getContent();
+            preg_match_all('~class="prayer-time" dir="ltr">([^<]+)<~', $html, $cards);
+            $this->assertCount(6, $cards[1], $locale);
+            [$fajr, $sunrise, $dhuhr, $asr, $maghrib, $isha] = $cards[1];
+            preg_match('~<title>([^<]+)</title>~', $html, $title);
+            preg_match('~<meta name="description" content="([^"]+)">~', $html, $description);
+            $title = html_entity_decode($title[1], ENT_QUOTES);
+            $description = html_entity_decode($description[1], ENT_QUOTES);
+            $this->assertStringContainsString($fajr, $title, $locale);
+            $this->assertStringContainsString($maghrib, $title, $locale);
+            foreach ([$fajr, $sunrise, $dhuhr, $asr, $maghrib, $isha] as $time) {
+                $this->assertStringContainsString($time, $description, $locale);
+            }
+            $this->assertStringNotContainsString(':fajr', $title.$description, $locale);
+            $this->assertLessThanOrEqual(80, mb_strlen($title), $locale.': '.$title);
+        }
+    }
+
     public function test_world_catalog_has_valid_coordinates_timezones_methods_and_unique_country_slugs(): void
     {
         $catalog = app(PrayerPageCatalog::class);

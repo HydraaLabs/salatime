@@ -81,6 +81,7 @@ class PrayerPageController extends Controller
             'city' => $cityName, 'method' => __('prayer_pages.methods.'.$cityConfig['method']),
             'school' => __('prayer_pages.schools.'.$cityConfig['school']), 'timezone' => $timezone,
         ]);
+        [$seoTitle, $seoDescription] = $this->cityMeta($today['times'], $cityName, $countryName, $timezone);
         // Do not let a cached "next prayer" survive a prayer boundary or local midnight.
         $ttl = max(1, min(60, $now->diffInSeconds($now->addDay()->startOfDay())));
         if ($nextPrayer['at'] !== null) {
@@ -90,8 +91,31 @@ class PrayerPageController extends Controller
         return $this->publicResponse('prayer_pages.show', compact(
             'locale', 'localeConfig', 'cityConfig', 'cityName', 'countryName', 'countryUrl', 'worldUrl',
             'timezone', 'today', 'nextPrayer', 'weeklySchedule', 'monthlySchedule', 'nearbyCities',
-            'canonical', 'alternates', 'methodText'
+            'canonical', 'alternates', 'methodText', 'seoTitle', 'seoDescription'
         ), $ttl);
+    }
+
+    /**
+     * Search results show today's times in the title and description. The page
+     * cache ends at the next prayer or local midnight, so they stay current.
+     * Polar days without a time keep the generic wording.
+     */
+    private function cityMeta(array $times, string $cityName, string $countryName, string $timezone): array
+    {
+        $keys = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+        $complete = collect($keys)->every(fn ($key) => preg_match('/^\d{1,2}:\d{2}$/', (string) ($times[$key] ?? '')) === 1);
+        if (! $complete) {
+            return [
+                __('prayer_pages.city_title', ['city' => $cityName.', '.$countryName]),
+                __('prayer_pages.city_description', ['city' => $cityName, 'country' => $countryName, 'timezone' => $timezone]),
+            ];
+        }
+        $values = collect($keys)->mapWithKeys(fn ($key) => [strtolower($key) => $times[$key]])->all();
+
+        return [
+            __('prayer_pages.city_title_times', ['city' => $cityName] + $values),
+            __('prayer_pages.city_description_times', ['city' => $cityName, 'country' => $countryName, 'timezone' => $timezone] + $values),
+        ];
     }
 
     private function countryCode(Request $request, PrayerPageCatalog $catalog, string $locale): ?string

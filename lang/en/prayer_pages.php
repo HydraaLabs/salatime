@@ -13,6 +13,8 @@ return [
     'index_intro' => 'Choose your city to see today’s prayer times and a seven-day schedule, calculated in Morocco’s local time zone.',
     'city_title' => 'Prayer Times in :city Today | SalaTime',
     'city_description' => 'Prayer times in :city, :country today: Fajr, sunrise, Dhuhr, Asr, Maghrib and Isha. Weekly and monthly calendars in :timezone.',
+    'city_title_times' => ':city Prayer Times Today: Fajr :fajr, Maghrib :maghrib',
+    'city_description_times' => 'Today in :city, :country: Fajr :fajr, Sunrise :sunrise, Dhuhr :dhuhr, Asr :asr, Maghrib :maghrib, Isha :isha. Weekly and monthly calendars in :timezone.',
     'city_heading' => 'Prayer times in :city',
     'today' => 'Today, :date',
     'next_prayer' => 'Next prayer',

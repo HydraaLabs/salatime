@@ -13,6 +13,8 @@ return [
     'index_intro' => 'आज की नमाज़ का समय और सात दिनों की समय सारणी देखने के लिए अपना शहर चुनें। समय की गणना मोरक्को के स्थानीय समय क्षेत्र के अनुसार की जाती है।',
     'city_title' => 'आज :city में नमाज़ का समय | SalaTime',
     'city_description' => 'आज :city, :country में फ़ज्र, सूर्योदय, ज़ुहर, अस्र, मग़रिब और इशा का समय। :timezone समय क्षेत्र में साप्ताहिक और मासिक कैलेंडर।',
+    'city_title_times' => 'आज :city में नमाज़ का समय: फ़ज्र :fajr, मग़रिब :maghrib',
+    'city_description_times' => 'आज :city, :country में: फ़ज्र :fajr, सूर्योदय :sunrise, ज़ुहर :dhuhr, अस्र :asr, मग़रिब :maghrib, इशा :isha। :timezone समय क्षेत्र में साप्ताहिक और मासिक कैलेंडर।',
     'city_heading' => ':city में नमाज़ का समय',
     'today' => 'आज, :date',
     'next_prayer' => 'अगली नमाज़',

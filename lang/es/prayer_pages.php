@@ -13,6 +13,8 @@ return [
     'index_intro' => 'Elige tu ciudad para consultar los horarios de hoy y el calendario de los próximos siete días, calculados en la zona horaria de Marruecos.',
     'city_title' => 'Horarios de oración en :city hoy | SalaTime',
     'city_description' => 'Horarios de oración en :city, :country: Fajr, amanecer, Dhuhr, Asr, Maghrib e Isha. Calendarios semanales y mensuales en :timezone.',
+    'city_title_times' => 'Horarios de oración en :city hoy: Fajr :fajr, Maghrib :maghrib',
+    'city_description_times' => 'Hoy en :city, :country: Fajr :fajr, amanecer :sunrise, Dhuhr :dhuhr, Asr :asr, Maghrib :maghrib, Isha :isha. Calendarios semanales y mensuales en :timezone.',
     'city_heading' => 'Horarios de oración en :city',
     'today' => 'Hoy, :date',
     'next_prayer' => 'Próxima oración',

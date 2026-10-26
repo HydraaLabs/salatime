@@ -1,7 +1,7 @@
 @extends('prayer_pages.layout')
 
-@section('title', __('prayer_pages.city_title', ['city' => $cityName.', '.$countryName]))
-@section('description', __('prayer_pages.city_description', ['city' => $cityName, 'country' => $countryName, 'timezone' => $timezone]))
+@section('title', $seoTitle)
+@section('description', $seoDescription)
 
 @push('structured-data')
 @php
@@ -27,7 +27,7 @@
                 '@id' => $canonical.'#webpage',
                 'url' => $canonical,
                 'name' => __('prayer_pages.city_heading', ['city' => $cityName]),
-                'description' => __('prayer_pages.city_description', ['city' => $cityName, 'country' => $countryName, 'timezone' => $timezone]),
+                'description' => $seoDescription,
                 'dateModified' => $today['date']->toAtomString(),
                 'inLanguage' => $localeConfig['language_tag'],
                 'isPartOf' => ['@id' => config('seo.site_url').'/#website'],
