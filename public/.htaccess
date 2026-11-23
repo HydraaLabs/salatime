@@ -53,8 +53,9 @@
             Header set Expires "0"
         </FilesMatch>
 
-        # Keep legacy template documentation and demo files out of search indexes.
-        SetEnvIf Request_URI "^/(documentation|demo)(/|$)" NOINDEX_LEGACY=1
+        # Keep legacy template documentation and demo files out of search indexes
+        # (match both direct /documentation and OVH's internal /public/documentation rewrite).
+        SetEnvIf Request_URI "^/(?:public/)?(documentation|demo)(/|$)" NOINDEX_LEGACY=1
         Header set X-Robots-Tag "noindex, nofollow" env=NOINDEX_LEGACY
 
         # Cache immutable static web assets to reduce OVH load and speed up repeat visits.
