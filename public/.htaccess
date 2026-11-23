@@ -52,6 +52,15 @@
             Header set Pragma "no-cache"
             Header set Expires "0"
         </FilesMatch>
+
+        # Keep legacy template documentation and demo files out of search indexes.
+        SetEnvIf Request_URI "^/(documentation|demo)(/|$)" NOINDEX_LEGACY=1
+        Header set X-Robots-Tag "noindex, nofollow" env=NOINDEX_LEGACY
+
+        # Cache immutable static web assets to reduce OVH load and speed up repeat visits.
+        <FilesMatch "\.(css|js|svg|png|jpe?g|webp|ico|woff2?)$">
+            Header set Cache-Control "public, max-age=2592000"
+        </FilesMatch>
     </IfModule>
 
     # Handle Authorization Header

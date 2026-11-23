@@ -21,51 +21,96 @@
         $twDesc     = !empty($s['seo_twitter_description']) ? $s['seo_twitter_description'] : $ogDesc;
         $ogImage    = !empty($s['seo_og_image']) ? asset($s['seo_og_image']) : (!empty($s['web_logo']) ? asset($s['web_logo']) : null);
         $canonical  = $s['seo_canonical_url'] ?? (config('seo.site_url') . '/');
-        $hasAppStoreLink = !empty($s['app_store_url']) && $s['app_store_url'] !== '#' && str_starts_with($s['app_store_url'], 'https://apps.apple.com/');
-        $structuredData = [
-            '@context' => 'https://schema.org',
-            '@graph' => [
-                [
-                    '@type' => 'WebSite',
-                    '@id' => $canonical . '#website',
-                    'url' => $canonical,
-                    'name' => $s['app_name'] ?? 'SalaTime',
-                    'description' => $seoDesc,
-                    'inLanguage' => 'en',
+        $playStoreUrl = $s['play_store_url'] ?? config('seo.play_store_url');
+        $appStoreUrl = $s['app_store_url'] ?? config('seo.app_store_url');
+        $hasAppStoreLink = !empty($appStoreUrl) && $appStoreUrl !== '#' && str_starts_with($appStoreUrl, 'https://apps.apple.com/');
+        $logoUrl = asset($s['web_logo'] ?? 'assets/img/logo.png');
+        $sameAs = array_values(array_filter([
+            $playStoreUrl,
+            $hasAppStoreLink ? $appStoreUrl : null,
+            'https://github.com/HydraaLabs/salatime',
+            'https://github.com/HydraaLabs/salatime_app',
+        ]));
+        $appLanguages = ['en', 'ar', 'fr', 'es', 'tr', 'ur', 'id', 'ms', 'bn', 'fa'];
+        $appFeatures = 'Accurate prayer times, Adhan alerts, Offline Quran & audio recitations, Qibla compass, Nearby mosques, Hadith, Daily Dhikr & Duas, Zakat calculator';
+        $graph = [
+            [
+                '@type' => 'WebSite',
+                '@id' => $canonical . '#website',
+                'url' => $canonical,
+                'name' => $s['app_name'] ?? 'SalaTime',
+                'alternateName' => ['Sala Time', 'Salatime'],
+                'description' => $seoDesc,
+                'inLanguage' => ['en', 'ar', 'fr', 'es', 'bn', 'hi'],
+                'publisher' => ['@id' => $canonical . '#organization'],
+            ],
+            [
+                '@type' => 'Organization',
+                '@id' => $canonical . '#organization',
+                'name' => $s['app_name'] ?? 'SalaTime',
+                'url' => $canonical,
+                'logo' => [
+                    '@type' => 'ImageObject',
+                    'url' => $logoUrl,
                 ],
-                [
-                    '@type' => 'Organization',
-                    '@id' => $canonical . '#organization',
-                    'name' => $s['app_name'] ?? 'SalaTime',
-                    'url' => $canonical,
-                    'logo' => asset($s['web_logo'] ?? 'assets/img/logo.png'),
-                    'sameAs' => [$s['play_store_url'] ?? config('seo.play_store_url')],
-                ],
-                [
-                    '@type' => 'MobileApplication',
-                    '@id' => $canonical . '#android-app',
-                    'name' => $s['app_name'] ?? 'SalaTime',
-                    'description' => $seoDesc,
-                    'applicationCategory' => 'LifestyleApplication',
-                    'operatingSystem' => 'Android',
-                    'url' => $canonical,
-                    'downloadUrl' => $s['play_store_url'] ?? config('seo.play_store_url'),
-                    'image' => $ogImage,
-                    'offers' => [
-                        '@type' => 'Offer',
-                        'price' => '0',
-                        'priceCurrency' => 'USD',
-                    ],
+                'sameAs' => $sameAs,
+            ],
+            [
+                '@type' => 'MobileApplication',
+                '@id' => $canonical . '#android-app',
+                'name' => $s['app_name'] ?? 'SalaTime',
+                'description' => $seoDesc,
+                'applicationCategory' => 'LifestyleApplication',
+                'operatingSystem' => 'Android',
+                'inLanguage' => $appLanguages,
+                'featureList' => $appFeatures,
+                'url' => $canonical,
+                'downloadUrl' => $playStoreUrl,
+                'image' => $ogImage,
+                'publisher' => ['@id' => $canonical . '#organization'],
+                'offers' => [
+                    '@type' => 'Offer',
+                    'price' => '0',
+                    'priceCurrency' => 'USD',
                 ],
             ],
         ];
+        if ($hasAppStoreLink) {
+            $graph[] = [
+                '@type' => 'MobileApplication',
+                '@id' => $canonical . '#ios-app',
+                'name' => $s['app_name'] ?? 'SalaTime',
+                'description' => $seoDesc,
+                'applicationCategory' => 'LifestyleApplication',
+                'operatingSystem' => 'iOS',
+                'inLanguage' => $appLanguages,
+                'featureList' => $appFeatures,
+                'url' => $canonical,
+                'downloadUrl' => $appStoreUrl,
+                'image' => $ogImage,
+                'publisher' => ['@id' => $canonical . '#organization'],
+                'offers' => [
+                    '@type' => 'Offer',
+                    'price' => '0',
+                    'priceCurrency' => 'USD',
+                ],
+            ];
+        }
+        $structuredData = [
+            '@context' => 'https://schema.org',
+            '@graph' => $graph,
+        ];
+        $robotsMeta = $s['seo_robots'] ?? 'index,follow';
+        if ($robotsMeta === 'index,follow') {
+            $robotsMeta = 'index,follow,max-image-preview:large';
+        }
     @endphp
 
     <title>{{ $seoTitle }}</title>
     <meta name="description" content="{{ $seoDesc }}">
     <meta name="theme-color" content="{{ config('brand.primary') }}">
     @if(!empty($s['seo_keywords']))<meta name="keywords" content="{{ $s['seo_keywords'] }}">@endif
-    <meta name="robots" content="{{ $s['seo_robots'] ?? 'index,follow' }}">
+    <meta name="robots" content="{{ $robotsMeta }}">
     <link rel="canonical" href="{{ $canonical }}">
     @if(!empty($s['seo_google_verification']))<meta name="google-site-verification" content="{{ $s['seo_google_verification'] }}">@endif
 
@@ -80,7 +125,7 @@
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="SalaTime Android app for prayer times, Quran and Qibla">
+    <meta property="og:image:alt" content="SalaTime app for prayer times, Quran and Qibla on Android and iOS">
     @endif
     <meta property="og:url" content="{{ $canonical }}">
 
@@ -89,18 +134,20 @@
     <meta name="twitter:description" content="{{ $twDesc }}">
     @if($ogImage)
     <meta name="twitter:image" content="{{ $ogImage }}">
-    <meta name="twitter:image:alt" content="SalaTime Android app for prayer times, Quran and Qibla">
+    <meta name="twitter:image:alt" content="SalaTime app for prayer times, Quran and Qibla on Android and iOS">
     @endif
 
-    <script type="application/ld+json">{!! json_encode($structuredData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+    <script type="application/ld+json">{!! json_encode($structuredData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
 
     <link rel="icon" href="{{ asset('favicon.ico') }}?v=20260827">
 
-    <!-- Fonts: Inter, Amiri (Quran), Cairo (Arabic UI), Noto Sans Bengali, Noto Sans Devanagari (Hindi) -->
+    <!-- Fonts: primary Latin + Quran first; secondary script families load non-blocking -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://t.contentsquare.net/uxa/2fd348fa4e3b8.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
+    <script defer src="https://t.contentsquare.net/uxa/2fd348fa4e3b8.js"></script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -846,9 +893,9 @@
             <!-- Logo -->
             <a href="{{ url('/') }}" class="nav-logo flex items-center gap-3" aria-label="{{ $s['app_name'] }} home">
                 @if(!empty($s['web_logo']))
-                    <img src="{{ asset($s['web_logo']) }}?v=20260827" alt="{{ $s['app_name'] }}" class="h-10 w-auto max-w-[160px] object-contain" />
+                    <img src="{{ asset($s['web_logo']) }}?v=20260827" alt="{{ $s['app_name'] }}" width="160" height="40" decoding="async" class="h-10 w-auto max-w-[160px] object-contain" />
                 @else
-                    <img src="{{ asset('assets/img/logo.png') }}?v=20260827" alt="{{ $s['app_name'] }}" class="h-10 w-auto max-w-[160px] object-contain" />
+                    <img src="{{ asset('assets/img/logo.png') }}?v=20260827" alt="{{ $s['app_name'] }}" width="160" height="40" decoding="async" class="h-10 w-auto max-w-[160px] object-contain" />
                 @endif
                 {{-- <span class="text-white font-bold text-2xl tracking-tight">{{ $s['app_name'] }}</span> --}}
             </a>
@@ -859,6 +906,7 @@
                 <a href="#quran" class="nav-link-modern transition-colors" data-i18n="nav.quran">Quran</a>
                 <a href="#quran-audio" class="nav-link-modern transition-colors" data-i18n="nav.listen">Listen</a>
                 <a href="#prayer" class="nav-link-modern transition-colors" data-i18n="nav.prayer">Prayer</a>
+                <a data-prayer-directory href="{{ route('prayer-pages.en.world') }}" class="nav-link-modern transition-colors">Prayer times around the world</a>
                 <a href="#ai" class="nav-link-modern transition-colors" data-i18n="nav.ai">AI</a>
                 <a href="#download" class="nav-link-modern transition-colors" data-i18n="nav.download">Download</a>
             </div>
@@ -891,6 +939,7 @@
             <a href="#quran" class="block py-2 px-4 text-white/80 hover:text-white" onclick="toggleMenu()" data-i18n="nav.quran">Quran</a>
             <a href="#quran-audio" class="block py-2 px-4 text-white/80 hover:text-white" onclick="toggleMenu()" data-i18n="nav.listen">Listen</a>
             <a href="#prayer" class="block py-2 px-4 text-white/80 hover:text-white" onclick="toggleMenu()" data-i18n="nav.prayer">Prayer</a>
+            <a data-prayer-directory href="{{ route('prayer-pages.en.world') }}" class="block py-2 px-4 text-white/80 hover:text-white">Prayer times around the world</a>
             <a href="#ai" class="block py-2 px-4 text-white/80 hover:text-white" onclick="toggleMenu()" data-i18n="nav.ai">AI</a>
             <a href="#download" class="block py-2 px-4 text-white/80 hover:text-white" onclick="toggleMenu()" data-i18n="nav.download">Download</a>
             <div class="px-4 py-3">
@@ -1439,19 +1488,50 @@
                 <!-- Prayer times visual -->
                 <div class="reveal" style="transition-delay: 0.2s;">
                     <div id="prayer-card" class="bg-white rounded-3xl p-6 shadow-xl max-w-sm mx-auto" style="border: 1px solid var(--lp-border);">
-                        <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center justify-between mb-4">
                             <div>
                                 <p class="text-gray-400 text-xs" data-i18n="prayer.card_label">Today's Prayer Times</p>
-                                <p id="prayer-city" class="font-bold text-gray-900">Detecting location…</p>
+                                <p id="prayer-city" class="font-bold text-gray-900" data-i18n="prayer.near_you_title">Prayer times near you</p>
+                                <p id="prayer-method" class="text-gray-400 text-xs hidden"></p>
                             </div>
-                            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, var(--green-dark), var(--green-mid));">
-                                <span class="text-lg">🌙</span>
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, var(--green-dark), var(--green-mid));">
+                                <span class="text-lg" aria-hidden="true">🌙</span>
                             </div>
                         </div>
+                        <button type="button" id="prayer-detect-btn" onclick="detectLocalPrayerTimes()"
+                                class="w-full mb-4 py-2.5 px-4 rounded-xl text-sm font-semibold text-white transition-all flex items-center justify-center gap-2 hover:opacity-95"
+                                style="background: linear-gradient(135deg, var(--green-dark), var(--green-mid));">
+                            <span aria-hidden="true">📍</span>
+                            <span data-i18n="prayer.use_location">Use my location</span>
+                        </button>
                         <div id="prayer-rows"></div>
+                        <div class="mt-4 pt-4 border-t border-gray-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+                            <a id="prayer-city-link" href="{{ route('prayer-pages.en.world') }}" class="font-semibold text-emerald-700 hover:underline hidden" data-i18n="prayer.full_calendar">View full monthly calendar →</a>
+                            <a data-prayer-directory href="{{ route('prayer-pages.en.world') }}" class="font-semibold text-emerald-700 hover:underline">Prayer times around the world</a>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            @if(!empty($popularCities))
+            <div class="mt-14 pt-10 border-t border-gray-200 reveal">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
+                    <h3 class="text-lg font-bold text-gray-900" data-i18n="prayer.popular_cities">Today's prayer times by city</h3>
+                    <a data-prayer-directory href="{{ route('prayer-pages.en.world') }}" class="text-sm font-semibold text-emerald-700 hover:underline">Prayer times around the world</a>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                    @foreach($popularCities as $idx => $city)
+                    <a href="{{ $city['urls']['en'] }}"
+                       data-popular-city="{{ $idx }}"
+                       class="bg-white rounded-2xl px-4 py-3 text-sm font-semibold text-gray-900 hover:text-emerald-700 transition-all card-hover flex items-center justify-between gap-2"
+                       style="border: 1px solid var(--lp-border);">
+                        <span data-popular-city-name>{{ $city['names']['en'] }}</span>
+                        <span class="text-emerald-700" aria-hidden="true">→</span>
+                    </a>
+                    @endforeach
+                </div>
+            </div>
+            @endif
         </div>
     </section>
 
@@ -1811,9 +1891,9 @@
                 <div class="md:col-span-2">
                     <a href="{{ url('/') }}" class="inline-flex items-center mb-5" aria-label="{{ $s['app_name'] }} home">
                         @if(!empty($s['web_logo']))
-                            <img src="{{ asset($s['web_logo']) }}?v=20260827" alt="{{ $s['app_name'] }}" class="footer-logo h-12 w-auto max-w-[190px] object-contain" />
+                            <img src="{{ asset($s['web_logo']) }}?v=20260827" alt="{{ $s['app_name'] }}" width="190" height="48" loading="lazy" decoding="async" class="footer-logo h-12 w-auto max-w-[190px] object-contain" />
                         @else
-                            <img src="{{ asset('assets/img/logo.png') }}?v=20260827" alt="{{ $s['app_name'] }}" class="footer-logo h-12 w-auto max-w-[190px] object-contain" />
+                            <img src="{{ asset('assets/img/logo.png') }}?v=20260827" alt="{{ $s['app_name'] }}" width="190" height="48" loading="lazy" decoding="async" class="footer-logo h-12 w-auto max-w-[190px] object-contain" />
                         @endif
                     </a>
                     <p class="text-gray-400 text-sm leading-relaxed mb-4 max-w-xs" data-i18n="footer.description" data-i18n-en="{{ $s['footer_description'] }}">
@@ -1862,6 +1942,7 @@
     <script>
         @php($PRAYER_DIRECTORY = collect(config('prayer_pages.locales'))->mapWithKeys(fn ($settings, $code) => [$code => ['url' => route("prayer-pages.$code.world"), 'label' => __('prayer_pages.world_heading', [], $code)]]))
         const PRAYER_DIRECTORY = @json($PRAYER_DIRECTORY);
+        const POPULAR_CITIES = @json($popularCities ?? []);
     </script>
     <!-- ===================== SCRIPTS ===================== -->
     <script>
@@ -1910,7 +1991,7 @@
                 'prayer.adhan_title':'Adhan Alerts','prayer.adhan_desc':'Multiple beautiful reciters to choose from',
                 'prayer.ramadan_title':'Ramadan Mode','prayer.ramadan_desc':'Iftar & Sehri times for your city',
                 'prayer.custom_title':'Customizable','prayer.custom_desc':'Manual adjustments & AM/PM format',
-                'prayer.card_label':"Today's Prayer Times",
+                'prayer.card_label':"Today's Prayer Times",'prayer.near_you_title':'Prayer times near you','prayer.use_location':'Use my location','prayer.full_calendar':'View full monthly calendar →','prayer.popular_cities':"Today's prayer times by city",
                 'ai.chat_title':'AI Islamic Chat','ai.chat_desc':'Ask any Islamic question and receive knowledgeable, accurate answers instantly. From fiqh rulings to daily duas, our AI assistant is always ready to guide you.',
                 'ai.chat_q':'What is the dua before eating?','ai.chat_a':'"Bismillah" — In the name of Allah. (Bukhari & Muslim)',
                 'ai.name_title':'Islamic Name Generator','ai.name_desc':'Find the perfect Islamic name for your child. Our AI generates beautiful, meaningful names with their Arabic origin, meaning, and pronunciation.','ai.name_label':'Generated Names for Boys',
@@ -1989,7 +2070,7 @@
                 'prayer.adhan_title':'تنبيهات الأذان','prayer.adhan_desc':'مقرئون جميلون متعددون للاختيار',
                 'prayer.ramadan_title':'وضع رمضان','prayer.ramadan_desc':'أوقات الإفطار والسحور لمدينتك',
                 'prayer.custom_title':'قابل للتخصيص','prayer.custom_desc':'تعديلات يدوية وتنسيق ١٢/٢٤ ساعة',
-                'prayer.card_label':'مواقيت الصلاة اليوم',
+                'prayer.card_label':'مواقيت الصلاة اليوم','prayer.near_you_title':'مواقيت الصلاة بالقرب منك','prayer.use_location':'استخدام موقعي','prayer.full_calendar':'عرض الجدول الشهري الكامل ←','prayer.popular_cities':'مواقيت الصلاة اليوم حسب المدينة',
                 'ai.chat_title':'محادثة إسلامية ذكية','ai.chat_desc':'اطرح أي سؤال إسلامي واحصل على إجابات دقيقة وموثوقة فوراً. من أحكام الفقه إلى الأدعية اليومية.',
                 'ai.chat_q':'ما هو الدعاء قبل الأكل؟','ai.chat_a':'"بِسْمِ اللَّهِ" — باسم الله. (البخاري ومسلم)',
                 'ai.name_title':'مولد الأسماء الإسلامية','ai.name_desc':'اعثر على الاسم الإسلامي المثالي لطفلك. يقترح الذكاء الاصطناعي أسماء جميلة وذات معنى مع أصلها العربي.','ai.name_label':'أسماء مقترحة للأولاد',
@@ -2067,7 +2148,7 @@
                 'prayer.adhan_title':'আজানের সতর্কতা','prayer.adhan_desc':'বেছে নেওয়ার জন্য একাধিক সুন্দর কারী',
                 'prayer.ramadan_title':'রমজান মোড','prayer.ramadan_desc':'আপনার শহরের ইফতার ও সেহরির সময়',
                 'prayer.custom_title':'কাস্টমাইজযোগ্য','prayer.custom_desc':'ম্যানুয়াল সমন্বয় এবং AM/PM ফরম্যাট',
-                'prayer.card_label':'আজকের নামাজের সময়',
+                'prayer.card_label':'আজকের নামাজের সময়','prayer.near_you_title':'আপনার কাছাকাছি নামাজের সময়','prayer.use_location':'আমার অবস্থান ব্যবহার করুন','prayer.full_calendar':'সম্পূর্ণ মাসিক ক্যালেন্ডার দেখুন →','prayer.popular_cities':'শহর অনুযায়ী আজকের নামাজের সময়',
                 'ai.chat_title':'AI ইসলামিক চ্যাট','ai.chat_desc':'যেকোনো ইসলামিক প্রশ্ন করুন এবং তাৎক্ষণিক সঠিক উত্তর পান। ফিকহ থেকে দৈনন্দিন দোয়া পর্যন্ত।',
                 'ai.chat_q':'খাওয়ার আগে দোয়া কী?','ai.chat_a':'"বিসমিল্লাহ" — আল্লাহর নামে। (বুখারি ও মুসলিম)',
                 'ai.name_title':'ইসলামিক নাম জেনারেটর','ai.name_desc':'আপনার সন্তানের জন্য নিখুঁত ইসলামিক নাম খুঁজুন। AI আরবি উৎস ও উচ্চারণ সহ সুন্দর নাম তৈরি করে।','ai.name_label':'ছেলেদের জন্য প্রস্তাবিত নাম',
@@ -2145,7 +2226,7 @@
                 'prayer.adhan_title':'अज़ान अलर्ट','prayer.adhan_desc':'चुनने के लिए कई सुंदर कारी',
                 'prayer.ramadan_title':'रमज़ान मोड','prayer.ramadan_desc':'आपके शहर के इफ्तार और सहरी का समय',
                 'prayer.custom_title':'अनुकूलनीय','prayer.custom_desc':'मैनुअल समायोजन और AM/PM प्रारूप',
-                'prayer.card_label':'आज का नमाज़ का समय',
+                'prayer.card_label':'आज का नमाज़ का समय','prayer.near_you_title':'आपके पास नमाज़ का समय','prayer.use_location':'मेरा स्थान उपयोग करें','prayer.full_calendar':'पूरा मासिक कैलेंडर देखें →','prayer.popular_cities':'शहर के अनुसार आज की नमाज़ का समय',
                 'ai.chat_title':'AI इस्लामिक चैट','ai.chat_desc':'कोई भी इस्लामिक प्रश्न पूछें और तुरंत सटीक उत्तर पाएं। फिकह से लेकर रोज़ाना की दुआओं तक।',
                 'ai.chat_q':'खाने से पहले की दुआ क्या है?','ai.chat_a':'"बिस्मिल्लाह" — अल्लाह के नाम से। (बुखारी और मुस्लिम)',
                 'ai.name_title':'इस्लामिक नाम जनरेटर','ai.name_desc':'अपने बच्चे के लिए सही इस्लामिक नाम खोजें। AI अरबी मूल और उच्चारण के साथ सुंदर नाम बनाता है।','ai.name_label':'लड़कों के लिए सुझाए गए नाम',
@@ -2223,7 +2304,7 @@
                 'prayer.adhan_title':'Alertas de Adhan','prayer.adhan_desc':'Múltiples recitadores hermosos para elegir',
                 'prayer.ramadan_title':'Modo Ramadán','prayer.ramadan_desc':'Horarios de Iftar y Suhur para tu ciudad',
                 'prayer.custom_title':'Personalizable','prayer.custom_desc':'Ajustes manuales y formato AM/PM',
-                'prayer.card_label':'Horarios de Oración de Hoy',
+                'prayer.card_label':'Horarios de Oración de Hoy','prayer.near_you_title':'Horarios de oración cerca de ti','prayer.use_location':'Usar mi ubicación','prayer.full_calendar':'Ver calendario mensual completo →','prayer.popular_cities':'Horarios de oración de hoy por ciudad',
                 'ai.chat_title':'Chat Islámico con IA','ai.chat_desc':'Haz cualquier pregunta islámica y recibe respuestas precisas al instante. Desde fallos de fiqh hasta du\'as diarias.',
                 'ai.chat_q':'¿Cuál es la du\'a antes de comer?','ai.chat_a':'"Bismillah" — En el nombre de Allah. (Bujari y Muslim)',
                 'ai.name_title':'Generador de Nombres Islámicos','ai.name_desc':'Encuentra el nombre islámico perfecto para tu hijo. La IA genera nombres bellos y significativos con su origen árabe.','ai.name_label':'Nombres Sugeridos para Niños',
@@ -2301,7 +2382,7 @@
                 'prayer.adhan_title':'Alertes Adhan','prayer.adhan_desc':'Plusieurs beaux récitateurs au choix',
                 'prayer.ramadan_title':'Mode Ramadan','prayer.ramadan_desc':'Horaires Iftar et Suhur pour votre ville',
                 'prayer.custom_title':'Personnalisable','prayer.custom_desc':'Ajustements manuels et format AM/PM',
-                'prayer.card_label':'Horaires de Prière d\'Aujourd\'hui',
+                'prayer.card_label':'Horaires de Prière d\'Aujourd\'hui','prayer.near_you_title':'Horaires de prière près de vous','prayer.use_location':'Utiliser ma position','prayer.full_calendar':'Voir le calendrier mensuel complet →','prayer.popular_cities':'Horaires de prière du jour par ville',
                 'ai.chat_title':'Chat Islamique IA','ai.chat_desc':'Posez n\'importe quelle question islamique et recevez des réponses précises instantanément.',
                 'ai.chat_q':'Quelle est la doua avant de manger ?','ai.chat_a':'"Bismillah" — Au nom d\'Allah. (Bukhari et Muslim)',
                 'ai.name_title':'Générateur de Prénoms Islamiques','ai.name_desc':'Trouvez le prénom islamique parfait pour votre enfant. L\'IA génère de beaux prénoms significatifs avec leur origine arabe.','ai.name_label':'Prénoms Suggérés pour Garçons',
@@ -2417,6 +2498,13 @@
                 link.href = PRAYER_DIRECTORY[lang].url;
                 link.textContent = PRAYER_DIRECTORY[lang].label;
             });
+            document.querySelectorAll('[data-popular-city]').forEach(link => {
+                const city = POPULAR_CITIES[parseInt(link.dataset.popularCity, 10)];
+                if (!city) return;
+                link.href = (city.urls && city.urls[lang]) || city.urls.en;
+                const nameEl = link.querySelector('[data-popular-city-name]');
+                if (nameEl) nameEl.textContent = (city.names && city.names[lang]) || city.names.en;
+            });
 
             // Translate all data-i18n elements
             document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -2455,11 +2543,10 @@
 
             // Re-render prayer rows with translated names
             if (cachedPrayers) renderPrayerRows(cachedPrayers);
-            else {
-                const pn = PRAYER_NAMES[lang] || PRAYER_NAMES.en;
-                const cityEl = document.getElementById('prayer-city');
-                if (cityEl && cityEl.textContent === (PRAYER_NAMES[currentLang === lang ? 'en' : 'en'].detecting || 'Detecting location…')) {
-                    cityEl.textContent = pn.detecting;
+            if (detectedNearestCity && detectedNearestCity.urls) {
+                const cityLink = document.getElementById('prayer-city-link');
+                if (cityLink) {
+                    cityLink.href = detectedNearestCity.urls[lang] || detectedNearestCity.urls.en;
                 }
             }
 
@@ -2475,6 +2562,7 @@
             { name:'Maghrib', time:'06:42 PM', is_next:false },
             { name:'Isha',    time:'08:10 PM', is_next:false },
         ];
+        let detectedNearestCity = null;
 
         function renderPrayerRows(prayers) {
             const pn = PRAYER_NAMES[currentLang] || PRAYER_NAMES.en;
@@ -2484,45 +2572,79 @@
                 <div class="flex items-center justify-between py-3 ${i < prayers.length - 1 ? 'border-b border-gray-50' : ''}">
                     <div class="flex items-center gap-3">
                         <div class="w-2 h-2 rounded-full ${p.is_next ? 'bg-green-500 animate-pulse' : 'bg-gray-200'}"></div>
-                        <span class="font-medium text-gray-900 text-sm">${pn[p.name] || p.name}</span>
-                        ${p.is_next ? `<span class="text-xs px-2 py-0.5 rounded-full text-white" style="background:var(--green-mid);">${pn.Next || 'Next'}</span>` : ''}
+                        <span class="font-medium text-gray-900 text-sm">${escapeHtml(pn[p.name] || p.name)}</span>
+                        ${p.is_next ? `<span class="text-xs px-2 py-0.5 rounded-full text-white" style="background:var(--green-mid);">${escapeHtml(pn.Next || 'Next')}</span>` : ''}
                     </div>
-                    <span class="font-semibold text-sm ${p.is_next ? 'text-emerald-700' : 'text-gray-500'}">${p.time}</span>
+                    <span class="font-semibold text-sm ${p.is_next ? 'text-emerald-700' : 'text-gray-500'}" dir="ltr">${escapeHtml(p.time)}</span>
                 </div>
             `).join('');
         }
 
         function loadPrayerTimes(lat, lng) {
+            const btn = document.getElementById('prayer-detect-btn');
             const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            fetch(`/api/prayer-by-location?lat=${lat}&lng=${lng}&timezone=${encodeURIComponent(timezone)}`)
+            fetch(`/api/prayer-by-location?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&timezone=${encodeURIComponent(timezone)}&lang=${encodeURIComponent(currentLang)}`)
                 .then(r => r.json())
                 .then(data => {
-                    if (data.status) {
-                        document.getElementById('prayer-city').textContent = data.city;
+                    if (data.status && Array.isArray(data.prayers)) {
+                        const cityEl = document.getElementById('prayer-city');
+                        cityEl.removeAttribute('data-i18n');
+                        cityEl.textContent = data.city;
+                        const methodEl = document.getElementById('prayer-method');
+                        if (methodEl && data.method_label) {
+                            methodEl.textContent = data.method_label;
+                            methodEl.classList.remove('hidden');
+                        }
+                        const cityLink = document.getElementById('prayer-city-link');
+                        if (cityLink && data.nearest_city_url) {
+                            detectedNearestCity = data.nearest_city || null;
+                            cityLink.href = data.nearest_city_url;
+                            cityLink.classList.remove('hidden');
+                        }
                         cachedPrayers = data.prayers;
                         renderPrayerRows(data.prayers);
                     } else { showFallback(); }
                 })
-                .catch(() => showFallback());
+                .catch(() => showFallback())
+                .finally(() => {
+                    if (btn) btn.disabled = false;
+                });
         }
 
         function showFallback() {
             const pn = PRAYER_NAMES[currentLang] || PRAYER_NAMES.en;
-            document.getElementById('prayer-city').textContent = pn.sample;
+            const cityEl = document.getElementById('prayer-city');
+            if (cityEl && !cityEl.hasAttribute('data-i18n')) {
+                cityEl.textContent = pn.sample;
+            }
             cachedPrayers = FALLBACK_PRAYERS;
             renderPrayerRows(FALLBACK_PRAYERS);
         }
 
-        if (navigator.geolocation) {
+        function detectLocalPrayerTimes() {
+            const btn = document.getElementById('prayer-detect-btn');
             const pn = PRAYER_NAMES[currentLang] || PRAYER_NAMES.en;
-            document.getElementById('prayer-city').textContent = pn.detecting;
-            renderPrayerRows(FALLBACK_PRAYERS);
+            if (!navigator.geolocation) {
+                showFallback();
+                return;
+            }
+            if (btn) btn.disabled = true;
+            const cityEl = document.getElementById('prayer-city');
+            cityEl.removeAttribute('data-i18n');
+            cityEl.textContent = pn.detecting;
             navigator.geolocation.getCurrentPosition(
                 pos => loadPrayerTimes(pos.coords.latitude, pos.coords.longitude),
-                ()  => showFallback(),
+                ()  => {
+                    if (btn) btn.disabled = false;
+                    showFallback();
+                },
                 { timeout: 8000 }
             );
-        } else { showFallback(); }
+        }
+
+        // Render initial sample preview without prompting geolocation on page load.
+        cachedPrayers = FALLBACK_PRAYERS;
+        renderPrayerRows(FALLBACK_PRAYERS);
 
         // ── Init language from localStorage ─────────────────────
         (function () {
@@ -2736,9 +2858,9 @@
                         <span class="font-arabic text-2xl leading-none" style="color:var(--lp-accent);">${escapeHtml(n.arabic || '')}</span>
                         <span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:${ngGender==='boy'?'#dbeafe':'#fce7f3'}; color:${ngGender==='boy'?'#1d4ed8':'#be185d'};">${ngGender==='boy'?'Boy':'Girl'}</span>
                     </div>
-                    <p class="font-bold text-gray-900 text-base mb-1">${escapeHtml(n.name || '')}</p>
+                    <p class="font-bold text-gray-900 text-base mb-1">${escapeHtml(n.english || n.name || '')}</p>
                     <p class="text-gray-500 text-sm leading-relaxed mb-2">${escapeHtml(n.meaning || '')}</p>
-                    <p class="text-gray-400 text-xs">Origin: ${escapeHtml(n.origin || 'Arabic')}</p>
+                    <p class="text-gray-400 text-xs">Origin: ${escapeHtml(n.origin || 'Arabic')}${n.quranicReference ? ' · ' + escapeHtml(n.quranicReference) : ''}</p>
                 </div>
             `).join('');
 

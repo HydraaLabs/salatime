@@ -70,17 +70,18 @@ Route::middleware('not_install')->group(function (Router $router) {
     $router->post('setup-skip', [DatabaseManagerController::class, 'setupSkip'])->name('skip-setup');
 });
 
-Route::get('/', [ViewController::class, 'landingPage'])->name('landing')->middleware('install');
-Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
-
-// These public calendars are identical for all visitors and need no session cookies.
-Route::withoutMiddleware([
+$statelessPublicMiddleware = [
     \App\Http\Middleware\EncryptCookies::class,
     \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
     \Illuminate\Session\Middleware\StartSession::class,
     \Illuminate\View\Middleware\ShareErrorsFromSession::class,
     \App\Http\Middleware\VerifyCsrfToken::class,
-])->group(function () {
+];
+
+Route::withoutMiddleware($statelessPublicMiddleware)->group(function () {
+    Route::get('/', [ViewController::class, 'landingPage'])->name('landing')->middleware('install');
+    Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
+
     foreach (config('prayer_pages.locales') as $locale => $settings) {
         $prefix = trim($settings['prefix'], '/');
 
@@ -106,6 +107,12 @@ Route::withoutMiddleware([
             ->defaults('locale', $locale)->name("prayer-pages.$locale.city");
     }
 
+    Route::get('blog', [BlogPublicController::class, 'index'])->name('blog.index');
+    Route::get('blog/{slug}', [BlogPublicController::class, 'show'])->name('blog.show');
+
+    Route::get('privacy-policy', [SupportController::class, 'privacyPolicy'])->name('privacy-policy');
+    Route::get('terms-and-conditions', [SupportController::class, 'termsCondition'])->name('terms-and-conditions');
+    Route::get('support', [SupportController::class, 'support'])->name('support');
 });
 
 Route::get('/admin', function () {
@@ -324,16 +331,20 @@ Route::middleware(['auth', 'authorize'])->group(callback: function (Router $rout
 
 // Serve public storage files through Laravel (Apache FollowSymLinks is
 // disabled on this shared host, so the public/storage symlink returns 403)
-Route::get('storage/{path}', function (string $path) {
-    $full = storage_path('app/public/'.$path);
-    abort_unless(is_file($full), 404);
+Route::withoutMiddleware($statelessPublicMiddleware)->get('storage/{path}', function (string $path) {
+    abort_if(str_contains($path, "\0") || preg_match('#(?:^|/)\.\.?(?:/|$)#', $path) === 1, 404);
+    $publicRoot = realpath(storage_path('app/public'));
+    $full = $publicRoot !== false ? realpath($publicRoot.DIRECTORY_SEPARATOR.$path) : false;
+    abort_unless(
+        $publicRoot !== false
+        && $full !== false
+        && str_starts_with($full, $publicRoot.DIRECTORY_SEPARATOR)
+        && is_file($full)
+        && ! str_starts_with(basename($full), '.'),
+        404
+    );
 
-    return response()->file($full);
+    return response()->file($full, [
+        'Cache-Control' => 'public, max-age=2592000',
+    ]);
 })->where('path', '.*');
-
-Route::get('blog', [BlogPublicController::class, 'index'])->name('blog.index');
-Route::get('blog/{slug}', [BlogPublicController::class, 'show'])->name('blog.show');
-
-Route::get('privacy-policy', [SupportController::class, 'privacyPolicy'])->name('privacy-policy');
-Route::get('terms-and-conditions', [SupportController::class, 'termsCondition'])->name('terms-and-conditions');
-Route::get('support', [SupportController::class, 'support'])->name('support');

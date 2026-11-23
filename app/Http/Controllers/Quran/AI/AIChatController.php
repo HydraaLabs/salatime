@@ -20,7 +20,11 @@ class AIChatController extends Controller
         $settings = $this->service->getCachedFormattedSettings();
 
         $apiKey = env('ONEMIN_API_KEY')
-            ?: $this->safeDecrypt($settings['islamic_name_api_key']);
+            ?: $this->safeDecrypt($settings['islamic_name_api_key'] ?? null);
+
+        if (! is_string($apiKey) || trim($apiKey) === '') {
+            throw new \RuntimeException('AI API key is not configured.');
+        }
 
         // 1min.ai takes a single prompt string: merge system + user messages.
         $prompt = collect($messages)

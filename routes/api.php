@@ -104,8 +104,10 @@ Route::post('donation/sslcommerz/fail', [SslCommerzDonationController::class, 'f
 Route::post('donation/sslcommerz/cancel', [SslCommerzDonationController::class, 'cancel']);
 Route::post('donation/sslcommerz/ipn', [SslCommerzDonationController::class, 'ipn']);
 Route::get('payment-methods', [PaymentMethodController::class, 'customerPaymentMethod']);
-Route::post('ai/chat', [AIChatController::class, 'chat']);
-Route::post('ai/generate-names', [AIChatController::class, 'generateNames']);
+Route::middleware('throttle:15,1')->group(function () {
+    Route::post('ai/chat', [AIChatController::class, 'chat']);
+    Route::post('ai/generate-names', [AIChatController::class, 'generateNames']);
+});
 
 // Mobile accounts are isolated from administrator users and sessions.
 require __DIR__.'/mobile.php';

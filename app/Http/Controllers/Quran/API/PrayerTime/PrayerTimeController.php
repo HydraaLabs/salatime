@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Quran\API\PrayerTime;
 use App\Http\Controllers\Controller;
 use App\Models\Quran\Prayer\PrayerTime;
 use App\Services\Prayer\PrayerCalendarService;
+use App\Services\Prayer\PrayerPageCatalog;
 use App\Vendor\PrayerTimes\Method;
-use Carbon\Carbon;
-use DateTime;
-use DateTimeZone;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use App\Vendor\PrayerTimes\PrayerTimes;
+use Carbon\Carbon;
+use Carbon\CarbonImmutable;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 
 class PrayerTimeController extends Controller
 {
@@ -115,8 +116,8 @@ class PrayerTimeController extends Controller
     public function getManualPrayerTime(Request $request)
     {
         $request->validate([
-            'date' => 'required|date:Y-m-d',
-            'city' => 'required|string',
+            'date' => 'required|date_format:Y-m-d',
+            'city' => 'required|string|max:255',
         ]);
 
         try {
@@ -125,6 +126,14 @@ class PrayerTimeController extends Controller
                 ->where('city', $request->get('city'))
                 ->select($this->columns())
                 ->first();
+
+            if ($data === null) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data not found.',
+                    'data' => $this->defaultPrayerTimeResponse(),
+                ]);
+            }
 
             $data['is_jumma'] = date('l', strtotime($request->get('date'))) === 'Friday';
             $this->fillDefaultPrayerTimeValues($data);
@@ -152,20 +161,21 @@ class PrayerTimeController extends Controller
     public function getAutomaticPrayerTime(Request $request)
     {
         $request->validate([
-            'lat' => 'required|numeric',
-            'lng' => 'required|numeric',
+            'lat' => 'required|numeric|between:-90,90',
+            'lng' => 'required|numeric|between:-180,180',
             'prayer_method' => 'required|in:0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,99',
             'school' => 'required|in:HANAFI,STANDARD',
-            'timezone' => 'required|string',
-            'date' => 'required|date:Y-m-d',
+            'timezone' => 'required|timezone',
+            'date' => 'required|date_format:Y-m-d',
         ]);
 
         try {
             $prayerTimes = new PrayerTimes($request->prayer_method, $request->school);
             $times = $prayerTimes->getTimesForToday(
-                $request->date,
-                $request->lat,
-                $request->lng,
+                // Use the daytime offset on days when clocks change after midnight.
+                $request->date.' 12:00:00',
+                (float) $request->lat,
+                (float) $request->lng,
                 $request->timezone
             );
 
@@ -230,80 +240,124 @@ class PrayerTimeController extends Controller
         return $this;
     }
 
-    public function prayerByLocation(Request $request)
+    public function prayerByLocation(Request $request, PrayerPageCatalog $catalog)
     {
-        $request->validate([
-            'lat'      => 'required|numeric',
-            'lng'      => 'required|numeric',
-            'timezone' => 'required|string',
+        $validated = $request->validate([
+            'lat'      => 'required|numeric|between:-90,90',
+            'lng'      => 'required|numeric|between:-180,180',
+            'timezone' => 'required|timezone',
+            'lang'     => 'nullable|string|in:en,ar,fr,es,bn,hi',
         ]);
 
-        $lat      = $request->lat;
-        $lng      = $request->lng;
-        $timezone = $request->timezone;
-        $date     = now($timezone)->format('Y-m-d');
+        $lat      = (float) $validated['lat'];
+        $lng      = (float) $validated['lng'];
+        $timezone = $validated['timezone'];
+        $locale   = $validated['lang'] ?? 'en';
+        $now      = CarbonImmutable::now($timezone);
+        $date     = $now->format('Y-m-d');
 
-        // Reverse geocode to get city name
-        $city = 'Your Location';
+        // Pick regional calculation defaults from the nearest catalog city.
+        $nearest = $catalog->nearestCity($lat, $lng);
+        $method  = $nearest['method'] ?? Method::METHOD_MWL;
+        $school  = $nearest['school'] ?? PrayerTimes::SCHOOL_STANDARD;
+
+        // Tile-cached reverse geocode (0.02° ≈ 2 km) to respect Nominatim limits.
+        $tileLat = round(round($lat / 0.02) * 0.02, 2);
+        $tileLng = round(round($lng / 0.02) * 0.02, 2);
+        $geoKey  = sprintf('salatime:reverse-geo:v1:%.2f:%.2f', $tileLat, $tileLng);
+        $city    = Cache::remember($geoKey, now()->addDays(7), function () use ($tileLat, $tileLng, $nearest, $locale) {
+            try {
+                $response = Http::timeout(4)
+                    ->withHeaders(['User-Agent' => 'SalaTime/1.0 (+https://salatime.net; contact@salatime.net)'])
+                    ->get('https://nominatim.openstreetmap.org/reverse', [
+                        'lat'    => $tileLat,
+                        'lon'    => $tileLng,
+                        'format' => 'json',
+                    ]);
+
+                if ($response->successful()) {
+                    $addr     = $response->json('address') ?? [];
+                    $cityName = $addr['city'] ?? $addr['town'] ?? $addr['village'] ?? $addr['county'] ?? null;
+                    $country  = $addr['country'] ?? '';
+                    if (is_string($cityName) && $cityName !== '') {
+                        return $country !== '' ? "{$cityName}, {$country}" : $cityName;
+                    }
+                }
+            } catch (\Throwable) {
+            }
+
+            if ($nearest !== null) {
+                return ($nearest['names'][$locale] ?? $nearest['names']['en'])
+                    .', '.($nearest['country_names'][$locale] ?? $nearest['country_names']['en']);
+            }
+
+            return 'Your Location';
+        });
+
         try {
-            $geo  = Http::timeout(5)
-                ->withHeaders(['User-Agent' => 'SalaTimeApp/1.0 (contact@zabi.app)'])
-                ->get('https://nominatim.openstreetmap.org/reverse', [
-                    'lat'    => $lat,
-                    'lon'    => $lng,
-                    'format' => 'json',
-                ])->json();
-
-            $addr     = $geo['address'] ?? [];
-            $cityName = $addr['city'] ?? $addr['town'] ?? $addr['village'] ?? $addr['county'] ?? 'Unknown';
-            $country  = $addr['country'] ?? '';
-            $city     = $country ? "{$cityName}, {$country}" : $cityName;
-        } catch (\Throwable) {}
-
-        // Calculate prayer times (method 2 = ISNA, widely compatible)
-        try {
-            $pt    = new PrayerTimes(2, PrayerTimes::SCHOOL_STANDARD);
-            $times = $pt->getTimesForToday($date, $lat, $lng, $timezone);
+            $pt    = new PrayerTimes($method, $school);
+            $times = $pt->getTimesForToday($date.' 12:00:00', $lat, $lng, $timezone);
         } catch (\Throwable $e) {
             return response()->json(['status' => false, 'message' => 'Failed to calculate prayer times.'], 500);
         }
 
-        $now        = Carbon::now($timezone);
-        $nextMarked = false;
-        $prayers    = [];
-
-        foreach ([
-            ['Fajr',    'Fajr'],
-            ['Sunrise', 'Sunrise'],
-            ['Dhuhr',   'Dhuhr'],
-            ['Asr',     'Asr'],
-            ['Maghrib', 'Maghrib'],
-            ['Isha',    'Isha'],
-        ] as [$label, $key]) {
-            $raw    = $times[$key] ?? null;
-            $isNext = false;
-
-            if (!$nextMarked && $raw && $raw !== PrayerTimes::INVALID_TIME) {
-                $carbon = Carbon::createFromFormat('H:i', $raw, $timezone);
-                if ($now->lt($carbon)) {
-                    $isNext     = true;
-                    $nextMarked = true;
-                }
+        // Determine the next obligatory prayer (never highlight Sunrise as next prayer).
+        $nextPrayerKey = null;
+        $previousAt    = null;
+        foreach (['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as $key) {
+            $raw = $times[$key] ?? null;
+            if (! $raw || $raw === PrayerTimes::INVALID_TIME) {
+                continue;
             }
+            $at = CarbonImmutable::createFromFormat('!Y-m-d H:i', $date.' '.$raw, $timezone);
+            if ($previousAt !== null && $at->lt($previousAt)) {
+                $at = $at->addDay();
+            }
+            $previousAt = $at;
+            if ($now->lt($at)) {
+                $nextPrayerKey = $key;
+                break;
+            }
+        }
+        if ($nextPrayerKey === null && ! empty($times['Fajr']) && $times['Fajr'] !== PrayerTimes::INVALID_TIME) {
+            $nextPrayerKey = 'Fajr';
+        }
 
+        $prayers = [];
+        foreach (['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as $key) {
+            $raw = $times[$key] ?? null;
             $prayers[] = [
-                'name'    => $label,
+                'name'    => $key,
                 'time'    => ($raw && $raw !== PrayerTimes::INVALID_TIME)
-                    ? Carbon::createFromFormat('H:i', $raw, $timezone)->format('h:i A')
+                    ? CarbonImmutable::createFromFormat('!Y-m-d H:i', $date.' '.$raw, $timezone)->format('h:i A')
                     : '—',
-                'is_next' => $isNext,
+                'is_next' => $key === $nextPrayerKey,
+            ];
+        }
+
+        $nearestCityPayload = null;
+        $nearestCityUrl = null;
+        if ($nearest !== null) {
+            $urls = [];
+            foreach (array_keys(config('prayer_pages.locales')) as $loc) {
+                $urls[$loc] = $catalog->url($loc, $nearest['country_code'], $nearest['slug']);
+            }
+            $nearestCityUrl = $urls[$locale] ?? $urls['en'];
+            $nearestCityPayload = [
+                'names' => $nearest['names'],
+                'urls' => $urls,
             ];
         }
 
         return response()->json([
-            'status'  => true,
-            'city'    => $city,
-            'prayers' => $prayers,
+            'status'           => true,
+            'city'             => $city,
+            'method'           => $method,
+            'school'           => $school,
+            'method_label'     => __('prayer_pages.methods.'.$method, [], $locale),
+            'nearest_city_url' => $nearestCityUrl,
+            'nearest_city'     => $nearestCityPayload,
+            'prayers'          => $prayers,
         ]);
     }
 

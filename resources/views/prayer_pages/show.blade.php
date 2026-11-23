@@ -5,10 +5,24 @@
 
 @push('structured-data')
 @php
+    $homeUrl = $locale === 'en' ? config('seo.site_url').'/' : config('seo.site_url').'/?lang='.$locale;
+    $hasCompleteTimes = collect(['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'])
+        ->every(fn ($key) => preg_match('/^\d{1,2}:\d{2}$/', (string) ($today['times'][$key] ?? '')) === 1);
+    $faqTodayAnswer = $hasCompleteTimes
+        ? __('prayer_pages.faq_1_a_times', [
+            'city' => $cityName,
+            'fajr' => $today['times']['Fajr'],
+            'sunrise' => $today['times']['Sunrise'],
+            'dhuhr' => $today['times']['Dhuhr'],
+            'asr' => $today['times']['Asr'],
+            'maghrib' => $today['times']['Maghrib'],
+            'isha' => $today['times']['Isha'],
+        ])
+        : __('prayer_pages.faq_1_a');
     $faqs = [
         [
             'question' => __('prayer_pages.faq_1_q', ['city' => $cityName]),
-            'answer' => __('prayer_pages.faq_1_a'),
+            'answer' => $faqTodayAnswer,
         ],
         [
             'question' => __('prayer_pages.faq_2_q'),
@@ -31,6 +45,7 @@
                 'dateModified' => $today['date']->toAtomString(),
                 'inLanguage' => $localeConfig['language_tag'],
                 'isPartOf' => ['@id' => config('seo.site_url').'/#website'],
+                'publisher' => ['@id' => config('seo.site_url').'/#organization'],
                 'about' => [
                     '@type' => 'City',
                     'name' => $cityName,
@@ -78,7 +93,7 @@
 
 @section('content')
     <div class="container breadcrumbs" aria-label="{{ __('prayer_pages.breadcrumb') }}">
-        <a href="{{ config('seo.site_url') }}/?lang={{ $locale }}">{{ __('prayer_pages.home') }}</a><span>›</span>
+        <a href="{{ $homeUrl }}">{{ __('prayer_pages.home') }}</a><span>›</span>
         <a href="{{ $worldUrl }}">{{ __('prayer_pages.world_heading') }}</a><span>›</span>
         <a href="{{ $countryUrl }}">{{ $countryName }}</a><span>›</span>
         <span>{{ $cityName }}</span>

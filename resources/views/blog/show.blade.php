@@ -44,7 +44,8 @@
     <script type="application/ld+json">{!! json_encode($articleSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
     <link rel="icon" href="{{ asset('favicon.ico') }}?v=20260827">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: #f8faf9; color: #1a1f2e; }
@@ -164,7 +165,7 @@
             @foreach($related as $rel)
             <a href="{{ route('blog.show', $rel->slug) }}" class="related-card">
                 @if($rel->thumbnail)
-                    <img src="{{ asset($rel->thumbnail) }}" alt="{{ $rel->title }}" class="related-img">
+                    <img src="{{ asset($rel->thumbnail) }}" alt="{{ $rel->title }}" class="related-img" loading="lazy" decoding="async">
                 @else
                     <div class="related-placeholder">📖</div>
                 @endif

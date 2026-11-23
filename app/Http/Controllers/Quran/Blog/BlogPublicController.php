@@ -16,7 +16,10 @@ class BlogPublicController extends Controller
 
         $s = $this->seoSettings();
 
-        return view('blog.index', compact('posts', 's'));
+        return response()
+            ->view('blog.index', compact('posts', 's'))
+            ->header('Cache-Control', 'public, max-age=600, s-maxage=600')
+            ->header('Vary', 'Accept-Encoding');
     }
 
     public function show(string $slug)
@@ -31,7 +34,10 @@ class BlogPublicController extends Controller
 
         $s = $this->seoSettings();
 
-        return view('blog.show', compact('post', 'related', 's'));
+        return response()
+            ->view('blog.show', compact('post', 'related', 's'))
+            ->header('Cache-Control', 'public, max-age=600, s-maxage=600')
+            ->header('Vary', 'Accept-Encoding');
     }
 
     private function seoSettings(): array

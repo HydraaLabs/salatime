@@ -15,9 +15,17 @@ class PrayerPageController extends Controller
         [$locale, $localeConfig] = $this->localeContext($request);
         $code = $this->countryCode($request, $catalog, $locale);
         $country = $code === null ? null : $catalog->countries()[$code];
-        $countries = collect($catalog->countries())->map(fn ($country, $code) => $country + [
-            'url' => $catalog->url($locale, $code),
-        ])->sortBy(fn ($country) => $country['names'][$locale], SORT_NATURAL | SORT_FLAG_CASE);
+        $countries = collect($catalog->countries())->map(function ($country, $countryKey) use ($catalog, $locale, $code) {
+            $entry = $country + ['url' => $catalog->url($locale, $countryKey)];
+            if ($code === null) {
+                uasort(
+                    $entry['cities'],
+                    fn ($a, $b) => strnatcasecmp($a['names'][$locale], $b['names'][$locale])
+                );
+            }
+
+            return $entry;
+        })->sortBy(fn ($country) => $country['names'][$locale], SORT_NATURAL | SORT_FLAG_CASE);
         $cities = $code === null ? [] : collect($catalog->cities($code))
             ->map(fn ($city, $slug) => $city + ['slug' => $slug, 'url' => $catalog->url($locale, $code, $slug)])
             ->sortBy(fn ($city) => $city['names'][$locale], SORT_NATURAL | SORT_FLAG_CASE)->values()->all();

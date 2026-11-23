@@ -3,9 +3,14 @@ Allow: /
 Disallow: /admin
 Disallow: /api/
 Disallow: /dashboard
+Disallow: /demo/
+Disallow: /documentation/
+Disallow: /forget-password
 Disallow: /install
+Disallow: /join/
 Disallow: /landing/
 Disallow: /login
+Disallow: /password/
 Disallow: /settings
 
 Sitemap: https://salatime.net/sitemap.xml

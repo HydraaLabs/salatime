@@ -3,22 +3,30 @@
 namespace App\Http\Controllers\Quran\Support;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class SupportController extends Controller
 {
-    public function privacyPolicy()
+    public function privacyPolicy(): Response
     {
-        return view('support.privacy-policy');
+        return $this->publicView('support.privacy-policy');
     }
 
-    public function termsCondition()
+    public function termsCondition(): Response
     {
-        return view('support.terms-condition');
+        return $this->publicView('support.terms-condition');
     }
 
-    public function support()
+    public function support(): Response
     {
-        return view('support.support');
+        return $this->publicView('support.support');
+    }
+
+    private function publicView(string $view): Response
+    {
+        return response()
+            ->view($view)
+            ->header('Cache-Control', 'public, max-age=3600, s-maxage=3600')
+            ->header('Vary', 'Accept-Encoding');
     }
 }

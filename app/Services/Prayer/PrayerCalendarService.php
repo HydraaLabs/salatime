@@ -15,7 +15,7 @@ class PrayerCalendarService
 
     public const TOTAL_DAYS = self::PAST_DAYS + self::FUTURE_DAYS + 1;
 
-    private const CACHE_VERSION = 'v2';
+    private const CACHE_VERSION = 'v3';
 
     private const AUTOMATIC_CACHE_DAYS = 30;
 
@@ -128,7 +128,8 @@ class PrayerCalendarService
     ): array {
         $dateString = $date->format('Y-m-d');
         $times = $calculator->getTimesForToday(
-            $dateString,
+            // Use the daytime offset on days when clocks change after midnight.
+            $dateString.' 12:00:00',
             (float) $context['lat'],
             (float) $context['lng'],
             $context['timezone']

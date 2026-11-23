@@ -10,7 +10,8 @@
     <link rel="canonical" href="{{ config('seo.site_url') }}/privacy-policy">
     <link rel="shortcut icon" href="{{ asset(config('settings.application.web_icon') ?? 'favicon.ico') }}" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: #f8faf9; color: #1a1f2e; }

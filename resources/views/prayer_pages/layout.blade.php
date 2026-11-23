@@ -181,10 +181,13 @@
     @include('shared.language-picker-styles')
 </head>
 <body>
+    @php
+        $homeUrl = $locale === 'en' ? config('seo.site_url').'/' : config('seo.site_url').'/?lang='.$locale;
+    @endphp
     <header class="site-header">
         <div class="container nav">
-            <a class="brand" href="{{ config('seo.site_url') }}/?lang={{ $locale }}" aria-label="SalaTime">
-                <img src="{{ asset('assets/img/logo.png') }}?v=20260827" alt="SalaTime">
+            <a class="brand" href="{{ $homeUrl }}" aria-label="SalaTime">
+                <img src="{{ asset('assets/img/logo.png') }}?v=20260827" alt="SalaTime" width="170" height="46" decoding="async">
                 <span class="brand-tagline">{{ __('prayer_pages.brand_tagline') }}</span>
             </a>
             <div class="nav-actions">

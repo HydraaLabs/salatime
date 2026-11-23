@@ -5,10 +5,12 @@ namespace App\Http\Controllers\View;
 use App\Http\Controllers\Controller;
 use App\Models\Quran\Chapter\Chapter;
 use App\Models\Quran\Reciter\Reciter;
+use App\Services\Prayer\PrayerPageCatalog;
 use App\Services\Setting\SettingService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
+use Illuminate\Http\Response;
 
 class ViewController extends Controller
 {
@@ -176,14 +178,14 @@ class ViewController extends Controller
 
         $defaults = [
             'app_name' => 'SalaTime',
-            'hero_badge_text' => 'Available on Android',
+            'hero_badge_text' => 'Free on Android & iOS',
             'hero_title' => 'Your Complete',
             'hero_subtitle' => 'Islamic Companion',
-            'hero_description' => 'SalaTime brings you the full Quran, prayer times, hadith, dua, Qibla, Zakat calculator, AI Islamic chat, and 40+ languages — everything you need for your daily Islamic life in one beautiful app.',
+            'hero_description' => 'SalaTime brings you accurate daily prayer times, the full Quran, hadith, dua, Qibla compass, nearby mosques, Zakat calculator, and 10 languages — free on Android and iOS.',
             'rating' => '4.9',
             'downloads_count' => '100K+',
             'languages_count' => '40+',
-            'app_store_url' => $app['app_store_url'] ?? '#',
+            'app_store_url' => $app['app_store_url'] ?? config('seo.app_store_url'),
             'play_store_url' => $app['play_store_url'] ?? config('seo.play_store_url'),
             'web_logo' => $app['web_logo'] ?? null,
             'codecanyon_url' => 'https://codecanyon.net/item/zabi-islamic-flutter-android-iso-app/50458856',
@@ -223,7 +225,7 @@ class ViewController extends Controller
             'download_description' => 'Join hundreds of thousands of Muslims worldwide who use SalaTime for their daily Islamic needs. Download for free today.',
             'codecanyon_prompt_text' => 'Want to resell or customize?',
             'codecanyon_link_text' => 'Get the source code on CodeCanyon →',
-            'show_codecanyon_link' => '1',
+            'show_codecanyon_link' => '0',
             'footer_description' => 'Your complete Islamic companion app. Bringing the beauty of Islam to your fingertips with modern technology.',
             'features' => [],
             // SEO defaults
@@ -330,6 +332,44 @@ class ViewController extends Controller
         $showAdminLogin = env('SHOW_ADMIN_LOGIN', true);
         $showBuy = env('SHOW_BUY', false);
 
-        return view('landing.index', compact('s', 'showAdminLogin', 'showBuy'));
+        $catalog = app(PrayerPageCatalog::class);
+        $locales = array_keys(config('prayer_pages.locales'));
+        $featuredCityPairs = [
+            ['SA', 'makkah-104515'],
+            ['GB', 'london-2643743'],
+            ['FR', 'paris-2988507'],
+            ['MA', 'casablanca'],
+            ['EG', 'cairo-360630'],
+            ['TR', 'istanbul-745044'],
+            ['PK', 'karachi-1174872'],
+            ['BD', 'dhaka-1185241'],
+            ['ID', 'jakarta-1642911'],
+            ['MY', 'kuala-lumpur-1735161'],
+            ['AE', 'dubai-292223'],
+            ['US', 'new-york-city-5128581'],
+        ];
+        $popularCities = [];
+        $countries = $catalog->countries();
+        foreach ($featuredCityPairs as [$code, $slug]) {
+            if (! isset($countries[$code]['cities'][$slug])) {
+                continue;
+            }
+            $city = $countries[$code]['cities'][$slug];
+            $urls = [];
+            foreach ($locales as $locale) {
+                $urls[$locale] = $catalog->url($locale, $code, $slug);
+            }
+            $popularCities[] = [
+                'code' => $code,
+                'slug' => $slug,
+                'names' => $city['names'],
+                'urls' => $urls,
+            ];
+        }
+
+        return response()
+            ->view('landing.index', compact('s', 'showAdminLogin', 'showBuy', 'popularCities'))
+            ->header('Cache-Control', 'public, max-age=600, s-maxage=600')
+            ->header('Vary', 'Accept-Encoding');
     }
 }

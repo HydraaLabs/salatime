@@ -29,6 +29,7 @@ return [
     'faq_heading' => 'Frequently asked questions',
     'faq_1_q' => 'What time is prayer in :city today?',
     'faq_1_a' => 'Today’s Fajr, Dhuhr, Asr, Maghrib and Isha times are shown at the top of this page and update every day.',
+    'faq_1_a_times' => 'Today in :city, Fajr is at :fajr, sunrise at :sunrise, Dhuhr at :dhuhr, Asr at :asr, Maghrib at :maghrib and Isha at :isha.',
     'faq_2_q' => 'Which calculation method is used?',
     'faq_2_a' => 'SalaTime uses the Morocco method here: a 19° angle for Fajr and 17° for Isha, with the standard school.',
     'faq_3_q' => 'Why can the time differ from my mosque?',

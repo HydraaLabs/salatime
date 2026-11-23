@@ -9,10 +9,13 @@
 @section('description', $description)
 @push('structured-data')
 @php
+    $homeUrl = $locale === 'en' ? config('seo.site_url').'/' : config('seo.site_url').'/?lang='.$locale;
     $schema = [
         '@context' => 'https://schema.org', '@type' => 'CollectionPage',
         'url' => $canonical, 'name' => $heading, 'description' => $description,
         'inLanguage' => $localeConfig['language_tag'],
+        'isPartOf' => ['@id' => config('seo.site_url').'/#website'],
+        'publisher' => ['@id' => config('seo.site_url').'/#organization'],
         'breadcrumb' => ['@type' => 'BreadcrumbList', 'itemListElement' => array_merge([
             ['@type' => 'ListItem', 'position' => 1, 'name' => __('prayer_pages.home'), 'item' => config('seo.site_url').'/'],
             ['@type' => 'ListItem', 'position' => 2, 'name' => __('prayer_pages.world_heading'), 'item' => $worldUrl],
@@ -27,7 +30,7 @@
 @endpush
 @section('content')
 <div class="container breadcrumbs" aria-label="{{ __('prayer_pages.breadcrumb') }}">
-    <a href="{{ config('seo.site_url') }}/?lang={{ $locale }}">{{ __('prayer_pages.home') }}</a><span>›</span>
+    <a href="{{ $homeUrl }}">{{ __('prayer_pages.home') }}</a><span>›</span>
     @if($country)<a href="{{ $worldUrl }}">{{ __('prayer_pages.world_heading') }}</a><span>›</span><span>{{ $countryName }}</span>
     @else<span>{{ $heading }}</span>@endif
 </div>
@@ -96,7 +99,7 @@
             <h2><a href="{{ $entry['url'] }}">{{ $entry['names'][$locale] }} <span aria-hidden="true">→</span></a></h2>
             <p class="section-intro">{{ __('prayer_pages.cities_count', ['count' => count($entry['cities'])]) }}</p>
             <div class="city-grid">
-            @foreach(collect($entry['cities'])->sortBy(fn ($city) => $city['names'][$locale]) as $slug => $city)
+            @foreach($entry['cities'] as $slug => $city)
                 <a class="city-card" data-search="{{ implode(' ', $city['names']) }} {{ implode(' ', $entry['names']) }}" href="{{ $entry['url'].'/'.$slug }}"><span><strong>{{ $city['names'][$locale] }}</strong></span><span aria-hidden="true">→</span></a>
             @endforeach
             </div>

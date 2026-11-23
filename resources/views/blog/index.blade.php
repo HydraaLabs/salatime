@@ -3,7 +3,8 @@
 <head>
     @include('shared.google-analytics')
     @php
-        $blogCanonical = config('seo.site_url') . '/blog';
+        $blogBaseUrl = config('seo.site_url') . '/blog';
+        $blogCanonical = $posts->currentPage() > 1 ? $blogBaseUrl . '?page=' . $posts->currentPage() : $blogBaseUrl;
         $blogTitle = 'Islamic Prayer, Quran & Qibla Guides – SalaTime';
         $blogDescription = 'Practical Islamic guides about prayer times, Quran reading, Qibla direction, Adhan reminders, duas and dhikr from SalaTime.';
     @endphp
@@ -11,8 +12,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $blogTitle }}</title>
     <meta name="description" content="{{ $blogDescription }}">
-    <meta name="robots" content="{{ $posts->isEmpty() ? 'noindex,follow' : 'index,follow' }}">
+    <meta name="robots" content="{{ $posts->isEmpty() ? 'noindex,follow' : 'index,follow,max-image-preview:large' }}">
     <link rel="canonical" href="{{ $blogCanonical }}">
+    @if($posts->previousPageUrl())<link rel="prev" href="{{ $posts->currentPage() === 2 ? $blogBaseUrl : $blogBaseUrl . '?page=' . ($posts->currentPage() - 1) }}">@endif
+    @if($posts->hasMorePages())<link rel="next" href="{{ $blogBaseUrl . '?page=' . ($posts->currentPage() + 1) }}">@endif
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="SalaTime">
     <meta property="og:title" content="{{ $blogTitle }}">
@@ -25,7 +28,8 @@
     <meta name="twitter:image" content="{{ asset(config('seo.social_image')) }}">
     <link rel="icon" href="{{ asset('favicon.ico') }}?v=20260827">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: #f8faf9; color: #1a1f2e; }
@@ -125,7 +129,7 @@
             @foreach($posts as $post)
             <a href="{{ route('blog.show', $post->slug) }}" class="post-card">
                 @if($post->thumbnail)
-                    <img src="{{ asset($post->thumbnail) }}" alt="{{ $post->title }}" class="post-card-img">
+                    <img src="{{ asset($post->thumbnail) }}" alt="{{ $post->title }}" class="post-card-img" loading="lazy" decoding="async">
                 @else
                     <div class="post-card-img-placeholder">🕌</div>
                 @endif

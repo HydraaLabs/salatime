@@ -29,6 +29,7 @@ return [
     'faq_heading' => 'Preguntas frecuentes',
     'faq_1_q' => '¿A qué hora es la oración en :city hoy?',
     'faq_1_a' => 'Los horarios de Fajr, Dhuhr, Asr, Maghrib e Isha de hoy aparecen al principio de esta página y se actualizan cada día.',
+    'faq_1_a_times' => 'Hoy en :city, Fajr es a las :fajr, el amanecer a las :sunrise, Dhuhr a las :dhuhr, Asr a las :asr, Maghrib a las :maghrib e Isha a las :isha.',
     'faq_2_q' => '¿Qué método de cálculo se utiliza?',
     'faq_2_a' => 'SalaTime utiliza aquí el método de Marruecos: ángulo de 19° para Fajr y de 17° para Isha, con la escuela estándar.',
     'faq_3_q' => '¿Por qué puede ser distinto del horario de mi mezquita?',
